@@ -1,0 +1,16 @@
+name: FrameFlow checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  syntax-and-model-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - name: Check committed build is reproducible
+        run: git diff --exit-code -- dist

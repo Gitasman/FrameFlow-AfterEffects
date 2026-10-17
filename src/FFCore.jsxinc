@@ -1,0 +1,202 @@
+var FFCore = (function () {
+    function trim(v) { return String(v).replace(/^\s+|\s+$/g, ""); }
+    function frames(v) {
+        var s = trim(v), n;
+        if (!/^\d+$/.test(s)) throw new Error("Кадры: введите положительное целое число.");
+        n = Number(s);
+        if (!isFinite(n) || n < 1 || n > 1000000) throw new Error("Кадры: допустимо от 1 до 1000000.");
+        return n;
+    }
+    function decimal(v) {
+        var s = trim(v).replace(",", "."), n;
+        if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(s)) throw new Error("Диапазон: нужен номер кадра, например 24 или 24.5.");
+        n = Number(s);
+        if (!isFinite(n)) throw new Error("Диапазон: число вне допустимого предела.");
+        return n;
+    }
+    function inRegion(t, r) {
+        if (r.region === "before") return t < r.cti;
+        if (r.region === "after") return t >= r.cti;
+        if (r.region === "range") return t >= r.from && t < r.to;
+        return true;
+    }
+    function offsetSeconds(c, r) {
+        var d;
+        if (r.direction !== 1 && r.direction !== -1) throw new Error("Не задано направление");
+        if (typeof r.deltaSeconds !== "undefined") {
+            d = r.deltaSeconds;
+            if (typeof d !== "number" || !isFinite(d) || d === 0 || Math.abs(d) > 10800 || d * r.direction <= 0) throw new Error("Некорректный интервал сдвига");
+            return d;
+        }
+        return frames(r.frames) * c.frameDuration * r.direction;
+    }
+    function gapPlan(layers, c) {
+        var a = 0, b = null, i, l, d, eps = c.frameDuration * 0.000001;
+        function no(why) { return {ok:false,reason:why}; }
+        if (!isFinite(c.cti) || c.cti < 0 || c.cti >= c.duration || !(c.frameDuration > 0)) return no("Курсор должен быть внутри композиции");
+        if (!layers.length) return no("В выбранной области нет слоёв");
+        for (i = 0; i < layers.length; i++) {
+            l = layers[i];
+            if (!isFinite(l.inPoint) || !isFinite(l.outPoint) || l.inPoint >= l.outPoint) return no("У слоя некорректные границы времени");
+            if (l.inPoint <= c.cti && l.outPoint > c.cti) return no("Курсор находится на слое; пустого промежутка нет");
+            if (l.outPoint <= c.cti && l.outPoint > a) a = l.outPoint;
+            if (l.inPoint > c.cti && (b === null || l.inPoint < b)) b = l.inPoint;
+        }
+        if (b === null || b >= c.duration) return no("После курсора нет следующего слоя внутри композиции");
+        d = b-a;
+        if (d <= eps) return no("Между слоями нет паузы");
+        for (i = 0; i < layers.length; i++) if (layers[i].inPoint >= b && layers[i].locked) return no("После паузы есть заблокированный слой (Locked)");
+        return {ok:true,start:a,end:b,duration:d,frames:d/c.frameDuration};
+    }
+    function parsePanelState(raw) {
+        var result = {settings:{frames:1,scope:"auto",compMarkers:false},storageProtected:false,note:""}, parts, pair, seen = {}, i;
+        if (raw === null || typeof raw === "undefined" || raw === "") return result;
+        try {
+            parts = String(raw).split("|"); if (parts[0] !== "v1") throw new Error("Версия");
+            for (i = 1; i < parts.length; i++) {
+                pair = parts[i].split("=");
+                if (pair.length !== 2 || seen["k:"+pair[0]]) throw new Error("Формат");
+                seen["k:"+pair[0]] = true;
+                if (pair[0] === "frames") result.settings.frames = frames(pair[1]);
+                else if (pair[0] === "scope") {
+                    if (pair[1] !== "auto" && pair[1] !== "all" && pair[1] !== "selected") throw new Error("Область");
+                    result.settings.scope = pair[1];
+                } else if (pair[0] === "compMarkers") {
+                    if (pair[1] !== "0" && pair[1] !== "1") throw new Error("Маркеры");
+                    result.settings.compMarkers = pair[1] === "1";
+                } else throw new Error("Неизвестное поле");
+            }
+        } catch (e) {
+            result.settings = {frames:1,scope:"auto",compMarkers:false}; result.storageProtected = true;
+            result.note = "Сохранённые параметры панели не распознаны и оставлены без изменений. Значения действуют в этой сессии.";
+        }
+        return result;
+    }
+    function encodePanelState(s) {
+        if (s.scope !== "auto" && s.scope !== "all" && s.scope !== "selected") throw new Error("Неизвестная область");
+        return "v1|frames="+frames(s.frames)+"|scope="+s.scope+"|compMarkers="+(s.compMarkers ? "1" : "0");
+    }
+    function offsetLayerPlan(m, c, r) {
+        var d = offsetSeconds(c,r), kind = "none", a = m.inPoint, b = m.outPoint, st = m.start;
+        if (r.direction !== 1 && r.direction !== -1) throw new Error("Не задано направление");
+        if (r.region !== "before" && r.region !== "after") throw new Error("Выберите сторону курсора");
+        if (m.locked) return {skip:"Locked layer"};
+        if (r.region === "before") {
+            if (b <= c.cti) kind = "layer";
+            else if (a < c.cti) kind = "edge";
+        } else {
+            if (a >= c.cti) kind = "layer";
+            else if (b > c.cti) kind = "edge";
+        }
+        if (kind === "layer") { st += d; a += d; b += d; }
+        else if (kind === "edge") { if (r.region === "before") a += d; else b += d; }
+        if (kind !== "none" && (a >= b || b - a < c.frameDuration * 0.000001)) return {skip:"Сдвиг обнулит или перевернёт длительность слоя"};
+        if (Math.abs(st) > 10800 || Math.abs(a) > 10800 || Math.abs(b) > 10800) return {skip:"Границы слоя выйдут за диапазон AE ±10800 s"};
+        return {kind:kind,delta:d,start:st,inPoint:a,outPoint:b};
+    }
+    function keyPlan(keys, c, r, selectedOnly) {
+        var times = [], i, moved = 0, d = offsetSeconds(c,r);
+        var filter = {region:r.region, cti:c.cti, from:r.from, to:r.to};
+        var roving = false, epsilon = c.frameDuration * 0.000001;
+        for (i = 0; i < keys.length; i++) {
+            times[i] = keys[i].time;
+            if ((!selectedOnly || keys[i].selected) && inRegion(keys[i].time, filter)) {
+                times[i] += d;
+                moved++;
+            }
+            if (keys[i].roving) roving = true;
+        }
+        if (moved === 0) return {times:times, moved:0};
+        if (moved !== keys.length && roving) return {times:times, moved:0, skip:"Roving: требуется равномерный перенос всех ключей свойства"};
+        for (i = 0; i < times.length; i++) {
+            if (!isFinite(times[i]) || Math.abs(times[i]) > 10800) return {error:"Время ключа вне границ AE",moved:0};
+            if (i > 0 && Math.abs(times[i] - times[i-1]) <= epsilon) return {error:"Коллизия ключей: операция заблокирована",moved:0};
+            if (i > 0 && times[i] < times[i-1]) return {error:"Меняется порядок ключей: операция заблокирована",moved:0};
+        }
+        return {times:times, moved:moved};
+    }
+    function rippleSpec(c, options) {
+        var mode = options.mode, from = decimal(options.fromFrames)*c.frameDuration, n = decimal(options.lengthFrames), d = n*c.frameDuration;
+        if (mode !== "insert" && mode !== "remove") throw new Error("Выберите вставку или удаление времени");
+        if (!(c.frameDuration > 0) || !isFinite(c.duration) || !isFinite(from) || !isFinite(d) || n <= 0 || n > 1000000 || d > 10800) throw new Error("Длина: положительное число до 1000000 кадров в пределах AE");
+        if (from < 0 || from > c.duration || (mode === "remove" && from+d > c.duration+c.frameDuration*0.000001)) throw new Error("Интервал должен быть внутри композиции");
+        return {mode:mode,from:from,to:from+d,duration:d,delta:mode === "insert" ? d : -d,frames:n,frameDuration:c.frameDuration};
+    }
+    function rippleTime(t, s) {
+        if (t < s.from) return t;
+        if (s.mode === "insert") return t+s.duration;
+        return t < s.to ? s.from : t-s.duration;
+    }
+    function rippleLayerPlan(m, s) {
+        var kind, a = m.inPoint, b = m.outPoint, st = m.start;
+        if (!isFinite(a) || !isFinite(b) || !isFinite(st) || a >= b) return {error:"Некорректные границы слоя"};
+        if (b <= s.from) return {kind:"none"};
+        if (m.locked) return {error:"Затронут заблокированный слой (Locked)"};
+        if (s.mode === "remove" && a >= s.from && b <= s.to) return {error:"Слой целиком внутри удаляемого интервала: сначала удалите или переместите его вручную"};
+        kind = a >= (s.mode === "insert" ? s.from : s.to) ? "layer" : "edge";
+        if (kind === "layer") { st += s.delta; a += s.delta; b += s.delta; }
+        else { a = rippleTime(a,s); b = rippleTime(b,s); }
+        if (b-a < s.frameDuration*0.000001) return {error:"Операция обнулит длительность слоя"};
+        if (Math.abs(a) > 10800 || Math.abs(b) > 10800 || Math.abs(st) > 10800) return {error:"Границы слоя выйдут за диапазон AE ±10800 s"};
+        return {kind:kind,start:st,inPoint:a,outPoint:b,delta:s.delta};
+    }
+    function rippleKeyPlan(keys, c, s, allowEmpty) {
+        var p = {indices:[],times:[],moved:0,deleted:0}, i, t, roving = false, eps = c.frameDuration*0.000001;
+        for (i = 0; i < keys.length; i++) {
+            if (keys[i].roving) roving = true;
+            t = keys[i].time;
+            if (s.mode === "remove" && t >= s.from && t < s.to) { p.deleted++; continue; }
+            p.indices.push(i); p.times.push(rippleTime(t,s));
+            if (p.times[p.times.length-1] !== t) p.moved++;
+        }
+        if (p.deleted && !p.indices.length && !allowEmpty) { p.error = "Операция удалит все ключи свойства; такой переход в статическое значение пока не поддержан"; return p; }
+        if (roving && (p.deleted || (p.moved > 0 && p.moved !== keys.length))) { p.error = "Roving: требуется равномерный перенос всех ключей свойства"; return p; }
+        for (i = 0; i < p.times.length; i++) {
+            if (!isFinite(p.times[i]) || Math.abs(p.times[i]) > 10800) { p.error = "Время ключа вне границ AE"; return p; }
+            if (i && p.times[i]-p.times[i-1] <= eps) { p.error = "Коллизия ключей: операция заблокирована"; return p; }
+        }
+        return p;
+    }
+    function favorites(v) {
+        var parts = trim(v).split(","), out = [], i, j, n, found;
+        if (parts.length > 8) throw new Error("Избранное: максимум 8 значений.");
+        for (i = 0; i < parts.length; i++) {
+            n = frames(parts[i]); found = false;
+            for (j = 0; j < out.length; j++) if (out[j] === n) found = true;
+            if (!found) out.push(n);
+        }
+        return out;
+    }
+    function defaults() { return {density:0, spacing:6, logging:false, favorites:[1,5,12,24]}; }
+    function parseSettings(raw) {
+        var result = {settings:defaults(), storageProtected:false, note:""}, parts, i, pair, n;
+        if (raw === null || typeof raw === "undefined" || raw === "") return result;
+        parts = String(raw).split("|");
+        if (parts[0] !== "v1") {
+            result.storageProtected = true; result.note = "Неизвестная версия настроек сохранена. Новые настройки действуют только в этой сессии."; return result;
+        }
+        try {
+            for (i = 1; i < parts.length; i++) {
+                pair = parts[i].split("=");
+                if (pair.length !== 2) throw new Error("Повреждённый формат");
+                if (pair[0] === "density") {
+                    n = Number(pair[1]); if (!/^[01]$/.test(pair[1])) throw new Error("density"); result.settings.density = n;
+                } else if (pair[0] === "spacing") {
+                    n = Number(pair[1]); if (!/^\d+$/.test(pair[1]) || n < 3 || n > 16) throw new Error("spacing"); result.settings.spacing = n;
+                } else if (pair[0] === "logging") {
+                    if (!/^[01]$/.test(pair[1])) throw new Error("logging"); result.settings.logging = pair[1] === "1";
+                } else if (pair[0] === "favorites") result.settings.favorites = favorites(pair[1]);
+                else throw new Error("Неизвестный параметр");
+            }
+        } catch (e) {
+            result.settings = defaults(); result.storageProtected = true;
+            result.note = "Повреждённые настройки сохранены. Используются сессионные значения по умолчанию.";
+        }
+        return result;
+    }
+    function encodeSettings(s) {
+        return "v1|density=" + s.density + "|spacing=" + s.spacing + "|logging=" + (s.logging ? "1" : "0") + "|favorites=" + s.favorites.join(",");
+    }
+    return {rippleSpec:rippleSpec,rippleTime:rippleTime,rippleLayerPlan:rippleLayerPlan,rippleKeyPlan:rippleKeyPlan,offsetSeconds:offsetSeconds,gapPlan:gapPlan,parsePanelState:parsePanelState,encodePanelState:encodePanelState,parseFrames:frames, parseDecimal:decimal, inRegion:inRegion, offsetLayerPlan:offsetLayerPlan, keyPlan:keyPlan,
+        parseFavorites:favorites, defaults:defaults, parseSettings:parseSettings, encodeSettings:encodeSettings};
+}());

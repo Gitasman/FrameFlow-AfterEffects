@@ -1,0 +1,351 @@
+var FFUI = (function () {
+    var CONFIG = {title:"FrameFlow AE 2.0",namespace:"FrameFlowAE",prefsKey:"preferences",stateKey:"panelState",width:324,minWidth:276,maxLog:100};
+    function create(thisObj) {
+        var root = thisObj instanceof Panel ? thisObj : new Window("palette",CONFIG.title,undefined,{resizeable:true});
+        var controls = {}, scopes = ["auto","all","selected"], busy = false, sceneReady = false, logs = [];
+        var lastReport = FFHost.environment().join("\n"), lastContextTick = 0, presetColumns = 0, presetRows = 1;
+        function loadPreferences(key,parse) {
+            var raw = null, parsed;
+            try { if (app.settings.haveSetting(CONFIG.namespace,key)) raw = app.settings.getSetting(CONFIG.namespace,key); parsed = parse(raw); }
+            catch (e) { parsed = parse(null); parsed.storageProtected = true; parsed.note = "Параметры недоступны; изменения действуют в этой сессии."; }
+            parsed.raw = raw; return parsed;
+        }
+        var loaded = loadPreferences(CONFIG.prefsKey,FFCore.parseSettings), panelLoaded = loadPreferences(CONFIG.stateKey,FFCore.parsePanelState);
+        var settings = loaded.settings, panelState = panelLoaded.settings;
+        root.orientation = "column"; root.alignChildren = ["fill","top"]; root.preferredSize = [CONFIG.width,320];
+        function row(parent) { var g = parent.add("group"); g.orientation = "row"; g.alignChildren = ["fill","center"]; g.spacing = settings.spacing; g.margins = 0; return g; }
+        function label(parent,text) { var t = parent.add("statictext",undefined,text); t.alignment = ["left","center"]; return t; }
+        function dropdown(parent,items) { var d = parent.add("dropdownlist",undefined,items); d.alignment = ["fill","center"]; d.selection = 0; return d; }
+        function index(d) { return d.selection ? d.selection.index : 0; }
+        function font(control,extra,bold) {
+            try { var f = control.graphics.font; control.graphics.font = ScriptUI.newFont(f.family || f.name,bold ? ScriptUI.FontStyle.BOLD : f.style,f.size+extra); }
+            catch (unsupportedFont) { /* Typography is optional; native controls remain usable. */ }
+        }
+        function widthOf(control,fallback) { return control.size && (control.size.width || control.size[0]) || fallback; }
+        var head = row(root), title = label(head,"FrameFlow"); title.alignment = ["fill","center"]; font(title,1,true);
+        var version = label(head,"2.0"); version.alignment = ["right","center"];
+        controls.settings = head.add("button",undefined,"Настройки"); controls.settings.alignment = ["right","center"]; controls.settings.preferredSize.width = 86;
+        controls.scope = dropdown(root,["Авто: выделенные, иначе все","Вся композиция","Только выделенные слои"]);
+        controls.scope.selection = panelState.scope === "all" ? 1 : (panelState.scope === "selected" ? 2 : 0);
+        controls.scope.helpTip = "Авто использует выделенные слои, а без выделения — все. Выделение отдельных ключей не ограничивает действие. Пауза определяется только в этой области.";
+        var frameRow = row(root); label(frameRow,"Сдвиг");
+        controls.frames = frameRow.add("edittext",undefined,String(panelState.frames)); controls.frames.characters = 7; controls.frames.alignment = ["fill","center"]; controls.frames.preferredSize.height = 32; font(controls.frames,3,false);
+        controls.frames.helpTip = "Целое число кадров, 1–1000000. Быстрые значения ниже. Изменение числа само по себе не меняет сцену.";
+        label(frameRow,"кадр.");
+        controls.presetGroup = root.add("group"); controls.presetGroup.orientation = "column"; controls.presetGroup.alignChildren = ["fill","top"]; controls.presetGroup.margins = 0;
+        controls.presets = [];
+        var actions = row(root);
+        function side(text,region) {
+            var p = actions.add("panel",undefined,text); p.orientation = "row"; p.alignChildren = ["fill","center"]; p.alignment = ["fill","center"]; p.margins = [6,14,6,6]; p.spacing = 4;
+            var back = p.add("button",undefined,"−1"), forward = p.add("button",undefined,"+1"); back.preferredSize = forward.preferredSize = [54,30];
+            back.helpTip = text+": сдвинуть назад. Ключ на курсоре относится к «После».";
+            forward.helpTip = text+": сдвинуть вперёд. Ключ на курсоре относится к «После».";
+            back.onClick = function () { run(region,-1); }; forward.onClick = function () { run(region,1); };
+            return {back:back,forward:forward};
+        }
+        controls.before = side("До курсора","before"); controls.after = side("После курсора","after");
+        controls.gap = root.add("button",undefined,"Убрать паузу"); controls.gap.enabled = false; controls.gap.preferredSize.height = 26;
+        controls.ripple = root.add("button",undefined,"Вставка / удаление времени…"); controls.ripple.preferredSize.height = 28;
+        controls.ripple.helpTip = "Изменить интервал анимации с предварительной проверкой. Удаление убирает ключи внутри интервала. Длительность композиции сохраняется.";
+        controls.context = root.add("statictext",undefined,"",{multiline:true}); controls.context.preferredSize.height = 32;
+        var footer = row(root);
+        controls.status = footer.add("statictext",undefined,"Ключ на курсоре относится к «После».",{multiline:true}); controls.status.alignment = ["fill","center"]; controls.status.preferredSize.height = 34;
+        controls.report = footer.add("button",undefined,"Детали"); controls.report.alignment = ["right","center"]; controls.report.preferredSize.width = 64;
+        function status(text) { controls.status.text = text; controls.status.helpTip = text; }
+        function log(text) { if (!settings.logging) return; logs.push(new Date().toTimeString()+" "+text); while (logs.length > CONFIG.maxLog) logs.shift(); }
+        function persist(storage,key,encoded) {
+            var current = null;
+            if (storage.storageProtected) return storage.note;
+            try {
+                if (app.settings.haveSetting(CONFIG.namespace,key)) current = app.settings.getSetting(CONFIG.namespace,key);
+                if (current !== storage.raw && current !== encoded) {
+                    storage.storageProtected = true; storage.note = "Параметры изменены в другой панели. Новые значения действуют в этой сессии; сохранённые оставлены без изменений."; return storage.note;
+                }
+                if (current !== encoded) app.settings.saveSetting(CONFIG.namespace,key,encoded);
+                storage.raw = encoded; return "";
+            } catch (e) { return "Не удалось сохранить параметры; они действуют в этой сессии. "+FFHost.errorInfo(e).message; }
+        }
+        function savePanelState() { return persist(panelLoaded,CONFIG.stateKey,FFCore.encodePanelState(panelState)); }
+        function updateStep() {
+            var n = null, i, b, sides = [controls.before,controls.after];
+            try { n = FFCore.parseFrames(controls.frames.text); } catch (invalidStep) { }
+            for (i = 0; i < sides.length; i++) {
+                sides[i].back.text = n === null || n > 9999 ? "−" : "−"+n; sides[i].forward.text = n === null || n > 9999 ? "+" : "+"+n;
+                sides[i].back.enabled = sides[i].forward.enabled = sceneReady && n !== null;
+                sides[i].back.helpTip = "Назад на "+(n === null ? "указанное число" : n)+" кадр. До: ключи строго до курсора; После: на курсоре и позже.";
+                sides[i].forward.helpTip = "Вперёд на "+(n === null ? "указанное число" : n)+" кадр. До: ключи строго до курсора; После: на курсоре и позже.";
+            }
+            for (i = 0; i < controls.presets.length; i++) { b = controls.presets[i]; b.helpTip = (n === b.step ? "Текущий шаг: " : "Выбрать шаг: ")+b.step+" кадр."; }
+            controls.ripple.enabled = sceneReady && n !== null;
+            return n;
+        }
+        function minSize() {
+            root.minimumSize = [CONFIG.minWidth+Math.max(0,settings.spacing-6)*2,346+(presetRows-1)*28+Math.max(0,settings.spacing-6)*7+(settings.density === 1 ? 8 : 0)];
+        }
+        function renderPresets(force) {
+            var margin = settings.density === 1 ? 12 : 8, available = widthOf(root,CONFIG.width)-margin*2, maxWidth = 36, cols, i, g, b, measured;
+            for (i = 0; i < settings.favorites.length; i++) {
+                measured = String(settings.favorites[i]).length*8;
+                try { measured = controls.frames.graphics.measureString(String(settings.favorites[i]),root.graphics.font).width; } catch (noMeasure) { }
+                maxWidth = Math.max(maxWidth,Math.ceil(measured)+20);
+            }
+            cols = Math.max(1,Math.min(4,Math.floor((available+settings.spacing)/(maxWidth+settings.spacing))));
+            if (!force && cols === presetColumns) return false;
+            presetColumns = cols; presetRows = Math.ceil(settings.favorites.length/cols);
+            while (controls.presetGroup.children.length) controls.presetGroup.remove(controls.presetGroup.children[controls.presetGroup.children.length-1]);
+            controls.presets = []; controls.presetGroup.spacing = settings.spacing;
+            function addPreset(parent,value) {
+                var button = parent.add("button",undefined,String(value)); button.preferredSize = [Math.floor((available-(cols-1)*settings.spacing)/cols),24]; button.alignment = ["fill","center"]; button.step = value;
+                button.onClick = function () { controls.frames.text = String(value); commitStep(); };
+                controls.presets.push(button);
+            }
+            for (i = 0; i < settings.favorites.length; i++) {
+                if (i % cols === 0) g = row(controls.presetGroup);
+                addPreset(g,settings.favorites[i]);
+            }
+            minSize(); updateStep(); return true;
+        }
+        function reflow() {
+            var i; root.spacing = settings.spacing; root.margins = settings.density === 1 ? 12 : 8;
+            for (i = 0; i < root.children.length; i++) if (root.children[i].type === "group") root.children[i].spacing = settings.spacing;
+            renderPresets(true); minSize(); root.layout.layout(true); root.layout.resize();
+        }
+        function commitStep() {
+            var n, note;
+            try {
+                n = FFCore.parseFrames(controls.frames.text); panelState.frames = n; note = savePanelState(); updateStep();
+                status(note || "Шаг: "+n+" кадр.");
+            } catch (e) { updateStep(); status(FFHost.errorInfo(e).message); }
+        }
+        function formatFrames(n) {
+            if (n > 0 && n < 0.001) return "<0.001";
+            if (Math.abs(n-Math.round(n)) < 0.000001) return String(Math.round(n));
+            return n.toFixed(3).replace(/\.?0+$/,"");
+        }
+        function countText(n) { return "слоёв: "+n; }
+        function refreshContext(force) {
+            var now = new Date().getTime(), view, c, n, target, name, scope, framesText;
+            if (busy || (force !== true && now-lastContextTick < 250)) return;
+            lastContextTick = now;
+            try {
+                scope = scopes[index(controls.scope)]; view = FFHost.inspectGap(scope); c = view.context; n = c.comp.selectedLayers.length;
+                target = scope === "all" || (scope === "auto" && !n) ? "Все · "+countText(c.comp.numLayers) : "Выбрано · "+countText(n);
+                name = String(c.comp.name); if (name.length > 26) name = name.substring(0,23)+"…";
+                controls.context.text = name+" · "+(1/c.frameDuration).toFixed(2)+" FPS\n"+target+" · курсор "+(c.cti/c.frameDuration).toFixed(2);
+                controls.context.helpTip = c.comp.name+"\n"+target+". Позиция курсора указана в кадрах от начала композиции. Каждое действие читает текущие данные AE.";
+                sceneReady = view.layers.length > 0;
+                controls.gap.enabled = view.gap.ok;
+                if (view.gap.ok) {
+                    framesText = formatFrames(view.gap.frames);
+                    controls.gap.text = "Убрать паузу · "+framesText+" кадр.";
+                    controls.gap.helpTip = "Удалить весь пустой промежуток под курсором: "+framesText+" кадр. Все следующие слои выбранной области сдвинутся назад. Длительность композиции и курсор сохраняются.";
+                } else { controls.gap.text = "Убрать паузу"; controls.gap.helpTip = view.gap.reason; }
+            } catch (e) {
+                sceneReady = false; controls.context.text = FFHost.errorInfo(e).message; controls.context.helpTip = controls.context.text;
+                controls.gap.enabled = false; controls.gap.text = "Убрать паузу"; controls.gap.helpTip = controls.context.text;
+            }
+            updateStep();
+        }
+        function run(region,direction) {
+            var plan, result, message, note = "", gapMode = region === "gap", n;
+            if (busy) return;
+            busy = true; root.enabled = false; status(gapMode ? "Удаление паузы…" : "Сдвиг…");
+            try {
+                if (gapMode) plan = FFHost.prepareGap({scope:scopes[index(controls.scope)],compMarkers:panelState.compMarkers});
+                else {
+                    n = FFCore.parseFrames(controls.frames.text); panelState.frames = n; note = savePanelState();
+                    plan = FFHost.prepare({scope:scopes[index(controls.scope)],frames:n,region:region,direction:direction,compMarkers:panelState.compMarkers});
+                }
+                result = FFHost.applyPlan(plan); lastReport = FFHost.report(plan,result,gapMode ? "УБРАТЬ ПАУЗУ" : "TIME OFFSET");
+                if (result.selectionError) message = "Выделение не восстановлено.\nОткройте Детали.";
+                else if (result.ok && result.changed) {
+                    message = gapMode ? "Убрана пауза · "+formatFrames(plan.request.gap.frames)+" кадр.\nСлоёв: "+result.changedLayers : "Слоёв: "+result.changedLayers+" · ключей: "+result.movedKeys+"\nПропущено: "+plan.skips.length+(plan.mediaLimits.length ? " · предел медиа" : "");
+                } else if (result.ok && plan.mediaLimits.length) message = "Предел исходного медиа.\nСлой пропущен — см. Детали.";
+                else if (result.ok) message = "На этой стороне нет доступных целей."+(plan.skips.length ? "\nПропущено: "+plan.skips.length+" — см. Детали." : "");
+                else if (result.restored) message = result.failure && result.failure.layerIndex ? "Ошибка на слое №"+result.failure.layerIndex+"; данные восстановлены.\nПричина — в Деталях." : "Ошибка; исходные данные восстановлены.\nПричина — в Деталях.";
+                else if (result.recoveryErrors.length) message = "Восстановление не подтверждено.\nCtrl/Cmd+Z — отменить; см. Детали.";
+                else if (plan.errors.length) message = "Операция отменена до записи.\nПричина — в Деталях.";
+                else message = "Ошибка: "+(result.error ? result.error.message : "Undo Group")+"\nОткройте Детали.";
+                status(message+(note ? "\n"+note : "")); log((gapMode ? "gap" : region)+" ok="+result.ok+" layers="+result.changedLayers+" keys="+result.movedKeys);
+            } catch (e) {
+                status(FFHost.errorInfo(e).message); lastReport = FFHost.environment().join("\n")+"\nОшибка до применения: "+FFHost.errorInfo(e).message;
+            } finally { root.enabled = true; busy = false; refreshContext(true); }
+        }
+        function exportText(text) {
+            var file = File.saveDialog("Сохранить отчёт FrameFlow AE", "Text:*.txt"), opened = false;
+            if (!file) return;
+            try {
+                file.encoding = "UTF-8"; file.lineFeed = "Unix";
+                if (!file.open("w")) throw new Error(file.error || "Не удалось открыть файл");
+                opened = true;
+                if (!file.write(text)) throw new Error(file.error || "Не удалось записать отчёт");
+            } finally { if (opened) file.close(); }
+        }
+        function rippleDialog() {
+            var c;
+            try { c = FFHost.readContext(); } catch (noComp) { status(FFHost.errorInfo(noComp).message); return; }
+            var origin = c.comp, fd = c.frameDuration, checked = false, signature = "", checkedSelection = [];
+            var win = new Window("dialog","FrameFlow 2.0 — Время анимации",undefined,{resizeable:true});
+            win.orientation = "column"; win.alignChildren = ["fill","top"]; win.margins = 12; win.spacing = 8; win.minimumSize = [460,520];
+            label(win,"Операция"); var operation = dropdown(win,["Вставить время","Удалить время и ключи внутри"]);
+            var startRow = row(win); label(startRow,"С кадра"); var from = startRow.add("edittext",undefined,frameInput(c.cti/fd)); from.characters = 16; from.alignment = ["fill","center"];
+            from.helpTip = "Кадры от внутреннего начала композиции (0). Дробные кадры допустимы.";
+            var lengthRow = row(win); label(lengthRow,"Длина, кадр."); var length = lengthRow.add("edittext",undefined,controls.frames.text); length.characters = 16; length.alignment = ["fill","center"];
+            var fillRow = row(win), cursor = fillRow.add("button",undefined,"От курсора"), work = fillRow.add("button",undefined,"Из рабочей области");
+            work.enabled = typeof origin.workAreaStart === "number" && origin.workAreaDuration > 0;
+            var summary = win.add("statictext",undefined,"Длительность композиции сохраняется. Вставка меняет интервалы между ключами; стоп-кадр не создаётся.",{multiline:true}); summary.preferredSize = [540,38];
+            var field = win.add("edittext",undefined,"",{multiline:true,readonly:true,scrolling:true}); field.preferredSize = [540,270]; field.alignment = ["fill","fill"];
+            var note = win.add("statictext",undefined,"",{multiline:true}); note.preferredSize.height = 42;
+            var buttons = row(win), check = buttons.add("button",undefined,"Проверить"), apply = buttons.add("button",undefined,"Применить"), close = buttons.add("button",undefined,"Закрыть",{name:"cancel"});
+            function frameInput(n) { return n.toFixed(8).replace(/\.?0+$/,""); }
+            function currentContext() {
+                var now = FFHost.readContext();
+                if (now.comp !== origin || now.frameDuration !== fd) throw new Error("Композиция или FPS изменились; откройте окно заново");
+                return now;
+            }
+            function options() { return {scope:scopes[index(controls.scope)],mode:index(operation) === 0 ? "insert" : "remove",fromFrames:from.text,lengthFrames:length.text,compMarkers:panelState.compMarkers}; }
+            function inputSignature() { return index(operation)+"|"+from.text+"|"+length.text+"|"+index(controls.scope)+"|"+panelState.compMarkers; }
+            function invalidate() { checked = false; apply.enabled = false; note.text = "Параметры изменились. Нажмите Проверить; сцена не изменена."; }
+            function showError(e) { field.text = FFHost.environment().join("\n")+"\nВРЕМЯ АНИМАЦИИ\nОшибка: "+FFHost.errorInfo(e).message; note.text = "Операция не применена. Исправьте параметры или область и повторите проверку."; checked = false; apply.enabled = false; }
+            function inspect() {
+                var plan, selected, i;
+                try {
+                    currentContext(); plan = FFHost.prepareRipple(options());
+                    field.text = FFHost.report(plan,null,"ПРОВЕРКА ВРЕМЕНИ БЕЗ ПРИМЕНЕНИЯ");
+                    checked = plan.errors.length === 0 && plan.changes.length > 0; apply.enabled = checked; signature = inputSignature();
+                    selected = origin.selectedLayers; checkedSelection = []; for (i = 0; i < selected.length; i++) checkedSelection.push(selected[i]);
+                    note.text = plan.errors.length ? "Есть блокировки. Ни одна цель не будет изменена; причины указаны выше." : checked ? "План готов. Применить выполнит изменение одной операцией Undo." : "В этой области нет целей для изменения времени.";
+                } catch (e) { showError(e); }
+            }
+            apply.onClick = function () {
+                var plan, result, selected, i;
+                if (busy) return;
+                if (!checked || signature !== inputSignature()) { invalidate(); return; }
+                busy = true; root.enabled = false; win.enabled = false;
+                try {
+                    currentContext();
+                    if (options().scope !== "all") {
+                        selected = origin.selectedLayers;
+                        if (selected.length !== checkedSelection.length) throw new Error("Выделение изменилось. Снова нажмите Проверить");
+                        for (i = 0; i < selected.length; i++) if (selected[i] !== checkedSelection[i]) throw new Error("Выделение изменилось. Снова нажмите Проверить");
+                    }
+                    plan = FFHost.prepareRipple(options());
+                    result = FFHost.applyPlan(plan); lastReport = FFHost.report(plan,result,plan.ripple.mode === "insert" ? "ВСТАВИТЬ ВРЕМЯ" : "УДАЛИТЬ ВРЕМЯ"); field.text = lastReport;
+                    if (result.ok) note.text = "Слоёв: "+result.changedLayers+" · сдвинуто ключей: "+result.movedKeys+" · удалено: "+result.deletedKeys;
+                    else if (result.selectionError) note.text = "Выделение не восстановлено. Подробности в отчёте.";
+                    else if (result.restored) note.text = "Ошибка; исходные данные восстановлены. Подробности в отчёте.";
+                    else if (result.recoveryErrors.length) note.text = "Восстановление не подтверждено. Ctrl/Cmd+Z — отменить; см. отчёт.";
+                    else note.text = "Изменение не применено. Причины указаны в отчёте.";
+                    status(result.ok ? "Слоёв: "+result.changedLayers+" · ключей: "+result.movedKeys+"\nУдалено ключей: "+result.deletedKeys : note.text); log("ripple "+plan.ripple.mode+" ok="+result.ok+" deleted="+result.deletedKeys);
+                } catch (e) { showError(e); }
+                finally { checked = false; apply.enabled = false; win.enabled = true; root.enabled = true; busy = false; refreshContext(true); }
+            };
+            operation.onChange = function () {
+                summary.text = index(operation) === 0 ? "Длительность композиции сохраняется. Вставка меняет интервалы между ключами; стоп-кадр не создаётся." : "Ключи внутри [начало, конец) удаляются. Следующие слои и ключи сдвигаются назад. Длительность композиции сохраняется.";
+                invalidate();
+            };
+            from.onChanging = from.onChange = length.onChanging = length.onChange = invalidate;
+            cursor.onClick = function () { try { from.text = frameInput(currentContext().cti/fd); invalidate(); } catch (e) { showError(e); } };
+            work.onClick = function () { try { currentContext(); from.text = frameInput(origin.workAreaStart/fd); length.text = frameInput(origin.workAreaDuration/fd); invalidate(); } catch (e) { showError(e); } };
+            check.onClick = inspect; close.onClick = function () { win.close(); };
+            win.onResizing = win.onResize = function () { this.layout.resize(); }; inspect(); win.show();
+        }
+        function reportDialog() {
+            var win = new Window("dialog", "FrameFlow AE 2.0 — отчёт",undefined,{resizeable:true}), text = lastReport, appliedText;
+            var previewFrames = null, unavailable = "", previewRow, restore, field, note;
+            win.orientation = "column"; win.alignChildren = ["fill","top"]; win.margins = 12; win.spacing = 8; win.minimumSize = [460,460];
+            if (logs.length) text += "\n\nЛОГ (включён пользователем)\n"+logs.join("\n");
+            appliedText = text;
+            try { previewFrames = FFCore.parseFrames(controls.frames.text); FFHost.readContext(); }
+            catch (previewUnavailable) { unavailable = FFHost.errorInfo(previewUnavailable).message; }
+            label(win,"Проверить без применения"+(previewFrames !== null ? " · "+previewFrames+" кадр." : ""));
+            previewRow = row(win);
+            function inspect(region,direction) {
+                var plan;
+                try {
+                    plan = FFHost.prepare({scope:scopes[index(controls.scope)],frames:FFCore.parseFrames(controls.frames.text),region:region,direction:direction,compMarkers:panelState.compMarkers});
+                    text = FFHost.report(plan,null,"ПРОВЕРКА БЕЗ ПРИМЕНЕНИЯ");
+                    note.text = plan.errors.length ? "Есть блокировки. Причины указаны в отчёте; сцена не изменена." : "Сцена не изменена. Для сдвига закройте окно и нажмите нужную кнопку в панели.";
+                } catch (previewError) {
+                    text = FFHost.environment().join("\n")+"\nПРОВЕРКА БЕЗ ПРИМЕНЕНИЯ\nОшибка: "+FFHost.errorInfo(previewError).message;
+                    note.text = "Проверка недоступна; сцена не изменена. Последний результат сохранён.";
+                }
+                field.text = text; restore.enabled = true;
+            }
+            function addPreview(text,region,direction) {
+                var button = previewRow.add("button",undefined,text); button.alignment = ["fill","center"];
+                button.enabled = unavailable === "";
+                button.helpTip = "Проверить сдвиг "+(region === "before" ? "до" : "после")+" курсора "+(direction < 0 ? "назад" : "вперёд")+" без изменения слоёв, ключей и выделения.";
+                button.onClick = function () { inspect(region,direction); };
+            }
+            addPreview("До −","before",-1); addPreview("До +","before",1);
+            addPreview("После −","after",-1); addPreview("После +","after",1);
+            label(win,"Выделите текст и нажмите Ctrl/Cmd+C.");
+            field = win.add("edittext",undefined,text,{multiline:true,readonly:true,scrolling:true}); field.preferredSize = [580,360]; field.alignment = ["fill","fill"];
+            note = win.add("statictext",undefined,unavailable || "Проверка покажет план сдвига на текущем кадре. Применение — в основной панели.",{multiline:true}); note.preferredSize.height = 34;
+            var buttons = row(win); restore = buttons.add("button",undefined,"Последний результат"); restore.enabled = false;
+            var save = buttons.add("button",undefined,"Сохранить TXT"), close = buttons.add("button",undefined,"Закрыть",{name:"ok"});
+            restore.onClick = function () { text = appliedText; field.text = text; restore.enabled = false; note.text = "Последний результат. Предварительные проверки не меняют его."; };
+            save.onClick = function () { try { exportText(text); note.text = "Отчёт доступен для копирования; файл сохранён, если путь был выбран."; }
+                catch (e) { note.text = "Экспорт: "+FFHost.errorInfo(e).message+". Исходный отчёт сохранён в поле."; } };
+            close.onClick = function () { win.close(); }; win.onResizing = win.onResize = function () { this.layout.resize(); };
+            win.show();
+        }
+        function settingsDialog() {
+            var win = new Window("dialog","FrameFlow — настройки"), d, spacing, favorite, logging, markers, apply, reset, cancel, note;
+            win.orientation = "column"; win.alignChildren = ["fill","top"]; win.margins = 14; win.spacing = 8;
+            font(label(win,"Вид панели"),0,true);
+            d = dropdown(win,["Компактно","Свободнее"]); d.selection = settings.density;
+            var sg = row(win); label(sg,"Отступ, px"); spacing = sg.add("edittext",undefined,String(settings.spacing)); spacing.characters = 5;
+            reset = win.add("button",undefined,"Сбросить только вид");
+            label(win,"Быстрые значения кадров · до 8, через запятую"); favorite = win.add("edittext",undefined,settings.favorites.join(","));
+            font(label(win,"Действия и диагностика"),0,true);
+            markers = win.add("checkbox",undefined,"Сдвигать маркеры композиции"); markers.value = panelState.compMarkers;
+            markers.helpTip = "Влияет на сдвиг и удаление паузы. Маркер внутри удаляемой паузы блокирует её удаление.";
+            logging = win.add("checkbox",undefined,"Лог операций · до 100 записей"); logging.value = settings.logging;
+            note = win.add("statictext",undefined,loaded.note || panelLoaded.note || "Шаг и область запоминаются при изменении. Вид панели и параметры ниже — после Применить.",{multiline:true}); note.preferredSize = [330,58];
+            var help = win.add("button",undefined,"Справка"); help.onClick = helpDialog;
+            var buttons = row(win); apply = buttons.add("button",undefined,"Применить"); cancel = buttons.add("button",undefined,"Отмена",{name:"cancel"});
+            reset.onClick = function () { d.selection = 0; spacing.text = "6"; };
+            apply.onClick = function () {
+                var n, next, appearanceNote, stateNote;
+                try {
+                    n = FFCore.parseFrames(spacing.text); if (n < 3 || n > 16) throw new Error("Отступ: целое от 3 до 16 px.");
+                    next = {density:index(d),spacing:n,logging:logging.value,favorites:FFCore.parseFavorites(favorite.text)};
+                    settings = next; panelState.compMarkers = markers.value;
+                    if (!settings.logging) logs = [];
+                    appearanceNote = persist(loaded,CONFIG.prefsKey,FFCore.encodeSettings(settings)); stateNote = savePanelState();
+                    reflow(); refreshContext(true);
+                    status(appearanceNote || stateNote || "Настройки сохранены. Сцена не изменялась."); win.close();
+                } catch (e) { note.text = FFHost.errorInfo(e).message; }
+            };
+            cancel.onClick = function () { win.close(); }; win.show();
+        }
+        function helpDialog() {
+            var win = new Window("dialog","FrameFlow — как работает"); win.orientation = "column"; win.alignChildren = ["fill","top"]; win.margins = 14;
+            var text = "СДВИГ\nУкажите число кадров, затем нажмите минус или плюс для времени До / После курсора. Ключ ровно на курсоре относится к После. Целые слои перемещаются нативно вместе с ключами и маркерами; у пересекающих курсор сдвигаются ключи нужной стороны и In либо Out.\n\n"+
+                "ОБЛАСТЬ\nАвто использует выделенные слои; без выделения — все. Выделение ключей не ограничивает действие. Выберите Всю композицию, чтобы всегда работать со всеми слоями.\n\n"+
+                "УБРАТЬ ПАУЗУ\nПоставьте курсор между слоями. Удаляется весь пустой промежуток в выбранной области, а все следующие слои сдвигаются назад на его точную длину, включая subframes. Locked-слои и выключенные слои учитываются. Если следующий слой заблокирован или недоступен, операция не выполняется частично. Пауза в конце без следующего слоя не удаляется. При включённом переносе маркеров композиции маркер внутри паузы или его пересекающая длительность блокируют удаление.\n\n"+
+                "Курсор, длительность композиции, рабочая область и исходное выделение слоёв сохраняются. Один клик — одна операция Undo (Ctrl/Cmd+Z).\n\n"+
+                "ПРОВЕРКА БЕЗ ПРИМЕНЕНИЯ\nВ Деталях кнопки До / После показывают план сдвига с текущим шагом, цели, пропуски и блокировки. Они не меняют сцену и не создают Undo. Последний результат остаётся доступен отдельной кнопкой. Перед настоящим сдвигом сцена проверяется заново.\n\n"+
+                "НАСТРОЙКИ\nШаг и область запоминаются после завершения ввода. Настройки вида применяются кнопкой Применить. Сброс вида меняет только плотность и отступ. При ошибке сохранения значения остаются в этой сессии.\n\n"+
+                "ОГРАНИЧЕНИЯ\nВидео/аудио без Time Remap нельзя продлить за доступный исходник. Если край недоступен, весь этот слой пропускается, остальные продолжают сдвигаться; предел указан в Деталях. Продление со стоп-кадром через Time Remap — отдельная операция.\n\nВложенные композиции изнутри не меняются. Сдвиг не создаёт стоп-кадр видео/аудио. Auto-Bezier может пересчитываться AE. Частичный перенос Roving и неподдержанных специальных свойств пропускает целый слой; причины видны в Деталях. Коллизия ключей отменяет операцию до записи.";
+            text = "ВРЕМЯ АНИМАЦИИ 2.0\nКнопка Вставка / удаление времени открывает проверку интервала. Вставка сдвигает ключи на начале и позже; удаление [A, B) удаляет ключи внутри и сдвигает последующие назад. Интерполяция между соседними ключами может измениться. Вставка не создаёт стоп-кадр. Все цели должны быть доступны; блокировка отменяет изменение целиком. Целые удаляемые слои, переход свойства без ключей в статическое значение, а также частичный видеоряд/прекомпозиция без уже включённого Time Remap пока блокируются. Параметры можно заполнить от курсора или рабочей области; дробные кадры допустимы.\n\n"+text;
+            var field = win.add("edittext",undefined,text,{multiline:true,readonly:true,scrolling:true}); field.preferredSize = [460,370];
+            win.add("button",undefined,"Закрыть",{name:"ok"}).onClick = function () { win.close(); }; win.show();
+        }
+        controls.frames.onChanging = updateStep; controls.frames.onChange = commitStep;
+        controls.scope.onChange = function () { panelState.scope = scopes[index(controls.scope)]; var note = savePanelState(); refreshContext(true); status(note || "Область: "+controls.scope.selection.text); };
+        controls.gap.onClick = function () { run("gap",-1); };
+        controls.ripple.onClick = rippleDialog;
+        controls.settings.onClick = settingsDialog; controls.report.onClick = reportDialog;
+        root.onActivate = function () { refreshContext(true); };
+        if (root.addEventListener) root.addEventListener("mouseover",function () { refreshContext(false); });
+        root.onResizing = root.onResize = function () { if (renderPresets(false)) root.layout.layout(true); this.layout.resize(); };
+        reflow(); refreshContext(true);
+        if (loaded.note || panelLoaded.note) status(loaded.note || panelLoaded.note);
+        if (root instanceof Window) { root.center(); root.show(); }
+        return {root:root,controls:controls,reflow:reflow};
+    }
+    return {create:create};
+}());

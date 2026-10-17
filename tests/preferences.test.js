@@ -1,0 +1,5 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {FFCore:c}=require('./harness').load();
+test('panel preferences roundtrip step scope and false marker flag',()=>{const s={frames:12,scope:'all',compMarkers:false};assert.equal(c.encodePanelState(c.parsePanelState(c.encodePanelState(s)).settings),c.encodePanelState(s));assert.equal(c.parsePanelState(c.encodePanelState(s)).settings.compMarkers,false);});
+test('absent preferences use valid defaults without a write',()=>{const x=c.parsePanelState(null);assert.equal(x.storageProtected,false);assert.equal(x.settings.frames,1);assert.equal(x.settings.scope,'auto');assert.equal(x.settings.compMarkers,false);});
+test('unknown, newer and corrupt stored panel data remain protected',()=>{for(const s of ['v9|frames=12','v1|frames=0','v1|scope=unknown','v1|compMarkers=no','v1|future=1','v1|frames=1.5','v1|frames=12|frames=2']){const p=c.parsePanelState(s);assert.equal(p.storageProtected,true,s);assert.ok(p.note,s);}});
+test('unknown saved appearance fields are protected from destructive rewrite',()=>{assert.equal(c.parseSettings('v1|spacing=6|futureColor=8').storageProtected,true);});

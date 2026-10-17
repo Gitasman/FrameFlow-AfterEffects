@@ -1,0 +1,22 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {load}=require('./harness');
+const {FFCore:c}=load();
+const ctx={frameDuration:1/24,cti:5,duration:10};
+const req=(region,direction=1)=>({region,direction,frames:12,scope:'auto'});
+const layer=(a,b)=>({start:0,inPoint:a,outPoint:b,locked:false});
+function eq(m,r,want){const p=c.offsetLayerPlan(m,ctx,r);for(const [k,v] of Object.entries(want))assert.equal(p[k],v,k);}
+test('after moves complete layer including native keys exactly once',()=>eq(layer(6,9),req('after'),{kind:'layer',start:.5,inPoint:6.5,outPoint:9.5}));
+test('crossing after changes only out edge',()=>eq(layer(0,10),req('after'),{kind:'edge',start:0,inPoint:0,outPoint:10.5}));
+test('crossing before changes only in edge',()=>eq(layer(0,10),req('before',-1),{kind:'edge',start:0,inPoint:-.5,outPoint:10}));
+test('layer ending at CTI belongs before',()=>eq(layer(2,5),req('before'),{kind:'layer',inPoint:2.5,outPoint:5.5}));
+test('layer starting at CTI belongs after',()=>eq(layer(5,10),req('after'),{kind:'layer',inPoint:5.5,outPoint:10.5}));
+test('opposite side remains unchanged',()=>eq(layer(1,3),req('after'),{kind:'none'}));
+test('off-comp layer positions allowed',()=>eq(layer(8,10),req('after'),{kind:'layer',outPoint:10.5}));
+test('invalid shortened layer is skipped before mutation',()=>assert.ok(c.offsetLayerPlan(layer(4.9,5.1),ctx,req('after',-1)).skip));
+test('key exactly at CTI belongs after only',()=>{const ks=[{time:4},{time:5},{time:6}];assert.deepEqual(Array.from(c.keyPlan(ks,ctx,req('before'),false).times),[4.5,5,6]);assert.deepEqual(Array.from(c.keyPlan(ks,ctx,req('after'),false).times),[4,5.5,6.5]);});
+test('automatic Bezier keys can be offset by side',()=>{const p=c.keyPlan([{time:1,temporalAuto:true},{time:6,temporalAuto:true}],ctx,req('after'),false);assert.equal(p.moved,1);});
+test('roving partial move still reports unsupported constraint',()=>assert.match(c.keyPlan([{time:1,roving:true},{time:6}],ctx,req('after'),false).skip,/Roving/));
+test('subframes and noninteger FPS preserved',()=>{const x={...ctx,frameDuration:1001/24000};const p=c.keyPlan([{time:6.123}],x,req('after'),false);assert.equal(p.times[0],6.123+12*x.frameDuration);});
+test('collision or key order reversal rejected',()=>{assert.ok(c.keyPlan([{time:4.5},{time:5}],ctx,req('after',-1),false).error);assert.ok(c.keyPlan([{time:4.9},{time:5}],ctx,req('after',-1),false).error);});
+test('saved appearance stays compatible and corrupt settings stay protected',()=>{const raw='v1|density=1|spacing=4|logging=1|favorites=1,12,24';assert.equal(c.encodeSettings(c.parseSettings(raw).settings),raw);for(const s of ['v9|x=3','v1|spacing=bad'])assert.equal(c.parseSettings(s).storageProtected,true);});

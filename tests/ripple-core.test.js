@@ -1,0 +1,18 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {FFCore:c}=require('./harness').load();
+const context={frameDuration:1,duration:20,cti:5};
+function spec(mode='insert',from='5',length='2'){assert.equal(typeof c.rippleSpec,'function','missing time-edit planner');return c.rippleSpec(context,{mode,fromFrames:from,lengthFrames:length});}
+function keys(ts){return ts.map(time=>({time}));}const arr=x=>Array.from(x);
+test('insertion includes the boundary key and preserves earlier keys',()=>{const s=spec(),p=c.rippleKeyPlan(keys([2,5,8]),context,s);assert.deepEqual(arr(p.times),[2,7,10]);assert.equal(p.moved,2);assert.equal(p.deleted,0);});
+test('removal is half-open and retains the right boundary at the join',()=>{const s=spec('remove'),p=c.rippleKeyPlan(keys([2,5,6,7,9]),context,s);assert.deepEqual(arr(p.indices),[0,3,4]);assert.deepEqual(arr(p.times),[2,5,7]);assert.equal(p.deleted,2);assert.equal(p.moved,2);});
+test('fractional frames and comma notation retain exact interval length',()=>{const s=spec('remove','5,25','0,5');assert.equal(s.from,5.25);assert.equal(s.to,5.75);assert.equal(s.delta,-.5);});
+test('invalid operations ranges and nonpositive lengths are rejected',()=>{for(const args of [['other','5','2'],['remove','-1','2'],['remove','19','2'],['insert','21','2'],['insert','5','0'],['insert','5','NaN']])assert.throws(()=>spec(...args));});
+test('insertion moves downstream layers natively and only extends crossing Out',()=>{const s=spec();const cross=c.rippleLayerPlan({start:0,inPoint:0,outPoint:10},s),later=c.rippleLayerPlan({start:4,inPoint:5,outPoint:10},s);assert.equal(cross.kind,'edge');assert.equal(cross.start,0);assert.equal(cross.outPoint,12);assert.equal(later.kind,'layer');assert.equal(later.start,6);assert.equal(later.inPoint,7);});
+test('layer ending at insertion boundary is untouched even when locked',()=>{assert.equal(c.rippleLayerPlan({start:0,inPoint:0,outPoint:5,locked:true},spec()).kind,'none');});
+test('removal maps both crossing layer boundaries without moving Start',()=>{const s=spec('remove');for(const [a,b,ia,ob] of [[0,10,0,8],[6,10,5,8],[0,6,0,5]]){const p=c.rippleLayerPlan({start:0,inPoint:a,outPoint:b},s);assert.equal(p.kind,'edge');assert.equal(p.inPoint,ia);assert.equal(p.outPoint,ob);assert.equal(p.start,0);}});
+test('layer fully inside removal is blocked instead of silently deleted',()=>{assert.match(c.rippleLayerPlan({start:0,inPoint:5,outPoint:7},spec('remove')).error,/целиком/);});
+test('affected locked layer blocks but earlier locked layer does not',()=>{assert.ok(c.rippleLayerPlan({start:0,inPoint:7,outPoint:10,locked:true},spec()).error);assert.equal(c.rippleLayerPlan({start:0,inPoint:0,outPoint:2,locked:true},spec()).kind,'none');});
+test('removal cannot empty an animated property',()=>{assert.match(c.rippleKeyPlan(keys([5,6]),context,spec('remove')).error,/все ключи/);});
+test('partial Roving edits block while uniform movement remains valid',()=>{const k=keys([2,5,8]);k[1].roving=true;assert.match(c.rippleKeyPlan(k,context,spec()).error,/Roving/);assert.equal(c.rippleKeyPlan(k,context,spec('insert','0')).moved,3);});
+test('nearly colliding retained join keys block before native writes',()=>{assert.match(c.rippleKeyPlan(keys([4.9999999,7]),context,spec('remove')).error,/Коллизия/);});
+test('AE time bounds remain enforced after mapping',()=>{assert.ok(c.rippleKeyPlan(keys([10800]),context,spec()).error);assert.ok(c.rippleLayerPlan({start:0,inPoint:5,outPoint:10800},spec()).error);});
+test('no keys affected gives a genuine no-op plan',()=>{const p=c.rippleKeyPlan(keys([1,2]),context,spec('remove'));assert.equal(p.moved,0);assert.equal(p.deleted,0);assert.deepEqual(arr(p.times),[1,2]);});

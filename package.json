@@ -1,0 +1,14 @@
+{
+  "name": "frameflow-ae",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Native After Effects timing panel",
+  "scripts": {
+    "build": "node tools/build.cjs",
+    "test": "node --test tests/*.test.js",
+    "check:es3": "node tools/es3-check.cjs dist/FrameFlow_AE_2.0.jsx",
+    "check": "npm run build && npm test && npm run check:es3"
+  },
+  "devDependencies": {"acorn": "8.17.0"},
+  "engines": {"node": ">=22"}
+}

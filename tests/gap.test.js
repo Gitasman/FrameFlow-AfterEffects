@@ -1,0 +1,10 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {load}=require('./harness');const {FFCore:c}=load();
+const ctx={cti:5,duration:20,frameDuration:1/24};const l=(a,b,locked=false)=>({inPoint:a,outPoint:b,locked});
+test('finds full gap containing CTI, independent of layer stacking order',()=>{const g=c.gapPlan([l(8,12),l(0,3),l(2,4)],ctx);assert.equal(g.ok,true);assert.equal(g.start,4);assert.equal(g.end,8);assert.equal(g.duration,4);});
+test('occupied interval is not a removable gap including disabled and locked layers',()=>{for(const x of [{...l(4,6),enabled:false},l(4,6,true)]){const g=c.gapPlan([l(0,3),x,l(8,12)],ctx);assert.equal(g.ok,false);assert.match(g.reason,/сло/);}});
+test('CTI on previous out is a gap, CTI on following in is occupied',()=>{assert.equal(c.gapPlan([l(0,5),l(8,12)],ctx).ok,true);assert.equal(c.gapPlan([l(0,3),l(5,12)],ctx).ok,false);});
+test('leading gap uses comp zero, trailing empty tail is not removed',()=>{assert.equal(c.gapPlan([l(8,12)],ctx).start,0);assert.equal(c.gapPlan([l(0,3)],ctx).ok,false);});
+test('locked downstream layer prevents gap closure',()=>{const g=c.gapPlan([l(0,3),l(8,12),l(15,17,true)],ctx);assert.equal(g.ok,false);assert.match(g.reason,/Locked|заблок/);});
+test('preserves fractional gap and NTSC frame duration without rounding',()=>{const g=c.gapPlan([l(0,4.125),l(6.137,10)],{...ctx,frameDuration:1001/24000});assert.equal(g.duration,6.137-4.125);assert.equal(g.frames,g.duration/(1001/24000));});
+test('empty, invalid intervals and cursor outside comp are refused',()=>{for(const [ls,x] of [[[],ctx],[[l(7,3),l(8,10)],ctx],[[l(0,3),l(8,10)],{...ctx,cti:-1}],[[l(0,3),l(8,10)],{...ctx,cti:21}]])assert.equal(c.gapPlan(ls,x).ok,false);});
+test('normal operations retain integer frames, internal gap delta may be fractional',()=>{assert.throws(()=>c.offsetSeconds(ctx,{frames:1.5,direction:1}));assert.equal(c.offsetSeconds(ctx,{deltaSeconds:-.137,direction:-1}),-.137);assert.throws(()=>c.offsetSeconds(ctx,{deltaSeconds:NaN,direction:-1}));assert.throws(()=>c.offsetSeconds(ctx,{deltaSeconds:1,direction:-1}));});
