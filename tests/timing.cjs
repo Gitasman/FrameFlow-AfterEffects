@@ -84,7 +84,8 @@ test('whole-layer mode does not retime a crossing layer on the after side',()=>{
   const f=fixture();assert.equal(f.host.prepare(request('layers')).changes.length,0);
 });
 test('strict preflight blocks every write when another requested target is locked',()=>{
-  const f=fixture({second:true}),p=f.host.prepare(request('keys',{strict:true}));
+  const f=fixture({second:true}); f.comp.layer(2).numProperties=1; f.comp.layer(2).property=()=>f.prop;
+  const p=f.host.prepare(request('keys',{strict:true}));
   assert.equal(p.changes.length,1);assert.equal(p.skips.length,1);
   const result=f.host.applyPlan(p);assert.equal(result.ok,false);assert.equal(f.writes(),0);assert.equal(f.undo(),0);
 });

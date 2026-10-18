@@ -1,5 +1,10 @@
-# FrameFlow AE 2.0.2
+# FrameFlow AE 2.1.0
 
+A compact CEP 12 panel for timing commands around the After Effects playhead. The duplicate timeline, layer list, drag editing and trim/split inspector have been removed from the UI.
+
+**[Download installable ZIP](downloads/FrameFlow_AE_2.1.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
+
+Close AE, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Open **Window → Extensions (Legacy) → FrameFlow 2.1**. Target: AE 25.x–26.x / CEP 12. Previous installation and preferences are preserved. The panel has no runtime npm dependencies, server, telemetry or CEP Node requirement.
 **Visual timeline panel for Adobe After Effects 25.x–26.x (Windows and macOS).** Move, trim and split layers or offset keyframes from a dockable panel.
 
 **[Download v2.0.2 ZIP](downloads/FrameFlow_AE_2.0.2.zip)** · [Quick start](#quick-start) · [Russian installation guide](README_RU.md) · [Offline HTML preview](PREVIEW.html) · [Changelog](CHANGELOG.md)
@@ -16,21 +21,23 @@ This is an **unsigned CEP 12 extension**, not a signed ZXP. Read the [detailed i
 
 Version 2.0.2 addresses a host registration issue seen with `$.evalFile` in AE 25.6.4; the extension ID and preference storage are unchanged from 2.0.0. Startup and editing have **not** yet been confirmed in a real AE host; see [verification details](VERIFICATION.json) and the [smoke test](docs/AE_SMOKE_TEST_RU.md).
 
-## Development
+## Workflow
 
-- `src/core.jsxinc`: timing, keyframe preservation and bounded mutation/recovery core.
-- `src/panel-host.jsxinc`: data-only RPC and AE adapter.
-- `extension/js/bridge.js`: CEP initialization, version handshake and correlated RPC.
-- `extension/js/panel.js`: timeline UI, preferences and local reports.
+Choose Auto, Selected Layers or Entire Composition. Choose frames using presets, stepper, slider or rounded half/one-second shortcuts. Use one of the four always-visible Before − / Before + / After − / After + actions. Auto uses AE's selected layers, or the entire composition when none are selected. Each command refreshes AE state before mutation and retains the kernel's stale-state checks.
 
-`node tools/build.cjs` generates `extension/jsx/host.jsx`. `node tools/check.cjs` checks strict ES3, generated transport strings, pure calculations and simulated AE/CEP/DOM behavior. Maintainer checks need Node >=20 with a compatible Acorn module, or Node's bundled Acorn through `--expose-internals` as used by the check script. No runtime npm packages, CEP Node, server, remote scripts or telemetry are required by the installed panel.
+Offset preserves the original crossing-layer edge/key behavior; whole-layer mode uses layer In as its side anchor. Key modes preserve layer bounds. Close Gap uses the same scope independently of frame step/mode. Preview plans the last direction without writing. Undo/Redo remains native to AE.
 
-`node tools/preview.cjs` creates the standalone demo `PREVIEW.html`. The demo does not connect to or modify AE.
+Preference schema v2 migrates v1 without broadening explicit Selected scope or resetting timing choices/appearance. Obsolete timeline preference values are retained for reversible migration; their old controls are not shown.
 
-`python3 tools/package.py` runs the checks and builds `artifacts/FrameFlow_AE_2.0.2.zip` with a matching versioned root, checksums and verification report. It requires maintainer Python 3, Node and Bash; these are not required by the installed extension. Generated build folders are excluded from the archive.
+## Development and checks
 
-The GitHub PR workflow runs this packaging command and uploads an artifact. The checked download under `downloads/` is retained source distribution, not a signed ZXP or a GitHub Release. CI artifacts are separate builds identified by their workflow run; neither establishes execution in AE.
+`src/core.jsxinc` contains timing and bounded recovery. `src/panel-host.jsxinc` is the data-only RPC/AE adapter. `extension/js/bridge.js` retains the explicit global bootstrap validated by the user in AE 25.6.4 on 2.0.2. `extension/js/panel.js` implements the compact controls and acknowledged preference writes.
 
-## Validation boundary
+- `node tools/build.cjs`: generate the complete ES3 host.
+- `node tools/check.cjs`: strict ES3, calculations and simulated AE/CEP/DOM regressions.
+- `node tools/preview.cjs`: standalone, explicitly read-only browser demo.
+- `python3 tools/package.py`: checks, preview, path/shell validation and hash-verified versioned ZIP in `artifacts/`.
 
-No real AE/CEP host is available in this workspace. Local tests and strict syntax validation do not establish real startup, clipboard, Undo/Redo or visual correctness. See `VERIFICATION.json` for checked byte hashes and current results. Never retry an unconfirmed edit; refresh and inspect the AE state first.
+Maintainer tooling needs Node >=20 with Acorn 8.17.0 or bundled Acorn through `--expose-internals`; packaging also uses Python 3 and Bash. Installed-panel users need none of these tools. Read-only PR CI runs the package command and uploads a separate build; downloads are checked source distributions, not signed ZXP files or GitHub Releases.
+
+Tests simulate AE, scoped evalFile, CEP and the DOM. They cover all four directions, Auto/no-selection, explicit scope safety, stale CTI/selection, gap, lock relevance, key collisions, preference migration, frame controls, clipboard and connection recovery. See `VERIFICATION.json`. **New 2.1 behavior, clipboard, docking, layout and Undo/Redo still require real AE testing.** Use [the smoke test](docs/AE_SMOKE_TEST_RU.md) on a copy of a project.

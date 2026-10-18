@@ -1,6 +1,6 @@
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.0.2", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.1.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -231,17 +231,23 @@ var FFCEP = (function () {
     }
     function corePlan(c, r) {
         var request, plan;
-        if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
-        schema(r, "|op||token||ids||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
-        targets(c, r.ids, false);
+        if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
+        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
         if (r.op === "move") {
+            targets(c, r.ids, false);
             number(r.deltaFrames, -1000000, 1000000, false); if (r.deltaFrames === 0) fail("Сдвиг равен нулю.");
             request = {mode:"layers", region:"all", scope:"selected", layerIds:r.ids, direction:r.deltaFrames > 0 ? 1 : -1, deltaSeconds:r.deltaFrames * c.frameDuration, frames:1, strict:true};
         } else {
             if (!FFCore.validMode(r.mode)) fail("Режим не распознан."); FFCore.parseFrames(String(r.frames));
             if (r.region !== "before" && r.region !== "after") fail("Сторона не распознана.");
             if (r.direction !== 1 && r.direction !== -1) fail("Направление не распознано."); bool(r.compMarkers);
-            request = {mode:r.mode, region:r.region, scope:"selected", layerIds:r.ids, direction:r.direction, frames:r.frames, strict:true, compMarkers:r.compMarkers};
+            if (own(r, "ids")) { targets(c, r.ids, false); request = {scope:"selected",layerIds:r.ids}; }
+            else {
+                if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Выберите Авто, выделенные слои или всю композицию.");
+                request = {scope:r.scope};
+            }
+            request.mode = r.mode; request.region = r.region; request.direction = r.direction;
+            request.frames = r.frames; request.strict = true; request.compMarkers = r.compMarkers;
         }
         plan = FFHost.prepare(request); return plan;
     }
@@ -270,7 +276,7 @@ var FFCEP = (function () {
             if (typeof r.preview !== "undefined") bool(r.preview);
             result = directEdit(c, layers, r); report = stringify(result);
         } else fail("Неизвестная операция.");
-        if (!result.ok) return {state:snapshot(), failure:result, report:report, message:result.error ? result.error.message : "Не удалось завершить проверку записи. Откройте отчёт."};
+        if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
         return {state:snapshot(), result:result, report:report, message:result.changed ? "Готово · изменений: " + result.changed : "Подходящих целей нет · сцена не изменена"};
     }
     function dispatch(encoded) {

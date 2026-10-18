@@ -1,29 +1,13 @@
-# FrameFlow 2.0.2 status
+# FrameFlow 2.1.0 status
 
-## Source, issue and scope
+Baseline: merged 2.0.2 source, `main` commit `1c26076bf87b3cfa54ef78893d52f32249d3c229`, tree `112d429c22b902126518f564e18f621665da803e`. The user confirmed that 2.0.2 connects in AE 25.6.4 and requested removal of the duplicate timeline and repairs to command usability.
 
-The baseline is the conversation's issued FrameFlow AE 2.0.1 package. The user reproduced `BOOT_HOST / load / Host handshake/version mismatch` in AE 25.6.4. They authorized publishing complete tool source to `Gitasman/FrameFlow-AfterEffects` through a PR. Previous issued packages remain unchanged.
+The 2.0.2 primary arrows dispatched whole-region `move` commands. Before/After controls were hidden in whole-layer mode. Auto existed in the timing core but not the UI or CEP gap adapter. UI-derived IDs and stale CTI/selection could also reject commands. The compact panel now always dispatches side-specific offset commands with a validated scope, reads fresh AE state before each command, and keeps host stale-token protection. Close Gap accepts Auto and remains independent of frame step/mode.
 
-The repository's inspected `main` head was `f9931e254a0350d0641e246f39276b1b2e55acee`, containing only README.md; there were no existing source guides or CI/deploy triggers. Publication uses a task branch; no default-branch write or merge is part of this patch. See the PR and latest checks for remote state.
+The timeline, layer selection UI, drag/trim/split inspector and related keyboard mutations have been removed from the panel. Four directions, actual scope hint, clear mode descriptions, frame presets, stepper/Shift/wheel, slider and rounded time shortcuts are available. Settings v2 migrates v1, preserves explicit timing choices, appearance and 0/false, and adds editable quick steps. Invalid drafts remain in the current session. Clipboard, bootstrap, single-flight transport and uncertain-write recovery are retained.
 
-## Cause and repair
+Irrelevant locked layers are excluded before reporting skips: wrong-side offset layers and key-only layers without matching keys cannot block unrelated work. Relevant locked targets, collisions and read failures still block the whole operation before writes. Legacy host Move/Trim/Split endpoints remain for compatibility and regression checks, but have no panel controls.
 
-2.0.1 loaded `host.jsx` using `$.evalFile` inside the bootstrap function, but the host declared `var FrameFlowCEP`. The bootstrap then searched `$.global.FrameFlowCEP`. A function-scoped loader reproduces the user's exact mismatch because a local variable is not an explicit global export. Previous simulations always evaluated the file in global scope and missed this boundary. This explains the source failure; actual behavior in the user's AE must still be confirmed after installation.
+See `VERIFICATION.json` and `docs/verification.log` for exact current checks. New functional evidence is simulated AE/CEP/DOM, including all four directions, automatic scope, fresh CTI/selection, gap, locks, modes, drafts, migrated settings and clipboard recovery. The user's 2.0.2 connection confirmation is not a real execution test of 2.1.0. New behavior, native Undo/Redo and desktop layout still require `docs/AE_SMOKE_TEST_RU.md`. Source review is self-review. Publication uses a task branch/PR and preserves issued downloads.
 
-The generated host now assigns the completed API to `$.global.FrameFlowCEP` explicitly. RPC uses the same qualified namespace. Construction finishes before replacing the previous global object. Matching loaded hosts are reused; timed-out edits are never replayed.
-
-The bootstrap captures AE version/build, OS and ExtendScript version before loading, returns this environment on failures, separates file execution from registration verification, and reports the expected version and observed namespace/dispatch. Numeric engine script IDs are retained separately rather than displayed as filenames.
-
-## Preserved behavior
-
-Timeline UI, extension ID/install path, preference schema, editing algorithms, one in-flight RPC, replay protection, uncertainty/read-before-write recovery, polling suspension and one-click report copying are retained. No precomp/Smart Ripple features, scene changes during initialization, network services or telemetry are added.
-
-## Checks and delivery
-
-`python3 tools/package.py` builds the kernel, runs strict ES3 and all tests, generates the standalone preview, validates local paths and shell syntax, then verifies a versioned ZIP against file hashes. `VERIFICATION.json` and `docs/verification.log` record actual outcomes. Tests include local and global evalFile scopes, a detached engine namespace, local name shadowing, environment diagnostics, delayed replies and UI → loader → RPC → host → UI. All AE/CEP/DOM execution in these tests is simulated.
-
-No real AE connection is available. Real startup, docking, clipboard operation, layout and Undo/Redo remain unverified. Review is self-review. The GitHub workflow checks source and builds an Actions artifact; it does not run After Effects. The published download under `downloads/` is a checked ZIP, not a signed ZXP or a GitHub Release.
-
-## Next action
-
-Install 2.0.2 with AE closed. Open FrameFlow 2.0 and a composition. The report should show `FrameFlow 2.0.2`, loader `ready`, host `2.0.2`, and real environment values. Run `docs/AE_SMOKE_TEST_RU.md` on a copy of the project. On any failure, click Report and send the copied text. Reconcile changes against the repository branch before the next patch.
+Browser attempt: the public PREVIEW.html on the task branch was submitted to Firecrawl Interact for 320/480 px and open-state checks. The service returned INVALID_ARGUMENT with no session; no successful browser/layout evidence was obtained. No private source or project was uploaded.
