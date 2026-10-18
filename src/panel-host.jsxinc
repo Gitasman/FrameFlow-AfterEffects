@@ -1,0 +1,294 @@
+/* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
+var FFCEP = (function () {
+    var VERSION = "2.0.2", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var saved = null, recent = [], busy = false;
+    function fail(message) { throw new Error(message); }
+    function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+    function quote(s) {
+        return '"' + String(s).replace(/["\\\x00-\x1f\u2028\u2029]/g, function (c) {
+            var h = c.charCodeAt(0).toString(16);
+            return c === '"' ? '\\"' : c === "\\" ? "\\\\" : "\\u" + ("0000" + h).slice(-4);
+        }) + '"';
+    }
+    function stringify(v, depth) {
+        var a = [], i, k, t = typeof v;
+        depth = depth || 0; if (depth > 32) fail("RPC nesting limit");
+        if (v === null || t === "undefined") return "null";
+        if (t === "string") return quote(v);
+        if (t === "boolean") return v ? "true" : "false";
+        if (t === "number") { if (!isFinite(v)) fail("Non-finite RPC number"); return String(v); }
+        if (v instanceof Array) { for (i = 0; i < v.length; i++) a.push(stringify(v[i], depth + 1)); return "[" + a.join(",") + "]"; }
+        if (t !== "object") fail("Unsupported RPC value");
+        for (k in v) if (own(v, k)) a.push(quote(k) + ":" + stringify(v[k], depth + 1));
+        return "{" + a.join(",") + "}";
+    }
+    /* Strict bounded JSON parser: never uses eval or assumes native JSON exists. */
+    function parse(s) {
+        var at = 0, nodes = 0;
+        if (typeof s !== "string" || s.length > 65536) fail("RPC size limit");
+        function ws() { while (at < s.length && /[\x20\t\r\n]/.test(s.charAt(at))) at++; }
+        function str() {
+            var out = "", c, h;
+            if (s.charAt(at++) !== '"') fail("JSON string expected");
+            while (at < s.length) {
+                c = s.charAt(at++);
+                if (c === '"') return out;
+                if (c === "\\") {
+                    c = s.charAt(at++);
+                    if (c === "u") { h = s.substr(at, 4); if (!/^[0-9a-fA-F]{4}$/.test(h)) fail("Invalid JSON escape"); out += String.fromCharCode(parseInt(h, 16)); at += 4; }
+                    else if (c === '"' || c === "\\" || c === "/") out += c;
+                    else if (c === "b") out += "\b";
+                    else if (c === "f") out += "\f";
+                    else if (c === "n") out += "\n";
+                    else if (c === "r") out += "\r";
+                    else if (c === "t") out += "\t";
+                    else fail("Invalid JSON escape");
+                } else { if (c.charCodeAt(0) < 32) fail("Invalid JSON control"); out += c; }
+            }
+            fail("Unclosed JSON string");
+        }
+        function value(depth) {
+            var c, out, key, match;
+            if (++nodes > 10000 || depth > 12) fail("RPC complexity limit");
+            ws(); c = s.charAt(at);
+            if (c === '"') return str();
+            if (c === "{" || c === "[") {
+                at++; out = c === "{" ? {} : []; ws();
+                if (s.charAt(at) === (c === "{" ? "}" : "]")) { at++; return out; }
+                for (;;) {
+                    ws();
+                    if (c === "{") {
+                        key = str();
+                        if (key === "__proto__" || key === "constructor" || key === "prototype" || own(out, key)) fail("Invalid JSON key");
+                        ws(); if (s.charAt(at++) !== ":") fail("JSON colon expected"); out[key] = value(depth + 1);
+                    } else out.push(value(depth + 1));
+                    ws(); key = s.charAt(at++);
+                    if (key === (c === "{" ? "}" : "]")) return out;
+                    if (key !== ",") fail("JSON separator expected");
+                }
+            }
+            match = s.slice(at).match(/^(true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+            if (!match) fail("Invalid JSON value"); at += match[0].length;
+            if (match[0] === "true") return true;
+            if (match[0] === "false") return false;
+            if (match[0] === "null") return null;
+            out = Number(match[0]); if (!isFinite(out)) fail("Invalid JSON number"); return out;
+        }
+        var result = value(0); ws(); if (at !== s.length) fail("Trailing JSON data"); return result;
+    }
+    function number(v, min, max, integer) {
+        if (typeof v !== "number" || !isFinite(v) || v < min || v > max || (integer && Math.floor(v) !== v)) fail("Некорректное числовое значение.");
+        return v;
+    }
+    function schema(o, fields) {
+        var k; if (!o || typeof o !== "object" || o instanceof Array) fail("RPC object expected");
+        for (k in o) if (own(o, k) && fields.indexOf("|" + k + "|") < 0) fail("Unknown RPC field: " + k);
+    }
+    function bool(v) { if (typeof v !== "boolean") fail("Boolean expected"); return v; }
+    function ids(v) {
+        var seen = {}, i; if (!(v instanceof Array) || v.length > 2000) fail("Некорректный список слоёв.");
+        for (i = 0; i < v.length; i++) { number(v[i], 1, 2147483647, true); if (seen["k" + v[i]]) fail("Повтор цели."); seen["k" + v[i]] = true; }
+        return v;
+    }
+    function getComp() {
+        var c = app.project ? app.project.activeItem : null;
+        if (!(c instanceof CompItem)) fail("Откройте композицию в After Effects.");
+        if (c.numLayers > 2000) fail("Более 2000 слоёв: откройте меньшую композицию.");
+        return c;
+    }
+    function typeOfLayer(l) {
+        if (l.nullLayer) return "null";
+        if (l.matchName === "ADBE Text Layer") return "text";
+        if (l.matchName === "ADBE Vector Layer") return "shape";
+        if (l.matchName === "ADBE Camera Layer") return "camera";
+        if (l.matchName === "ADBE Light Layer") return "light";
+        if (l.source instanceof CompItem) return "comp";
+        if (l.hasAudio && !l.hasVideo) return "audio";
+        return "media";
+    }
+    function model(c) {
+        var layers = [], i, l, source, m;
+        for (i = 1; i <= c.numLayers; i++) {
+            l = c.layer(i); source = l.source || null;
+            m = {id:l.id, index:i, name:l.name, kind:typeOfLayer(l), start:l.startTime, inPoint:l.inPoint, outPoint:l.outPoint,
+                stretch:l.stretch, locked:l.locked, selected:l.selected, enabled:l.enabled, label:l.label,
+                parentId:l.parent ? l.parent.id : null, remap:l.timeRemapEnabled === true,
+                matte:l.hasTrackMatte === true || l.isTrackMatte === true, audio:l.hasAudio === true,
+                sourceId:source ? source.id : null, sourceDuration:source ? source.duration : null,
+                still:source && source.mainSource ? source.mainSource.isStill === true : false};
+            layers.push(m);
+        }
+        return {compId:c.id, name:c.name, duration:c.duration, frameDuration:c.frameDuration, displayStart:c.displayStartTime,
+            time:c.time, workStart:c.workAreaStart, workDuration:c.workAreaDuration, layers:layers};
+    }
+    function snapshot() {
+        var c = getComp(), state = model(c), signature = stringify(state);
+        if (!saved || saved.project !== app.project || saved.comp !== c || saved.signature !== signature) {
+            saved = {project:app.project, comp:c, signature:signature, token:session + ":" + (++serial)};
+        }
+        state.token = saved.token; state.version = VERSION;
+        state.environment = {ae:String(app.version), build:String(app.buildNumber), os:String($.os)};
+        return state;
+    }
+    function current(token) {
+        var s = snapshot(); if (typeof token !== "string" || token !== s.token) fail("Композиция изменилась. Обновите панель и повторите действие."); return saved.comp;
+    }
+    function targets(c, list, allowEmpty) {
+        var result = [], i, j; ids(list);
+        if (!list.length && !allowEmpty) fail("Выделите хотя бы один слой.");
+        for (i = 0; i < list.length; i++) {
+            for (j = 1; j <= c.numLayers; j++) if (c.layer(j).id === list[i]) { result.push(c.layer(j)); break; }
+            if (j > c.numLayers) fail("Целевой слой больше не существует.");
+        }
+        return result;
+    }
+    function unlocked(layers) { var i; for (i = 0; i < layers.length; i++) if (layers[i].locked) fail("Заблокированный слой: #" + layers[i].index + ". Снимите блокировку в AE."); }
+    function selection(c) { var a = [], i; for (i = 1; i <= c.numLayers; i++) a.push({layer:c.layer(i), value:c.layer(i).selected}); return a; }
+    function restoreSelection(a) { var i; for (i = 0; i < a.length; i++) if (a[i].layer.selected !== a[i].value) a[i].layer.selected = a[i].value; }
+    function verifyNear(a, b, eps) { if (Math.abs(a - b) > eps) fail("Проверка записи не совпала с расчётом."); }
+    function capture(l, budget) {
+        var props = FFHost.scanLayer(l), a = [], i, count = 0;
+        budget = budget || {keys:0, properties:0}; budget.properties += props.length;
+        if (budget.properties > 20000) fail("Более 20000 свойств: сузьте область.");
+        for (i = 0; i < props.length; i++) if (props[i].numKeys) {
+            count += props[i].numKeys; budget.keys += props[i].numKeys; if (count > 50000 || budget.keys > 50000) fail("Более 50000 ключей: сузьте область.");
+            a.push({p:props[i], s:FFHost.snapshotProperty(props[i])});
+        }
+        return a;
+    }
+    function verifyKeys(a, eps) { var i; for (i = 0; i < a.length; i++) FFHost.verifyProperty(a[i].p, a[i].s, FFHost.originalTimes(a[i].s), eps); }
+    function trimPlan(c, layers, r, budget) {
+        var out = [], i, l, t = number(r.time, -10800, 10800, false), eps = c.frameDuration * 0.000001, edge = r.edge, limit;
+        if (edge !== "in" && edge !== "out") fail("Укажите In или Out."); unlocked(layers);
+        for (i = 0; i < layers.length; i++) {
+            l = layers[i];
+            if (l.inPoint >= l.outPoint) fail("Обратные границы слоя пока не поддержаны.");
+            if (edge === "in" && t > l.outPoint - c.frameDuration + eps || edge === "out" && t < l.inPoint + c.frameDuration - eps) fail("Оставьте не менее одного кадра слоя.");
+            if ((edge === "in" && t < l.inPoint - eps) || (edge === "out" && t > l.outPoint + eps)) {
+                if (l.timeRemapEnabled === true || l.stretch <= 0) fail("Для Time Remap и обратного Stretch доступно только укорачивание.");
+                if (l.source && !(l.source.mainSource && l.source.mainSource.isStill)) {
+                    limit = edge === "in" ? l.startTime : l.startTime + l.source.duration * l.stretch / 100;
+                    if (edge === "in" && t < limit - eps || edge === "out" && t > limit + eps) fail("Край выходит за доступное исходное медиа.");
+                }
+            }
+            if (Math.abs(t - (edge === "in" ? l.inPoint : l.outPoint)) > eps) out.push({layer:l, before:{start:l.startTime, inPoint:l.inPoint, outPoint:l.outPoint}, time:t, keys:capture(l, budget)});
+        }
+        return out;
+    }
+    function bounds(l, s) { l.outPoint = Math.max(l.outPoint, s.outPoint); l.inPoint = s.inPoint; l.outPoint = s.outPoint; }
+    function directEdit(c, layers, r) {
+        var plans = [], touched = [], made = [], originalSelection = selection(c), opened = false, i, l, p, d;
+        var budget = {keys:0, properties:0};
+        var result = {ok:false, changed:0, recoveryErrors:[]}, eps = c.frameDuration * 0.000001;
+        unlocked(layers);
+        if (r.op === "trim") plans = trimPlan(c, layers, r, budget);
+        else {
+            number(r.time, 0, c.duration, false);
+            for (i = 0; i < layers.length; i++) {
+                l = layers[i];
+                if (r.time < l.inPoint + c.frameDuration - eps || r.time > l.outPoint - c.frameDuration + eps) fail("Split: курсор должен оставлять хотя бы кадр с обеих сторон каждого выбранного слоя.");
+                if (l.hasTrackMatte === true || l.isTrackMatte === true || l.parent !== null) fail("Split: связи Parent и Track Matte требуют ручного разделения в AE.");
+                for (var j = 1; j <= c.numLayers; j++) if (c.layer(j).parent === l) fail("Split: у выбранного слоя есть дочерние слои.");
+                plans.push({layer:l, before:{start:l.startTime, inPoint:l.inPoint, outPoint:l.outPoint}, keys:capture(l, budget)});
+            }
+        }
+        if (!plans.length) { result.ok = true; return result; }
+        try {
+            app.beginUndoGroup("FrameFlow 2.0 — " + (r.op === "split" ? "Split" : "Trim " + r.edge)); opened = true;
+            for (i = 0; i < plans.length; i++) {
+                p = plans[i]; l = p.layer; touched.push(p);
+                if (r.op === "split") {
+                    d = l.duplicate(); made.push(d); d.selected = false; d.inPoint = r.time; l.outPoint = r.time;
+                    verifyNear(d.inPoint, r.time, eps); verifyNear(d.outPoint, p.before.outPoint, eps); verifyNear(d.startTime, p.before.start, eps);
+                    verifyNear(l.outPoint, r.time, eps);
+                    /* Native duplicate carries values; compare the duplicate's captured property paths. */
+                    for (var q = 0; q < p.keys.length; q++) {
+                        var path = FFHost.pathOf(p.keys[q].p, l), prop = d;
+                        for (var z = 0; z < path.length; z++) prop = prop.property(path[z].index);
+                        FFHost.verifyProperty(prop, p.keys[q].s, FFHost.originalTimes(p.keys[q].s), eps);
+                    }
+                } else {
+                    if (r.edge === "in") l.inPoint = r.time; else l.outPoint = r.time;
+                    verifyNear(r.edge === "in" ? l.inPoint : l.outPoint, r.time, eps);
+                    verifyNear(r.edge === "in" ? l.outPoint : l.inPoint, r.edge === "in" ? p.before.outPoint : p.before.inPoint, eps);
+                }
+                verifyNear(l.startTime, p.before.start, eps); verifyKeys(p.keys, eps); result.changed++;
+            }
+            restoreSelection(originalSelection); result.ok = true;
+        } catch (e) {
+            result.error = FFHost.errorInfo(e);
+            for (i = made.length - 1; i >= 0; i--) try { made[i].remove(); } catch (removeError) { result.recoveryErrors.push(FFHost.errorInfo(removeError).message); }
+            for (i = touched.length - 1; i >= 0; i--) try {
+                p = touched[i]; bounds(p.layer, p.before); verifyNear(p.layer.inPoint, p.before.inPoint, eps); verifyNear(p.layer.outPoint, p.before.outPoint, eps); verifyKeys(p.keys, eps);
+            } catch (recoverError) { result.recoveryErrors.push(FFHost.errorInfo(recoverError).message); }
+            try { restoreSelection(originalSelection); } catch (selectError) { result.recoveryErrors.push(FFHost.errorInfo(selectError).message); }
+            result.restored = result.recoveryErrors.length === 0;
+            if (result.restored) result.changed = 0;
+        } finally {
+            if (opened) try { app.endUndoGroup(); } catch (closeError) { result.ok = false; result.cleanupError = FFHost.errorInfo(closeError); }
+        }
+        return result;
+    }
+    function corePlan(c, r) {
+        var request, plan;
+        if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
+        schema(r, "|op||token||ids||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
+        targets(c, r.ids, false);
+        if (r.op === "move") {
+            number(r.deltaFrames, -1000000, 1000000, false); if (r.deltaFrames === 0) fail("Сдвиг равен нулю.");
+            request = {mode:"layers", region:"all", scope:"selected", layerIds:r.ids, direction:r.deltaFrames > 0 ? 1 : -1, deltaSeconds:r.deltaFrames * c.frameDuration, frames:1, strict:true};
+        } else {
+            if (!FFCore.validMode(r.mode)) fail("Режим не распознан."); FFCore.parseFrames(String(r.frames));
+            if (r.region !== "before" && r.region !== "after") fail("Сторона не распознана.");
+            if (r.direction !== 1 && r.direction !== -1) fail("Направление не распознано."); bool(r.compMarkers);
+            request = {mode:r.mode, region:r.region, scope:"selected", layerIds:r.ids, direction:r.direction, frames:r.frames, strict:true, compMarkers:r.compMarkers};
+        }
+        plan = FFHost.prepare(request); return plan;
+    }
+    function action(r) {
+        var c, layers, i, on = {}, plan, result, report;
+        if (r.op === "read") { schema(r, "|op|"); return {state:snapshot()}; }
+        c = current(r.token);
+        if (r.op === "select") {
+            schema(r, "|op||token||ids|"); layers = targets(c, r.ids, true);
+            for (i = 0; i < layers.length; i++) on["k" + layers[i].id] = true;
+            var prior = selection(c);
+            try { for (i = 1; i <= c.numLayers; i++) if (c.layer(i).selected !== (on["k" + c.layer(i).id] === true)) c.layer(i).selected = on["k" + c.layer(i).id] === true; }
+            catch (selectionFailure) { try { restoreSelection(prior); } catch (ignored) { } throw selectionFailure; }
+            return {state:snapshot(), message:"Выделение обновлено"};
+        }
+        if (r.op === "seek") {
+            schema(r, "|op||token||time|"); c.time = number(r.time, 0, Math.max(0, c.duration - c.frameDuration), false); return {state:snapshot()};
+        }
+        if (r.op === "move" || r.op === "offset" || r.op === "gap") {
+            if (typeof r.preview !== "undefined") bool(r.preview);
+            plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
+            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length};
+            result = FFHost.applyPlan(plan); report = FFHost.report(plan, result, r.op);
+        } else if (r.op === "trim" || r.op === "split") {
+            schema(r, "|op||token||ids||time||edge|"); layers = targets(c, r.ids, false);
+            if (typeof r.preview !== "undefined") bool(r.preview);
+            result = directEdit(c, layers, r); report = stringify(result);
+        } else fail("Неизвестная операция.");
+        if (!result.ok) return {state:snapshot(), failure:result, report:report, message:result.error ? result.error.message : "Не удалось завершить проверку записи. Откройте отчёт."};
+        return {state:snapshot(), result:result, report:report, message:result.changed ? "Готово · изменений: " + result.changed : "Подходящих целей нет · сцена не изменена"};
+    }
+    function dispatch(encoded) {
+        var request, output, raw, i;
+        try {
+            if (busy) fail("Host занят. Дождитесь завершения операции.");
+            if (typeof encoded !== "string" || encoded.length > 262144) fail("RPC size limit");
+            raw = decodeURIComponent(encoded); request = parse(raw); schema(request, "|id||version||data|");
+            if (request.version !== VERSION || typeof request.id !== "string" || !/^[A-Za-z0-9:_-]{1,100}$/.test(request.id)) fail("Несовместимая версия запроса.");
+            for (i = 0; i < recent.length; i++) if (recent[i].id === request.id) {
+                if (recent[i].raw !== raw) fail("RPC id collision"); return recent[i].output;
+            }
+            busy = true;
+            try { output = {id:request.id, ok:true, data:action(request.data)}; }
+            catch (e) { output = {id:request.id, ok:false, error:FFHost.errorInfo(e)}; }
+            finally { busy = false; }
+            output = stringify(output); recent.push({id:request.id, raw:raw, output:output}); if (recent.length > 16) recent.shift(); return output;
+        } catch (outer) { return stringify({id:request ? request.id : null, ok:false, error:FFHost.errorInfo(outer)}); }
+    }
+    return {dispatch:dispatch, version:VERSION};
+}());

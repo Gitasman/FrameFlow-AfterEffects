@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>FrameFlow 2.0 — Демо без AE</title><style>:root{color-scheme:dark;--bg:#151515;--surface:#1c1c1c;--raised:#252525;--hover:#303030;--border:#353535;--line:#292929;--text:#ececec;--muted:#a2a2a2;--accent:#a7c7ff;--selected:rgba(167,199,255,.13);--danger:#ffacac;--row:38px;--gap:4px;--labels:226px;--radius:6px;--font-size:12px;--font:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:var(--font-size)/1.4 var(--font);overflow:hidden}button,input{font:inherit}button{cursor:pointer;white-space:nowrap;border:1px solid transparent;background:transparent;color:inherit;border-radius:var(--radius);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:28px;padding:4px 9px}button:hover{background:var(--hover)}button:active{background:var(--border)}button:disabled{opacity:.36;cursor:default}input{min-width:0;color:inherit;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:5px 7px;outline:none}input[type=number]{appearance:textfield;-moz-appearance:textfield}input::-webkit-inner-spin-button{display:none}input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;flex:none}input[type=range]{appearance:none;height:18px;width:68px;border:0;padding:0;background:transparent}input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--border);border-radius:3px}input[type=range]::-webkit-slider-thumb{appearance:none;width:11px;height:11px;margin-top:-4px;background:var(--text);border-radius:50%}button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round;flex:none;pointer-events:none}.svg-defs{position:absolute;width:0;height:0;overflow:hidden}[hidden]{display:none!important}.muted,.note{color:var(--muted)}.separator{width:1px;height:20px;background:var(--border);flex:none;margin:0 4px}.icon-button{height:28px;width:28px;min-width:28px;padding:5px}.quiet-button{color:var(--muted);font-size:.94em;padding:3px 7px}.quiet-button:hover{color:var(--text)}.secondary-button,.small-button{background:var(--raised);border-color:var(--border)}.primary-button{background:var(--text);color:var(--bg);font-weight:600}.primary-button:hover{background:var(--accent);color:#151515}.active,.icon-button[aria-pressed=true]{background:var(--selected);color:var(--accent)}#app{display:flex;flex-direction:column;height:100vh;min-width:360px}.topbar{display:flex;align-items:center;gap:5px;padding:8px 10px;border-bottom:1px solid var(--border);min-height:47px}.brand{display:flex;align-items:center;gap:7px;white-space:nowrap}.brand strong{font-weight:650;letter-spacing:-.35px;font-size:14px}.brand-mark{display:flex;gap:2px;align-items:center;width:20px}.brand-mark i{display:block;width:5px;background:var(--text);height:18px;border-radius:1px}.brand-mark i:nth-child(2){height:12px}.brand-mark i:nth-child(3){height:7px}.version{font-size:10px;color:var(--muted);margin-right:3px}.composition{display:flex;gap:9px;align-items:center;min-width:0;flex:1}.composition #comp-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:550}.composition #comp-meta{font-size:10px;white-space:nowrap}.connection{display:flex;gap:5px;align-items:center;color:var(--muted);font-size:10px;margin:0 4px}.connection:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--muted)}.connection.live:before{background:#a3c2ac}.connection.demo{color:var(--accent)}.connection.demo:before{background:var(--accent)}.toolbar{display:flex;align-items:center;gap:5px;padding:7px 10px;flex-wrap:wrap;border-bottom:1px solid var(--border);min-height:44px}.menu-trigger{background:var(--raised);border:1px solid var(--border);font-weight:550;justify-content:space-between;min-width:135px}.menu-trigger.secondary{min-width:119px;background:transparent;color:var(--muted);font-weight:400}.menu-trigger svg{width:13px;height:13px}.step-group{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;align-items:center;background:var(--surface)}.step-group .icon-button{border-radius:0;height:27px;min-height:27px}.step-input{display:flex;align-items:center;padding-right:5px;gap:1px}.step-input input{border:0;background:transparent;padding:3px;width:42px;text-align:center;font-variant-numeric:tabular-nums}.step-input span{color:var(--muted);font-size:10px}.presets{display:flex;gap:1px}.presets button{min-width:25px;min-height:25px;padding:3px 5px;font-size:10px;color:var(--muted)}.presets button.active{color:var(--accent)}.tool-button{padding:4px 7px}.tool-button svg{color:var(--muted)}.toolbar-end{margin-left:auto}.offset-controls{display:flex;gap:10px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--border);background:var(--surface)}.offset-controls>span{font-size:10px;color:var(--muted);flex:1}.segmented{display:flex;gap:2px}.segmented button{background:var(--raised);border-color:var(--border);min-height:27px}.workspace{display:flex;flex:1;min-height:0;position:relative}.timeline-section{display:flex;flex-direction:column;flex:1;min-width:0;position:relative}.timeline-toolbar{height:40px;display:flex;align-items:center;padding:5px 10px;gap:10px;border-bottom:1px solid var(--border)}.search{display:flex;align-items:center;gap:6px;width:calc(var(--labels) - 10px);flex:none;color:var(--muted)}.search svg{width:14px}.search input{border:0;background:transparent;padding:2px 0;width:100%;font-size:11px}.only-selected{font-size:10px;display:flex;align-items:center;gap:4px;white-space:nowrap;color:var(--muted)}.timeline-tools{margin-left:auto;display:flex;align-items:center;gap:2px}.timeline-tools .icon-button{height:25px;width:25px;min-width:25px;min-height:25px}.zoom-button{font-size:16px}.timeline{overflow:auto;position:relative;flex:1;min-height:80px;outline:none;scrollbar-color:#484848 var(--bg);scrollbar-width:thin}.surface{min-height:100%;position:relative}.ruler{position:sticky;top:0;height:34px;z-index:6;display:flex;background:var(--surface);border-bottom:1px solid var(--border)}.ruler-label{position:sticky;left:0;width:var(--labels);flex:none;z-index:9;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:var(--surface);border-right:1px solid var(--border);font-size:10px;color:var(--muted);overflow:hidden}.ruler-label button{font-size:10px;min-height:22px;padding:0 4px}.ruler-track{position:relative;flex:none;overflow:hidden;cursor:crosshair}.tick{position:absolute;bottom:0;height:8px;width:1px;background:var(--border);pointer-events:none}.tick.major{height:14px}.tick span{position:absolute;bottom:16px;left:5px;font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.work-area{position:absolute;bottom:0;height:3px;background:var(--muted);opacity:.75;pointer-events:none}.rows{position:relative}.layer-row{position:absolute;height:var(--row);display:flex;width:100%;border-bottom:1px solid var(--line);align-items:stretch}.layer-row.selected{background:var(--selected)}.layer-label{position:sticky;left:0;z-index:4;display:flex;align-items:center;gap:7px;padding:0 9px;width:var(--labels);flex:none;overflow:hidden;background:var(--bg);border-right:1px solid var(--border);cursor:default}.selected .layer-label{background:var(--raised);box-shadow:inset 2px 0 var(--accent)}.layer-index{font-size:9px;width:15px;text-align:right;flex:none;color:var(--muted);font-variant-numeric:tabular-nums}.layer-color{height:10px;width:3px;border-radius:1px;background:var(--clip);flex:none}.layer-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;min-width:0}.layer-kind{font-size:10px;width:14px;text-align:center;color:var(--muted);flex:none;font-weight:600}.layer-state{display:flex;gap:5px;color:var(--muted);flex:none}.layer-state svg{width:12px;height:12px}.layer-track{position:relative;flex:none;overflow:hidden;cursor:crosshair;background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-size:var(--grid) 100%}.clip{height:calc(var(--row) - var(--gap) - 10px);min-height:16px;position:absolute;top:calc((var(--gap) + 10px)/2);border:1px solid rgba(0,0,0,.18);border-radius:3px;background:var(--clip);color:#151515;cursor:grab;display:flex;align-items:center;overflow:hidden;min-width:2px;opacity:.76;user-select:none;touch-action:none}.clip .clip-name{font-size:10px;padding:0 11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;font-weight:550}.selected .clip{opacity:1;outline:1px solid var(--text);outline-offset:1px}.clip.locked{cursor:not-allowed;background:repeating-linear-gradient(135deg,var(--clip),var(--clip) 5px,#888 6px,var(--clip) 7px);opacity:.4}.clip.disabled{opacity:.35}.clip .handle{position:absolute;top:0;height:100%;width:8px;z-index:2;cursor:ew-resize}.clip .handle:after{content:"";width:2px;height:10px;background:#151515;opacity:0;position:absolute;top:50%;margin-top:-5px;left:3px;border-radius:1px}.clip:hover .handle:after,.clip:focus .handle:after{opacity:.7}.clip .handle.in{left:0}.clip .handle.out{right:0}.clip.drag-source{opacity:.28}.drag-ghost{pointer-events:none;z-index:3;opacity:.8!important;outline:1px dashed var(--text);outline-offset:2px}.playhead{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);pointer-events:none;z-index:5}.playhead>span{position:sticky;top:0;display:block;width:9px;height:10px;transform:translateX(-4px);background:var(--accent);clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%)}.snap-guide{position:absolute;top:34px;bottom:0;width:1px;border-left:1px dashed var(--text);pointer-events:none;z-index:5}.ghost-label{position:absolute;top:38px;background:var(--text);color:var(--bg);font-size:11px;font-weight:650;border-radius:4px;padding:3px 7px;z-index:7;pointer-events:none;white-space:nowrap}.timeline-footer{height:40px;min-height:40px;border-top:1px solid var(--border);padding:5px 10px;display:flex;align-items:center;gap:12px;background:var(--surface)}.time-entry{display:flex;gap:7px;align-items:center}.time-entry label{font-size:10px;color:var(--muted)}.time-entry input{font-size:12px;font-weight:600;width:106px;letter-spacing:.2px;padding:3px 5px;font-variant-numeric:tabular-nums;color:var(--accent);background:transparent}.time-entry span{font-size:10px;white-space:nowrap}.timeline-footer #selection-count{font-size:10px;white-space:nowrap}.footer-spacer{flex:1}.statusbar{min-height:29px;padding:4px 10px;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}#status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}.status-dot{width:4px;height:4px;border-radius:50%;background:var(--muted);flex:none}.status-dot.error{background:var(--danger)}.statusbar .quiet-button{min-height:20px;padding:1px 5px;font-size:10px}.status-shortcut{margin-left:10px;font-size:9px}.empty{position:absolute;inset:40px 0 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:22px;z-index:6;background:var(--bg)}.empty-mark{display:grid;place-items:center;width:43px;height:43px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:3px}.empty-mark svg{width:23px;height:23px;color:var(--muted)}.empty strong{font-size:14px}.empty p{color:var(--muted);max-width:300px;margin:0 0 5px;font-size:12px}.inspector{width:238px;flex:none;padding:9px 12px;background:var(--surface);border-left:1px solid var(--border);overflow:auto}.pane-title{display:flex;align-items:center;justify-content:space-between;gap:10px}.pane-title strong{font-size:11px}.inspect-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:17px 0}.field-line{display:flex;align-items:center;gap:5px;margin:6px 0}.field-line label{width:23px;color:var(--muted);font-size:11px}.field-line input{flex:1;width:70px;padding:4px;font-variant-numeric:tabular-nums}.small-button{font-size:10px;min-height:26px;padding:4px 6px}dl{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:10px;padding:8px 0;border-bottom:1px solid var(--border)}dt{color:var(--muted)}dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}.note{font-size:10px;line-height:1.55}.inspector-shift{display:grid;grid-template-columns:1fr 75px;gap:8px;margin:20px 0 8px;align-items:center}.inspector-shift label{font-size:11px}.inspector-shift button{grid-column:1/-1}.popup-menu{position:fixed;min-width:228px;max-width:calc(100vw - 16px);background:var(--raised);border:1px solid var(--border);border-radius:calc(var(--radius) + 2px);box-shadow:0 10px 35px #0008;padding:4px;z-index:30}.popup-menu button{width:100%;justify-content:flex-start;min-height:35px;position:relative;padding:7px 27px 7px 9px;text-align:left;white-space:normal}.popup-menu button .menu-copy{display:flex;flex-direction:column;gap:2px}.popup-menu small{font-size:10px;color:var(--muted);font-weight:400}.popup-menu button svg{position:absolute;right:7px;width:13px}.overlay{position:fixed;inset:0;z-index:40;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px}.dialog{width:540px;max-width:100%;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:1px solid var(--border);border-radius:calc(var(--radius) + 3px);background:var(--surface);box-shadow:0 18px 70px #0008;outline:none}.dialog>header{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}.dialog-body{overflow:auto;padding:12px 16px 16px}.dialog-body h3{font-size:12px;font-weight:650;margin:18px 0 8px}.dialog-body h3:first-child{margin-top:0}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:31px}.setting-row>span,.setting-row>label{font-size:11px}.setting-row input[type=range]{width:86px}.setting-row output{width:25px;font-size:10px;text-align:right;color:var(--muted)}.setting-row .range-wrap{display:flex;gap:7px;align-items:center}.setting-row input[type=color]{width:32px;height:25px;padding:2px;cursor:pointer}.settings-choice{display:flex;gap:3px;flex-wrap:wrap}.settings-choice button{background:var(--raised);border:1px solid var(--border);font-size:10px;min-height:27px}.settings-choice button.active{border-color:var(--accent);color:var(--accent)}.settings-actions{display:flex;gap:5px;flex-wrap:wrap;padding-top:12px;margin-top:12px;border-top:1px solid var(--border)}.settings-actions button{font-size:10px}.settings-status{font-size:10px;color:var(--muted);margin:8px 0 0;min-height:16px}.report-text{display:block;resize:vertical;width:100%;min-height:230px;max-height:50vh;white-space:pre-wrap;font:11px/1.5 var(--font);background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:8px}.help-table{border-collapse:collapse;width:100%;font-size:11px}.help-table td{padding:6px 0;border-bottom:1px solid var(--border)}.help-table td:last-child{text-align:right;color:var(--muted)}.help-text{font-size:11px;line-height:1.65;color:var(--muted)}.help-text strong{color:var(--text)}.light{color-scheme:light;--bg:#f4f4f4;--surface:#ededed;--raised:#fff;--hover:#e0e0e0;--border:#cacaca;--line:#e1e1e1;--text:#252525;--muted:#606060;--selected:rgba(45,83,140,.12);--danger:#a72c2c}.light .primary-button{background:#252525;color:white}.high-contrast{--muted:#c5c5c5;--border:#686868;--line:#414141}.light.high-contrast{--muted:#444;--border:#999;--line:#ccc}.motion .popup-menu,.motion .dialog{animation:appear .1s ease-out}@keyframes appear{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#484848;border:2px solid var(--bg);border-radius:8px}::-webkit-scrollbar-corner{background:var(--bg)}
+@media(max-width:940px){.presets{display:none}.status-shortcut{display:none}.composition #comp-meta{display:none}.only-selected{font-size:0}.only-selected input{margin-right:0}.inspector{position:absolute;right:0;top:0;bottom:0;z-index:12;box-shadow:-12px 0 25px #0005}}
+@media(max-width:600px){:root{--labels:160px}.topbar{padding:6px 8px;min-height:39px}.brand strong{font-size:12px}.brand-mark{width:16px}.brand-mark i{width:4px}.version{display:none}.connection{font-size:0;margin:0 2px}.toolbar{padding:5px 8px;gap:4px}.menu-trigger{min-width:125px}.menu-trigger.secondary{min-width:105px}.toolbar .separator{display:none}.toolbar-end{margin-left:0}.toolbar .tool-button{padding:3px 5px}.timeline-toolbar{padding:4px 7px;gap:5px}.search{width:calc(var(--labels) - 7px)}.timeline-tools{gap:0}#zoom{width:43px}.timeline-footer{padding:5px 7px;gap:6px}.time-entry label{display:none}.time-entry{gap:4px}.time-entry input{width:100px}#frame-label{display:none}#gap{font-size:10px;padding:3px 5px}.statusbar{padding:4px 7px}.offset-controls{gap:4px;padding:4px 7px;flex-wrap:wrap}.offset-controls>span{display:none}.settings-grid{grid-template-columns:1fr}.dialog-body{padding:10px 12px}.overlay{padding:8px}.dialog{max-height:calc(100vh - 16px)}.ruler-label{padding:0 7px}.layer-label{padding:0 6px;gap:5px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true"><defs>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M5.5 8a7 7 0 0 1 11.7-3L20 8M4 16l2.8 3A7 7 0 0 0 18.5 16"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v6M12 7v1"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24"><path d="M12 3v18M8 7H4v10h4M16 7h4v10h-4"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M7 4v16M11 7h9v10h-9M3 12h9m-3-3 3 3-3 3"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M17 4v16M13 7H4v10h9M21 12h-9m3-3-3 3 3 3"/></symbol>
+  <symbol id="i-snap" viewBox="0 0 24 24"><path d="M6 4v10a6 6 0 0 0 12 0V4h-4v10a2 2 0 0 1-4 0V4zM6 8h4m4 0h4"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 5v14M20 5v14M9 8l-4 4 4 4M15 8l4 4-4 4M5 12h14"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m13 5-7 7 7 7M6 12h14"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m11 5 7 7-7 7M18 12H4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><path d="m12 3 8 9-8 9-8-9z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 .5-1 1-1 2M12 17v1"/></symbol>
+</defs></svg>
+<main id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span><strong>FrameFlow</strong><span class="version">2.0</span></div>
+    <span class="separator"></span><div class="composition"><span id="comp-name">Нет композиции</span><span id="comp-meta" class="muted"></span></div>
+    <span id="connection" class="connection">Подключение</span>
+    <button class="icon-button" id="refresh" aria-label="Обновить из AE" title="Обновить из AE · R"><svg><use href="#i-refresh"/></svg></button>
+    <button class="icon-button" id="open-settings" aria-label="Настройки" title="Настройки"><svg><use href="#i-settings"/></svg></button>
+    <button class="icon-button" id="open-help" aria-label="Как пользоваться" title="Как пользоваться · ?"><svg><use href="#i-help"/></svg></button>
+  </header>
+  <section class="toolbar" aria-label="Инструменты времени">
+    <div class="menu-control"><button id="mode" class="menu-trigger" aria-haspopup="menu" aria-expanded="false">Слои целиком<svg><use href="#i-chevron"/></svg></button></div>
+    <div class="menu-control"><button id="scope" class="menu-trigger secondary" aria-haspopup="menu" aria-expanded="false">Выделенные<svg><use href="#i-chevron"/></svg></button></div>
+    <span class="separator"></span>
+    <div class="step-group"><button id="minus" class="icon-button" aria-label="Перенести назад на шаг" title="Перенести назад на шаг"><svg><use href="#i-left"/></svg></button><label class="step-input"><input id="frames" aria-label="Шаг в кадрах" type="number" min="1" max="1000000" value="12"><span>кадр.</span></label><button id="plus" class="icon-button" aria-label="Перенести вперёд на шаг" title="Перенести вперёд на шаг"><svg><use href="#i-right"/></svg></button></div>
+    <div class="presets" aria-label="Быстрый шаг"><button data-step="1">1</button><button data-step="5">5</button><button data-step="12" class="active">12</button><button data-step="24">24</button></div>
+    <span class="separator edit-divider"></span>
+    <button id="trim-in" class="tool-button" title="Обрезать In по курсору · ["><svg><use href="#i-in"/></svg><span>In</span></button>
+    <button id="trim-out" class="tool-button" title="Обрезать Out по курсору · ]"><svg><use href="#i-out"/></svg><span>Out</span></button>
+    <button id="split" class="tool-button" title="Разделить выбранные слои по курсору · S"><svg><use href="#i-split"/></svg><span>Split</span></button>
+    <div class="toolbar-end"><button id="inspect" class="icon-button" aria-label="Точные значения" aria-pressed="false" title="Точные значения"><svg><use href="#i-panel"/></svg></button></div>
+  </section>
+  <section id="offset-controls" class="offset-controls" hidden><span id="offset-hint">Сторона курсора</span><div class="segmented"><button data-offset="before:-1">До −</button><button data-offset="before:1">До +</button><button data-offset="after:-1">После −</button><button data-offset="after:1">После +</button></div><button id="preview-plan" class="quiet-button" title="Показать план последнего выбранного направления, без записи">Проверить</button></section>
+  <div class="workspace">
+    <section class="timeline-section" aria-label="Таймлайн композиции">
+      <div class="timeline-toolbar"><label class="search"><svg><use href="#i-search"/></svg><input id="search" placeholder="Найти слой" aria-label="Найти слой по имени"></label><label class="only-selected"><input id="only-selected" type="checkbox"> Только выделенные</label><div class="timeline-tools"><button id="snap" class="icon-button active" aria-pressed="true" aria-label="Привязка" title="Привязка · N; Alt временно отключает"><svg><use href="#i-snap"/></svg></button><button id="fit" class="icon-button" aria-label="Вся композиция" title="Вся композиция · F"><svg><use href="#i-fit"/></svg></button><button id="zoom-out" class="icon-button zoom-button" aria-label="Уменьшить масштаб">−</button><input id="zoom" type="range" min="0" max="100" value="0" aria-label="Масштаб таймлайна"><button id="zoom-in" class="icon-button zoom-button" aria-label="Увеличить масштаб">+</button></div></div>
+      <div id="timeline" class="timeline" tabindex="0" role="region" aria-label="Слои. Стрелки влево и вправо — сдвиг на кадр; Shift — на шаг. Escape отменяет перетаскивание.">
+        <div id="surface" class="surface"><div id="ruler" class="ruler"></div><div id="rows" class="rows"></div><div id="playhead" class="playhead" hidden><span></span></div><div id="guide" class="snap-guide" hidden></div><div id="ghost-label" class="ghost-label" hidden></div></div>
+      </div>
+      <div id="empty" class="empty"><div class="empty-mark"><svg><use href="#i-panel"/></svg></div><strong id="empty-title">Подключение к After Effects</strong><p id="empty-text">Откройте композицию, затем нажмите «Обновить».</p><button id="demo" class="secondary-button" hidden>Посмотреть демо</button></div>
+      <footer class="timeline-footer"><div class="time-entry"><label for="cti">Курсор</label><input id="cti" value="00:00:00:00" aria-label="Время курсора"><span id="frame-label" class="muted"></span></div><span id="selection-count" class="muted">0 слоёв</span><span class="footer-spacer"></span><button id="gap" class="quiet-button" title="Убрать пустой промежуток под курсором в выбранной области">Убрать паузу</button></footer>
+    </section>
+    <aside id="inspector" class="inspector" hidden aria-label="Точные значения"><div class="pane-title"><strong>Точные значения</strong><button id="close-inspector" class="icon-button" aria-label="Закрыть точные значения"><svg><use href="#i-close"/></svg></button></div><p id="inspect-name" class="inspect-name">Выберите слой</p><div class="field-line"><label for="in-value">In</label><input id="in-value" placeholder="00:00:00:00"><button id="apply-in" class="small-button">Применить</button></div><div class="field-line"><label for="out-value">Out</label><input id="out-value" placeholder="00:00:00:00"><button id="apply-out" class="small-button">Применить</button></div><dl><dt>Длительность</dt><dd id="inspect-duration">—</dd><dt>Start</dt><dd id="inspect-start">—</dd></dl><p class="note">In / Out меняют край слоя. Время ключей сохраняется.</p><div class="inspector-shift"><label for="exact-shift">Перенос, кадров</label><input id="exact-shift" type="number" value="12" min="-1000000" max="1000000"><button id="apply-shift" class="primary-button">Перенести</button></div><p class="note">Отрицательное число — назад. Перемещается весь слой вместе с анимацией.</p></aside>
+  </div>
+  <div class="statusbar"><span id="status-icon" class="status-dot"></span><span id="status" role="status" aria-live="polite">Готовим соединение…</span><button id="open-report" class="quiet-button" title="Открыть и скопировать отчёт">Отчёт</button><span class="status-shortcut">Одна операция — один Undo в AE</span></div>
+</main>
+<div id="menu" class="popup-menu" role="menu" hidden></div>
+<div id="overlay" class="overlay" hidden>
+  <section id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header><strong id="dialog-title"></strong><button id="close-dialog" class="icon-button" aria-label="Закрыть окно"><svg><use href="#i-close"/></svg></button></header><div id="dialog-body" class="dialog-body"></div></section>
+</div>
+<input id="import-file" type="file" accept="application/json,.json" hidden>
+<script>(function (root) {
+  'use strict';
+  const VERSION = '2.0.2';
+  const defaults = {version:1, theme:'dark', font:'system', fontSize:12, rowHeight:38, spacing:4, labelWidth:226, radius:6, accent:'#a7c7ff', motion:false, snap:true, autoRefresh:true, poll:1800, frames:12, mode:'layers', scope:'selected', compMarkers:false, units:'timecode', showKinds:true, contrast:'normal'};
+  const ranges = {fontSize:[11,16], rowHeight:[30,58], spacing:[0,12], labelWidth:[150,340], radius:[0,12], poll:[1000,5000], frames:[1,1000000]};
+  const choices = {theme:['dark','light','host'],font:['system','sans','mono'],mode:['layers','keys','selectedKeys','offset'],scope:['selected','all'],units:['timecode','frames'],contrast:['normal','high']};
+  function luminance(hex) { const channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)); return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722; }
+  function contrast(a,b) { const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
+  function accentFor(hex,light) {if(!light)return hex; let channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)),out=hex;while(contrast(out,'#f4f4f4')<4.5){channels=channels.map(n=>Math.floor(n*.8));out='#'+channels.map(n=>n.toString(16).padStart(2,'0')).join('');}return out;}
+  function validate(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value) || value.version !== 1) throw Error('Версия настроек не поддерживается. Исходные данные сохранены.');
+    const out = Object.assign({}, defaults);
+    Object.keys(value).forEach(k => {
+      if (!Object.prototype.hasOwnProperty.call(defaults,k)) throw Error('Неизвестный параметр: ' + k);
+      const v = value[k];
+      if (k in ranges) { const r = ranges[k]; if (!Number.isInteger(v) || v < r[0] || v > r[1]) throw Error('Значение вне диапазона: ' + k); }
+      else if (k in choices) { if (!choices[k].includes(v)) throw Error('Недопустимый вариант: ' + k); }
+      else if (k === 'accent') { if (typeof v !== 'string' || !/^#[0-9a-f]{6}$/i.test(v) || contrast(v,'#151515') < 4.5) throw Error('Выберите более светлый акцентный цвет.'); }
+      else if (typeof v !== typeof defaults[k] || (k === 'version' && v !== 1)) throw Error('Неверный тип: ' + k);
+      out[k] = v;
+    });
+    return out;
+  }
+  function storage(store) {
+    const key='frameflow.preferences.v1'; let known=null, protectedValue=false;
+    function load() {
+      try { known=store.getItem(key); return {value:known===null?Object.assign({},defaults):validate(JSON.parse(known)),error:null}; }
+      catch(e) { protectedValue=true; return {value:Object.assign({},defaults),error:e.message}; }
+    }
+    function save(value) {
+      const v=validate(value);
+      if (protectedValue) throw Error('Сохранённые настройки не распознаны; изменения действуют в этой сессии. Экспортируйте их для сохранения.');
+      if (store.getItem(key)!==known) { protectedValue=true; throw Error('Настройки изменились в другом окне. Перезапустите панель; текущие значения действуют в этой сессии.'); }
+      const next=JSON.stringify(v); store.setItem(key,next);
+      if(store.getItem(key)!==next) throw Error('Хранилище не подтвердило запись настроек.');
+      known=next; return v;
+    }
+    return {load,save};
+  }
+  function selected(s) { return s ? s.layers.filter(l=>l.selected) : []; }
+  function frame(time,fd) { return Math.round(time/fd); }
+  function timecode(t,fd,displayStart) {
+    const fps=Math.round(1/fd), frames=Math.round((t+(displayStart||0))/fd), a=Math.abs(frames);
+    return (frames<0?'-':'') + [Math.floor(a/(fps*3600)),Math.floor(a/(fps*60))%60,Math.floor(a/fps)%60,a%fps].map(v=>String(v).padStart(2,'0')).join(':');
+  }
+  function parseTime(text,fd,displayStart,units) {
+    const raw=String(text).trim();
+    if (/^-?\d+(?:\.\d+)?$/.test(raw)) return units==='frames' ? Number(raw)*fd : Number(raw);
+    const match=raw.match(/^(-?)(\d+):(\d{2}):(\d{2}):(\d{2})$/), fps=Math.round(1/fd);
+    if(!match || Number(match[3])>59 || Number(match[4])>59 || Number(match[5])>=fps) throw Error('Время: HH:MM:SS:FF или число ' + (units==='frames'?'кадров':'секунд') + '.');
+    return (match[1]? -1:1)*((Number(match[2])*3600+Number(match[3])*60+Number(match[4]))*fps+Number(match[5]))*fd - (displayStart||0);
+  }
+  function snapDelta(s, ids, delta, pps, enabled, excludeCTI) {
+    const movers=s.layers.filter(l=>ids.includes(l.id)), fixed=s.layers.filter(l=>!ids.includes(l.id));
+    let result=delta, best=7/pps, guide=null;
+    const anchors=[0,s.duration,s.workStart,s.workStart+s.workDuration]; if(!excludeCTI) anchors.push(s.time);
+    fixed.forEach(l=>anchors.push(l.inPoint,l.outPoint));
+    if(enabled) movers.forEach(l=>[l.inPoint,l.outPoint].forEach(edge=>anchors.forEach(target=>{
+      const d=target-(edge+delta); if(Math.abs(d)<best) {best=Math.abs(d);result=delta+d;guide=target;}
+    })));
+    return {delta:result,guide};
+  }
+  function trimLimit(l, edge, value, fd) {
+    let lower=-10800,upper=10800;
+    if(edge==='in') upper=l.outPoint-fd; else lower=l.inPoint+fd;
+    if(l.remap || l.stretch<=0) {if(edge==='in') lower=l.inPoint;else upper=l.outPoint;}
+    else if(l.sourceDuration!==null&&!l.still) {lower=Math.max(lower,Math.min(l.inPoint,l.start));upper=Math.min(upper,Math.max(l.outPoint,l.start+l.sourceDuration*l.stretch/100));}
+    return Math.max(lower,Math.min(upper,value));
+  }
+  const api={VERSION,contrast,accentFor,defaults,ranges,choices,validate,storage,selected,frame,timecode,parseTime,snapDelta,trimLimit};
+  if(typeof module==='object'&&module.exports) module.exports=api; else root.FFModel=api;
+}(typeof window==='object'?window:this));
+</script><script>(function(root) {
+  'use strict';
+  const VERSION='2.0.2';
+  function uri(value) {return encodeURIComponent(value).replace(/[!'()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase());}
+  function encode(request) {return '$.global.FrameFlowCEP.dispatch("'+uri(JSON.stringify(request))+'")';}
+  function problem(message,code,stage,op) {const e=Error(message);e.code=code;e.stage=stage;e.operation=op;return e;}
+  function create(transport,timeout=15000) {
+    let pending=false,uncertain=false,count=0,disposed=false;
+    const session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2), timers=new Set(),cancel=new Set();
+    function call(data) {
+      if(disposed) return Promise.reject(Error('Панель закрыта.'));
+      if(pending) return Promise.reject(Error('Дождитесь завершения операции.'));
+      if(uncertain&&data.op!=='read') return Promise.reject(Error('Результат предыдущего действия неизвестен. Нажмите «Обновить».'));
+      const id=session+':'+(++count), request={id,version:VERSION,data}; pending=true;
+      return new Promise((resolve,reject)=>{
+        let done=false;
+        function finish(error,value) {
+          if(done)return;done=true;clearTimeout(timer);timers.delete(timer);cancel.delete(abort);pending=false;
+          if(error){uncertain=true;reject(error);}else{if(data.op==='read')uncertain=false;resolve(value);}
+        }
+        function abort(){finish(problem('Панель закрыта.','DISPOSED','rpc',data.op));}
+        const timer=setTimeout(()=>finish(problem(data.op==='read'?'AE не ответил на чтение вовремя. Изменения не отправлялись. Нажмите «Обновить».':'AE не ответил вовремя. Операция могла выполниться. Нажмите «Обновить» перед следующим действием.','RPC_TIMEOUT','rpc',data.op)),timeout);
+        timers.add(timer);cancel.add(abort);
+        try {transport(encode(request),raw=>{
+          if(done||disposed)return;
+          try {
+            if(typeof raw!=='string'||!raw||/^EvalScript error\.?$/i.test(raw)||raw.length>2500000) throw problem('AE не вернул данные FrameFlow. Нажмите «Обновить» для проверки загрузки ядра.','RPC_EMPTY','rpc',data.op);
+            let result;
+            try{result=JSON.parse(raw);}catch(e){throw problem('AE вернул ответ вне протокола FrameFlow (длина '+raw.length+'). Нажмите «Обновить».','RPC_FORMAT','rpc',data.op);}
+            if(!result||result.id!==id||typeof result.ok!=='boolean') throw problem('Ответ AE не соответствует запросу.','RPC_ID','rpc',data.op);
+            if(!result.ok) {
+              const e=problem(result.error&&result.error.message||'Ошибка AE','HOST_REJECTED','host',data.op);e.host=result.error;
+              done=true;clearTimeout(timer);timers.delete(timer);cancel.delete(abort);pending=false;reject(e);return;
+            }
+            if(!result.data||typeof result.data!=='object') throw problem('В ответе AE нет данных.','RPC_DATA','rpc',data.op);
+            finish(null,result.data);
+          } catch(e) {finish(e);}
+        });}catch(e){finish(problem(e.message||String(e),'RPC_TRANSPORT','rpc',data.op));}
+      });
+    }
+    return {call,get busy(){return pending;},get uncertain(){return uncertain;},dispose(){disposed=true;Array.from(cancel).forEach(fn=>fn());timers.forEach(clearTimeout);timers.clear();}};
+  }
+  function extensionPath(raw) {
+    if(typeof raw!=='string'||!raw||raw.length>16384||/[\x00-\x1f]/.test(raw))throw problem('CEP не сообщил папку расширения.','BOOT_PATH','bootstrap','read');
+    // CSInterface's documented URI decoding, plus UNC and already-native paths.
+    let value=raw;
+    if(/^file:\/\//i.test(value)) {
+      value=decodeURI(value);
+      if(/^file:\/\/\/[A-Za-z]:\//i.test(value))value=value.slice(8);
+      else if(/^file:\/\/\//i.test(value))value=value.slice(7);
+      else value='//'+value.slice(7);
+    }
+    value=value.replace(/\\/g,'/').replace(/\/$/,'');
+    if(!/^(?:[A-Za-z]:\/|\/)/.test(value))throw problem('CEP вернул относительный путь расширения.','BOOT_PATH','bootstrap','read');
+    return value;
+  }
+  function bootstrapScript(path) {
+    // Only our installed file can be loaded. Arguments are URI literals, never code.
+    // All reply strings are URI-encoded: no dependency on JSON in ExtendScript.
+    return [
+      '(function () {',
+      'var stage="probe", f, h, expected="'+VERSION+'";',
+      'function q(v) { return "\\\""+encodeURIComponent(String(v))+"\\\""; }',
+      'function read(fn) { try { var value=fn(); return value===null || typeof value==="undefined" ? "" : value; } catch (ignored) { return ""; } }',
+      // Capture the environment before loading the kernel: failure diagnostics need it too.
+      'var ae=read(function(){return app.version;}), build=read(function(){return app.buildNumber;}), os=read(function(){return $.os;}), engine=read(function(){return $.version;});',
+      'function reply(ok, message, e) {',
+      'var original=e ? String(e.fileName||"").replace(/^.*[\\\\\\/]/,"") : "", scriptId=/^\\d+$/.test(original) ? original : "";',
+      'var file=scriptId ? (stage==="load" ? "host.jsx" : "CEP bootstrap") : original;',
+      'var fields=[["stage",stage],["message",message||""],["line",e ? (e.line||e.lineNumber||0) : 0],["file",file],["scriptId",scriptId],',
+      '["version",h ? h.version||"" : ""],["expected",expected],["namespace",typeof h],["dispatchType",h ? typeof h.dispatch : "undefined"],',
+      '["ae",ae],["build",build],["os",os],["engine",engine]], out=["\\\"ok\\\":"+(ok ? "true" : "false")], i;',
+      'for (i=0;i<fields.length;i++) out.push(q(fields[i][0])+":"+q(fields[i][1]));',
+      'return "{"+out.join(",")+"}";',
+      '}',
+      'try {',
+      'h=$.global.FrameFlowCEP;',
+      'if (!h || h.version!==expected || typeof h.dispatch!=="function") {',
+      'stage="file"; f=new File(decodeURIComponent("'+uri(path+'/jsx/host.jsx')+'")); f.encoding="UTF-8";',
+      'if (!f.exists) throw new Error("Host file missing: host.jsx");',
+      'stage="load"; $.evalFile(f); h=$.global.FrameFlowCEP;',
+      'stage="verify";',
+      'if (!h) return reply(false,"Host namespace not registered in $.global");',
+      'if (h.version!==expected) return reply(false,"Host version mismatch: expected "+expected+", received "+String(h.version||"unknown"));',
+      'if (typeof h.dispatch!=="function") return reply(false,"Host dispatch is not a function");',
+      '}',
+      'stage="ready"; return reply(true);',
+      '} catch (e) { return reply(false,e.message||e,e); }',
+      '}())'
+    ].join('\n');
+  }
+  function createCEP(cep,options={}) {
+    const transport=(script,cb)=>cep.evalScript(script,cb),rpc=create(transport,options.timeout||15000);
+    const diagnostics={stage:'not-started',hostVersion:'',environment:null,lastError:null};
+    // CEP can identify AE even when the ExtendScript loader itself fails.
+    try{const env=JSON.parse(cep.getHostEnvironment());if(typeof env.appVersion==='string')diagnostics.environment={ae:env.appVersion,build:'не получен',os:typeof cep.getOSInformation==='function'?String(cep.getOSInformation()).slice(0,300):'не получена'};}catch(e){}
+    let connected=false,boot=null,disposed=false,abortBoot=null;
+    function connect() {
+      if(boot)return boot;
+      diagnostics.stage='bootstrap';
+      boot=new Promise((resolve,reject)=>{
+        let done=false;
+        function finish(e,value){if(done)return;done=true;clearTimeout(timer);abortBoot=null;if(e){connected=false;diagnostics.stage='failed';diagnostics.lastError={code:e.code,stage:e.stage,message:e.message,host:e.host};reject(e);}else{connected=true;diagnostics.stage='ready';diagnostics.lastError=null;resolve(value);}}
+        const timer=setTimeout(()=>finish(problem('AE не ответил на проверку загрузчика. Сцена не изменялась. Закройте модальные окна AE и нажмите «Обновить».','BOOT_TIMEOUT','bootstrap','read')),options.bootTimeout||10000);
+        abortBoot=()=>finish(problem('Панель закрыта.','DISPOSED','bootstrap','read'));
+        try {
+          const path=extensionPath(cep.getSystemPath('extension'));
+          transport(bootstrapScript(path),raw=>{
+            if(done||disposed)return;
+            try {
+              if(typeof raw!=='string'||raw.length>32000||!raw||/^EvalScript error\.?$/i.test(raw))throw problem('AE не выполнил загрузчик FrameFlow. Нажмите «Обновить».','BOOT_EMPTY','bootstrap','read');
+              let result;try{result=JSON.parse(raw);}catch(e){throw problem('AE вернул некорректный ответ загрузчика (длина '+raw.length+').','BOOT_FORMAT','bootstrap','read');}
+              if(!result||typeof result.ok!=='boolean')throw problem('Неизвестный ответ загрузчика AE.','BOOT_FORMAT','bootstrap','read');
+              for(const key of Object.keys(result))if(typeof result[key]==='string')result[key]=decodeURIComponent(result[key]);
+              if(result.ae)diagnostics.environment={ae:result.ae,build:result.build||'не получен',os:result.os||'не получена',engine:result.engine||''};
+              if(!result.ok){const e=problem('Не удалось загрузить ядро AE: '+result.message,'BOOT_HOST',result.stage||'load','read');e.host={message:result.message,line:result.line,file:result.file,scriptId:result.scriptId,expectedVersion:result.expected,registeredVersion:result.version,namespace:result.namespace,dispatchType:result.dispatchType};throw e;}
+              if(result.version!==VERSION)throw problem('Версии панели и ядра различаются. Переустановите FrameFlow '+VERSION+'.','BOOT_VERSION','probe','read');
+              diagnostics.hostVersion=result.version;diagnostics.environment={ae:result.ae,build:result.build,os:result.os,engine:result.engine};finish(null,result);
+            }catch(e){finish(e.code?e:problem(e.message||String(e),'BOOT_FORMAT','bootstrap','read'));}
+          });
+        }catch(e){finish(e.code?e:problem(e.message||String(e),'BOOT_TRANSPORT','bootstrap','read'));}
+      }).finally(()=>{boot=null;});
+      return boot;
+    }
+    return {
+      async call(data){
+        if(disposed)throw Error('Панель закрыта.');
+        if(!connected){if(data.op!=='read')throw Error('Сначала нажмите «Обновить» для подключения к AE.');await connect();}
+        try{return await rpc.call(data);}catch(e){if(e.code&&e.code!=='HOST_REJECTED'){connected=false;diagnostics.stage='failed';diagnostics.lastError={code:e.code,stage:e.stage,message:e.message};}throw e;}
+      },
+      get busy(){return !!boot||rpc.busy;},get uncertain(){return rpc.uncertain;},get connected(){return connected;},
+      get needsReconnect(){return diagnostics.stage==='failed';},get diagnostics(){return diagnostics;},
+      dispose(){disposed=true;if(abortBoot)abortBoot();rpc.dispose();}
+    };
+  }
+  const api={create,createCEP,encode,extensionPath,bootstrapScript,VERSION};
+  if(typeof module==='object'&&module.exports) module.exports=api;else root.FFBridge=api;
+}(typeof window==='object'?window:this));
+</script><script>/* Explicit browser-only demo. Never selected automatically after a host failure. */
+(function(root){
+  'use strict';
+  function create(){
+    const s={version:'2.0.2',token:'demo:1',compId:1,name:'MOSAIC · Brand film',duration:16,frameDuration:1/24,displayStart:0,time:4,workStart:1,workDuration:12,environment:{ae:'Демо — AE не подключён',build:'—',os:'Browser'},layers:[]};
+    const data=[['Logotype','comp',1,6,9],['Make room for ideas','text',2.5,7,1],['Subline · 2026','text',4,9,1],['Shape / Reveal','shape',.5,5.5,11],['Studio footage · 01','media',0,7.5,8],['Studio footage · 02','media',7.5,14,8],['Texture overlay','media',0,16,12],['Light sweep','shape',3,10,11],['Camera 01','camera',0,16,6],['Music · Editorial','audio',0,16,14],['Direction / Null','null',0,16,2],['Background','shape',0,16,4]];
+    data.forEach((d,i)=>s.layers.push({id:101+i,index:i+1,name:d[0],kind:d[1],inPoint:d[2],outPoint:d[3],start:0,stretch:100,locked:i===11,selected:i===0||i===1,enabled:true,label:d[4],parentId:null,remap:false,matte:false,audio:d[1]==='audio',sourceId:10+i,sourceDuration:24,still:d[1]==='shape'||d[1]==='text'}));
+    let rev=1;
+    function state(){return JSON.parse(JSON.stringify(s));}
+    return {get busy(){return false;},get uncertain(){return false;},dispose(){},async call(r){
+      await new Promise(resolve=>setTimeout(resolve,65));
+      if(r.op==='read')return {state:state()};
+      if(r.token!==s.token)throw Error('Демо изменилось. Обновите панель.');
+      const list=s.layers.filter(l=>(r.ids||[]).includes(l.id));
+      if(r.preview)return {state:state(),report:'Демонстрационная проверка.\nAE не подключён; ключи не моделируются.\nЦелей: '+list.length,message:'Демо: проверка без записи'};
+      if(!['select','seek'].includes(r.op)&&list.some(l=>l.locked))throw Error('Заблокированный слой.');
+      if(r.op==='select')s.layers.forEach(l=>l.selected=r.ids.includes(l.id));
+      else if(r.op==='seek')s.time=r.time;
+      else if(r.op==='move')list.forEach(l=>{const d=r.deltaFrames*s.frameDuration;l.start+=d;l.inPoint+=d;l.outPoint+=d;});
+      else if(r.op==='trim')list.forEach(l=>l[r.edge==='in'?'inPoint':'outPoint']=r.time);
+      else if(r.op==='split'){
+        if(list.some(l=>r.time<=l.inPoint||r.time>=l.outPoint||l.locked))throw Error('Split: курсор должен быть внутри выбранных слоёв.');
+        list.forEach(l=>{const copy=Object.assign({},l,{id:1000+(++rev),inPoint:r.time,selected:false});l.outPoint=r.time;s.layers.splice(s.layers.indexOf(l),0,copy);});s.layers.forEach((l,i)=>l.index=i+1);
+      }else if(r.op==='gap')throw Error('В демо под курсором нет пустого промежутка.');
+      else throw Error('Этот режим проверяется в AE. Демо не моделирует ключи.');
+      s.token='demo:'+(++rev);return {state:state(),result:{ok:true,changed:list.length},message:r.op==='select'?'Демо · выделение обновлено':'Демо · AE не изменён',report:'FrameFlow 2.0.2 · ДЕМО\nОперация: '+r.op+'\nЭто пример интерфейса, без подключения к AE.'};
+    }};
+  }
+  root.FFDemo={create};
+}(window));
+</script><script>(function(){
+  'use strict';
+  const M=FFModel,$=id=>document.getElementById(id),icons=id=>'<svg aria-hidden="true"><use href="#i-'+id+'"/></svg>';
+  const modeNames={layers:'Слои целиком',keys:'Только ключи',selectedKeys:'Выделенные ключи',offset:'Time Offset'};
+  const modeNotes={layers:'Перенос всех ключей вместе со слоем',keys:'Ключи стороны курсора, без изменения краёв',selectedKeys:'Только ключи, выделенные в AE',offset:'Поведение 1.4: край пересекающего слоя и ключи'};
+  const labelColors=['#9b9b9b','#c09a9a','#c7be91','#9dbbbb','#b0a4c2','#b6a4bc','#c7b39b','#9fb6b3','#8dabc6','#94b5a0','#b6a0cd','#c59a81','#a2a4c4','#c0a0b1','#8eb8a5','#b6b6b6','#b1bb92'];
+  let prefs,preferenceStore,saveTimer=null,saveError='',state=null,bridge=null,isDemo=false,disposed=false,pollTimer=null,busy=false,drag=null,lastAnchor=null,zoom=0,pps=1,labelWidth=226,viewLayers=[],menuOwner=null,dialogFocus=null,lastDirection=['after',1],lastReport='',history=[],rowFrame=0,scrollX=0,readFailures=0,connectionFailed=false;
+  const timeline=$('timeline'),surface=$('surface'),rows=$('rows');
+  function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function textTime(t){return prefs.units==='frames'?String(M.frame(t,state.frameDuration)):M.timecode(t,state.frameDuration,state.displayStart);}
+  function status(text,error){$('status').textContent=text;$('status').title=text;$('status-icon').classList.toggle('error',!!error);}
+  function log(op,detail){history.push(new Date().toISOString()+' '+op+' '+String(detail||'').slice(0,350));if(history.length>40)history.shift();}
+  function reportText(){
+    const d=bridge&&bridge.diagnostics,env=state?state.environment:d&&d.environment;
+    return 'FrameFlow '+M.VERSION+'\n'+(isDemo?'ДЕМО · AE не подключён\n':'')+
+      (env?'AE '+env.ae+' / build '+env.build+'\nOS '+env.os+'\n'+(env.engine?'ExtendScript '+env.engine+'\n':''):'AE: нет подтверждённого соединения\n')+
+      (state?'Comp ID '+state.compId+' / FPS '+(1/state.frameDuration)+' / CTI '+state.time+'\n':'')+
+      (d?'Загрузчик: '+d.stage+' / ядро: '+(d.hostVersion||'не подтверждено')+'\n':'')+
+      (connectionFailed?'Автообновление приостановлено до «Обновить».\n':'')+'\n'+lastReport+'\n\nПоследние события:\n'+history.join('\n');
+  }
+  function preferenceError(message){saveError=message;status(message,true);const node=$('settings-status');if(node)node.textContent=message;}
+  function persist(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{preferenceStore.save(prefs);saveError='';const el=$('settings-status');if(el)el.textContent='Настройки сохранены на этом компьютере.';}catch(e){preferenceError(e.message);}},220);}
+  function change(key,value){try{prefs=M.validate(Object.assign({},prefs,{[key]:value}));applyAppearance();persist();if(['rowHeight','labelWidth','spacing','showKinds','fontSize','units','font'].includes(key))render();if(key==='mode'||key==='scope'||key==='snap'||key==='frames')renderControls();if(['autoRefresh','poll'].includes(key))schedulePoll();return true;}catch(e){status(e.message,true);return false;}}
+  function applyAppearance(){
+    const style=document.documentElement.style;
+    for(const [key,css,unit]of[['fontSize','font-size','px'],['rowHeight','row','px'],['spacing','gap','px'],['labelWidth','labels','px'],['radius','radius','px'],['accent','accent','']])style.setProperty('--'+css,prefs[key]+unit);
+    style.setProperty('--selected',hexAlpha(prefs.accent,.13));
+    style.setProperty('--font',prefs.font==='mono'?'"SFMono-Regular",Consolas,monospace':prefs.font==='sans'?'Arial,"Helvetica Neue",sans-serif':'system-ui,-apple-system,"Segoe UI",sans-serif');
+    let light=prefs.theme==='light';
+    if(prefs.theme==='host'&&window.__adobe_cep__){try{const env=JSON.parse(window.__adobe_cep__.getHostEnvironment()),c=env.appSkinInfo.panelBackgroundColor.color;light=c.red+c.green+c.blue>420;}catch(e){light=false;}}
+    const effectiveAccent=M.accentFor(prefs.accent,light);style.setProperty('--accent',effectiveAccent);style.setProperty('--selected',hexAlpha(effectiveAccent,.13));
+    document.body.classList.toggle('light',light);document.body.classList.toggle('motion',prefs.motion);document.body.classList.toggle('high-contrast',prefs.contrast==='high');
+  }
+  function hexAlpha(hex,a){return 'rgba('+[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)).join(',')+','+a+')';}
+  function ready(){return !!state&&!busy&&!bridge.uncertain&&!connectionFailed;}
+  function targetIds(){return state?(prefs.scope==='all'?state.layers:M.selected(state)).map(l=>l.id):[];}
+  function setBusy(value){busy=value;$('app').setAttribute('aria-busy',String(value));renderControls();}
+  function renderControls(){
+    $('mode').innerHTML=esc(modeNames[prefs.mode])+icons('chevron');$('scope').innerHTML=(prefs.scope==='all'?'Вся композиция':'Выделенные')+icons('chevron');
+    if(document.activeElement!==$('frames'))$('frames').value=prefs.frames;
+    document.querySelectorAll('[data-step]').forEach(b=>b.classList.toggle('active',Number(b.dataset.step)===prefs.frames));
+    $('snap').classList.toggle('active',prefs.snap);$('snap').setAttribute('aria-pressed',String(prefs.snap));
+    $('offset-controls').hidden=prefs.mode==='layers';$('offset-hint').textContent=prefs.mode==='offset'?'Край слоя и ключи':'Ключи относительно курсора';
+    const r=ready(),selection=M.selected(state),targets=targetIds(),any=targets.length>0;
+    ['minus','plus'].forEach(id=>{$(id).disabled=!r||!any||prefs.mode!=='layers';});
+    ['trim-in','trim-out','split','apply-in','apply-out','apply-shift'].forEach(id=>{$(id).disabled=!r||selection.length===0;});
+    document.querySelectorAll('[data-offset]').forEach(b=>{b.disabled=!r||!any;});$('preview-plan').disabled=!r||!any;$('gap').disabled=!r;$('cti').disabled=!r;$('refresh').disabled=busy;
+    $('selection-count').textContent=state?M.selected(state).length+' / '+state.layers.length+' слоёв':'0 слоёв';
+    const live=!connectionFailed&&(!!state||bridge&&bridge.connected);
+    $('connection').textContent=isDemo?'Демо':connectionFailed?'Сбой связи':live?'AE подключён':'Нет AE';$('connection').className='connection '+(isDemo?'demo':live?'live':'');
+  }
+  function accept(next,force){
+    validateState(next);
+    const changed=!state||state.token!==next.token;state=next;
+    $('comp-name').textContent=state.name;$('comp-name').title=state.name;
+    $('comp-meta').textContent=Number((1/state.frameDuration).toFixed(3))+' fps / '+M.frame(state.duration,state.frameDuration)+' кадров';
+    if(changed||force)render();else renderControls();
+  }
+  function validateState(s){
+    if(!s||s.version!==M.VERSION||typeof s.token!=='string'||!s.environment||!Array.isArray(s.layers)||s.layers.length>2000||!Number.isFinite(s.duration)||s.duration<=0||!Number.isFinite(s.frameDuration)||s.frameDuration<=0||!Number.isFinite(s.time))throw Error('Некорректное состояние композиции от AE.');
+    const ids=new Set();s.layers.forEach(l=>{if(!Number.isInteger(l.id)||ids.has(l.id)||typeof l.name!=='string'||![l.start,l.inPoint,l.outPoint,l.stretch].every(Number.isFinite))throw Error('Некорректные данные слоя.');ids.add(l.id);});
+  }
+  async function request(data,quiet){
+    if(disposed||busy)return null;
+    closeMenu();setBusy(true);
+    if(!quiet)status(data.op==='read'?'Обновляем из AE…':'Применяем в AE…');
+    try{
+      const result=await bridge.call(data);if(disposed)return null;
+      if(data.op==='read'){readFailures=0;connectionFailed=false;}
+      if(result.state)accept(result.state);
+      if(result.report)lastReport=result.report;
+      if(result.failure){log(data.op,result.message);lastReport=result.report||JSON.stringify(result.failure,null,2);status(result.message,true);showReport();}
+      else if(!quiet){status(result.message||(isDemo?'Демо · AE не подключён':'Синхронизировано с AE'));log(data.op,'подтверждено');}
+      return result;
+    }catch(e){
+      if(disposed)return null;
+      connectionFailed=!!(bridge.needsReconnect||bridge.uncertain);
+      if(data.op==='read')readFailures++;
+      status(e.message,true);
+      log(data.op,(e.code?e.code+' / '+e.stage+' · ':'')+e.message);
+      lastReport=e.message+(e.code?'\nКод: '+e.code+'\nЭтап: '+e.stage+'\nЗапрос: '+data.op:'')+(e.host?'\n'+JSON.stringify(e.host,null,2):'');
+      if(data.op==='read') {state=null;render();$('empty-title').textContent=connectionFailed?'Ядро AE не подключено':'Нет активной композиции';$('empty-text').textContent=e.message;}
+      return null;
+    }finally{setBusy(false);schedulePoll();}
+  }
+  function refresh(quiet=false){if(drag||!bridge||(quiet&&connectionFailed))return Promise.resolve(null);return request({op:'read'},quiet);}
+  function action(data){if(!ready()){status(bridge&&bridge.uncertain?'Результат действия неизвестен. Нажмите «Обновить».':'Дождитесь подключения к AE.',true);return Promise.resolve(null);}return request(Object.assign({token:state.token},data));}
+  function calcScale(){
+    labelWidth=window.innerWidth<=600?160:prefs.labelWidth;
+    const visible=Math.max(120,timeline.clientWidth-labelWidth-20),base=state?visible/state.duration:1;
+    pps=base*Math.pow(2,zoom/12.5);
+  }
+  function render(){
+    calcScale();renderControls();
+    if(!state){rows.innerHTML='';$('ruler').innerHTML='';$('empty').hidden=false;$('playhead').hidden=true;$('demo').hidden=!!window.__adobe_cep__;return;}
+    const query=$('search').value.toLocaleLowerCase(),only=$('only-selected').checked;
+    viewLayers=state.layers.filter(l=>(!only||l.selected)&&(!query||l.name.toLocaleLowerCase().includes(query)));
+    const width=Math.ceil(state.duration*pps)+40;
+    surface.style.width=(labelWidth+width)+'px';rows.style.height=(viewLayers.length*prefs.rowHeight)+'px';
+    $('empty').hidden=viewLayers.length>0;
+    if(!viewLayers.length){$('empty-title').textContent=state.layers.length?'Слои не найдены':'Композиция пуста';$('empty-text').textContent=state.layers.length?'Измените поиск или отключите фильтр выделения.':'Добавьте слои в After Effects и обновите панель.';$('demo').hidden=true;}
+    renderRuler(width);renderRows();renderTime();renderInspector();
+  }
+  function tickStep(){
+    const target=82/pps;let step=state.frameDuration;
+    const candidates=[state.frameDuration,2*state.frameDuration,5*state.frameDuration,10*state.frameDuration,.5,1,2,5,10,15,30,60,120,300,600,1800,3600];
+    for(const c of candidates)if(c>=target){step=c;break;}return step;
+  }
+  function renderRuler(width){
+    const step=tickStep(),grid=Math.max(1,step*pps),left=Math.max(0,(timeline.scrollLeft)/pps-step),right=Math.min(state.duration,(timeline.scrollLeft+timeline.clientWidth)/pps),start=Math.max(0,Math.floor(left/step));
+    document.documentElement.style.setProperty('--grid',grid+'px');
+    let ticks='';for(let i=start;i*step<=right+step;i++){const t=i*step;if(t>state.duration)break;const label=prefs.units==='frames'?M.frame(t,state.frameDuration):M.timecode(t,state.frameDuration,state.displayStart).replace(/^00:/,'');ticks+='<div class="tick major" style="left:'+t*pps+'px"><span>'+esc(label)+'</span></div>';}
+    $('ruler').innerHTML='<div class="ruler-label"><span>Слой</span><button id="select-visible" title="Выделить все видимые слои">Выбрать всё</button></div><div class="ruler-track" style="width:'+width+'px">'+ticks+'<div class="work-area" style="left:'+state.workStart*pps+'px;width:'+state.workDuration*pps+'px"></div></div>';
+  }
+  function clip(l,ghost,bounds){
+    const a=bounds?bounds.inPoint:l.inPoint,b=bounds?bounds.outPoint:l.outPoint,left=Math.max(0,a*pps),right=Math.min(state.duration*pps,b*pps);
+    if(right<0||left>state.duration*pps)return '';
+    return '<div class="clip '+(l.locked?'locked ':'')+(!l.enabled?'disabled ':'')+(ghost?'drag-ghost':'')+'" '+(ghost?'':'data-clip="'+l.id+'" tabindex="-1"')+' style="left:'+left+'px;width:'+Math.max(2,right-left)+'px" title="'+esc(l.name+' · '+textTime(a)+' — '+textTime(b)+(l.locked?' · Locked':''))+'"><span class="handle in" data-edge="in"></span><span class="clip-name">'+esc(l.name)+'</span><span class="handle out" data-edge="out"></span></div>';
+  }
+  function renderRows(){
+    if(!state)return;const start=Math.max(0,Math.floor((timeline.scrollTop-34)/prefs.rowHeight)-3),end=Math.min(viewLayers.length,start+Math.ceil(timeline.clientHeight/prefs.rowHeight)+8),width=Math.ceil(state.duration*pps)+40;
+    let html='';for(let i=start;i<end;i++){
+      const l=viewLayers[i],color=labelColors[l.label]||labelColors[0],kind={text:'T',shape:'◇',comp:'▣',camera:'C',light:'L',null:'N',audio:'♪',media:'▰'}[l.kind]||'▰';
+      html+='<div class="layer-row '+(l.selected?'selected':'')+'" data-row="'+l.id+'" style="top:'+i*prefs.rowHeight+'px;--clip:'+color+'"><div class="layer-label" data-select="'+l.id+'" tabindex="-1" title="'+esc(l.name)+'"><span class="layer-index">'+l.index+'</span><span class="layer-color"></span>'+(prefs.showKinds?'<span class="layer-kind" aria-label="'+esc(l.kind)+'">'+kind+'</span>':'')+'<span class="layer-name">'+esc(l.name)+'</span><span class="layer-state">'+(l.locked?icons('lock'):'')+(!l.enabled?icons('eye'):'')+'</span></div><div class="layer-track" style="width:'+width+'px">'+clip(l,false)+'</div></div>';
+    }
+    rows.innerHTML=html;
+  }
+  function renderTime(time){
+    if(!state)return;const t=time===undefined?state.time:time;
+    if(document.activeElement!==$('cti'))$('cti').value=textTime(t);
+    $('frame-label').textContent=M.frame(t,state.frameDuration)+'f';
+    const x=labelWidth+t*pps;$('playhead').style.left=x+'px';$('playhead').hidden=x<timeline.scrollLeft+labelWidth-1;
+  }
+  function renderInspector(){
+    const selected=M.selected(state),one=selected.length===1?selected[0]:null;
+    $('inspect-name').textContent=one?one.name:selected.length?selected.length+' выбранных слоёв':'Выберите слой';
+    for(const [id,value]of[['in-value',one?textTime(one.inPoint):''],['out-value',one?textTime(one.outPoint):'']])if(document.activeElement!==$(id))$(id).value=value;
+    $('inspect-duration').textContent=one?M.frame(one.outPoint-one.inPoint,state.frameDuration)+' кадров':'—';$('inspect-start').textContent=one?textTime(one.start):'—';
+  }
+  function schedulePoll(){
+    clearTimeout(pollTimer);if(disposed||connectionFailed||!prefs.autoRefresh||isDemo||!window.__adobe_cep__)return;
+    const interval=Math.min(30000,prefs.poll*Math.pow(2,Math.min(readFailures,5)));
+    pollTimer=setTimeout(()=>{if(!busy&&!drag&&!document.hidden&&$('overlay').hidden&&!document.querySelector('input:focus'))refresh(true);else schedulePoll();},document.hasFocus()?interval:Math.max(3000,interval));
+  }
+  function setZoom(next,anchorTime){
+    if(drag)return;const old=pps,center=anchorTime===undefined?(timeline.scrollLeft+(timeline.clientWidth-labelWidth)/2)/old:anchorTime;
+    zoom=Math.min(100,Math.max(0,next));$('zoom').value=zoom;render();timeline.scrollLeft=Math.max(0,center*pps-(timeline.clientWidth-labelWidth)/2);renderRuler(Math.ceil(state?state.duration*pps:1)+40);renderTime();
+  }
+  async function select(id,e){
+    if(!ready())return;let next=M.selected(state).map(l=>l.id);
+    if(e.shiftKey&&lastAnchor!==null){const a=viewLayers.findIndex(l=>l.id===lastAnchor),b=viewLayers.findIndex(l=>l.id===id);next=viewLayers.slice(Math.min(a<0?b:a,b),Math.max(a<0?b:a,b)+1).map(l=>l.id);}
+    else if(e.ctrlKey||e.metaKey)next=next.includes(id)?next.filter(v=>v!==id):next.concat(id);
+    else next=[id];lastAnchor=id;return action({op:'select',ids:next});
+  }
+  function pointerTime(e){return Math.max(0,Math.min(state.duration-state.frameDuration,(e.clientX-timeline.getBoundingClientRect().left+timeline.scrollLeft-labelWidth)/pps));}
+  function clearDrag(){
+    if(!drag)return;const pointer=drag.pointer;drag=null;try{timeline.releasePointerCapture(pointer);}catch(e){}
+    rows.querySelectorAll('.drag-ghost').forEach(el=>el.remove());rows.querySelectorAll('.drag-source').forEach(el=>el.classList.remove('drag-source'));
+    $('guide').hidden=true;$('ghost-label').hidden=true;renderTime();
+  }
+  function pointerDown(e){
+    if(!ready()||e.button===2||e.target.closest('.ruler-label'))return;
+    if(e.button===1){e.preventDefault();drag={kind:'pan',pointer:e.pointerId,x:e.clientX,scroll:timeline.scrollLeft};timeline.setPointerCapture(e.pointerId);return;}
+    const el=e.target.closest('[data-clip]'),label=e.target.closest('[data-select]');
+    if(label){e.preventDefault();timeline.focus();select(Number(label.dataset.select),e);return;}
+    if(el){
+      const id=Number(el.dataset.clip),l=state.layers.find(l=>l.id===id);
+      if(e.ctrlKey||e.metaKey||e.shiftKey){e.preventDefault();select(id,e);return;}
+      if(l.locked){status('Слой заблокирован. Снимите блокировку в AE.',true);return;}
+      const edge=e.target.dataset.edge,ids=l.selected?M.selected(state).map(l=>l.id):[id];
+      if(state.layers.filter(l=>ids.includes(l.id)).some(l=>l.locked)){status('В выделении есть заблокированный слой.',true);return;}
+      drag={kind:edge?'trim':'move',edge,layer:l,ids:edge?[id]:ids,pointer:e.pointerId,x:e.clientX,scroll:timeline.scrollLeft,token:state.token,delta:0,value:edge==='in'?l.inPoint:l.outPoint,moved:false};
+      if(!l.selected){lastAnchor=id;drag.selectionPromise=action({op:'select',ids:[id]});}
+    }else if(e.target.closest('.ruler-track')||e.target.closest('.layer-track')){
+      drag={kind:'seek',pointer:e.pointerId,time:Math.min(state.duration-state.frameDuration,Math.round(pointerTime(e)/state.frameDuration)*state.frameDuration)};renderTime(drag.time);
+    }else return;
+    e.preventDefault();timeline.focus();timeline.setPointerCapture(e.pointerId);
+  }
+  function pointerMove(e){
+    if(!drag||drag.pointer!==e.pointerId)return;
+    if(drag.kind==='pan'){timeline.scrollLeft=drag.scroll-(e.clientX-drag.x);return;}
+    if(drag.kind==='seek'){drag.time=Math.min(state.duration-state.frameDuration,Math.round(pointerTime(e)/state.frameDuration)*state.frameDuration);renderTime(drag.time);return;}
+    if(Math.abs(e.clientX-drag.x)<3&&!drag.moved)return;drag.moved=true;
+    const fd=state.frameDuration;
+    let delta=Math.round(((e.clientX-drag.x+timeline.scrollLeft-drag.scroll)/pps)/fd)*fd;
+    let snap=M.snapDelta(state,drag.ids,delta,pps,prefs.snap&&!e.altKey,false),guide=snap.guide;
+    if(drag.kind==='move'){delta=snap.delta;drag.delta=delta/fd;}
+    else{
+      const edge=drag.edge==='in'?drag.layer.inPoint:drag.layer.outPoint;
+      let value=edge+delta;
+      if(prefs.snap&&!e.altKey){let best=7/pps;guide=null;[0,state.duration,state.time,...state.layers.filter(l=>l.id!==drag.layer.id).flatMap(l=>[l.inPoint,l.outPoint])].forEach(t=>{const d=Math.abs(value-t);if(d<best){best=d;value=t;guide=t;}});}
+      drag.value=M.trimLimit(drag.layer,drag.edge,value,fd);delta=drag.value-edge;if(Math.abs(drag.value-value)>fd*.00001)guide=null;
+    }
+    rows.querySelectorAll('.drag-ghost').forEach(el=>el.remove());
+    drag.ids.forEach(id=>{const l=state.layers.find(l=>l.id===id),el=rows.querySelector('[data-clip="'+id+'"]');if(!el)return;el.classList.add('drag-source');const bounds=drag.kind==='move'?{inPoint:l.inPoint+delta,outPoint:l.outPoint+delta}:{inPoint:drag.edge==='in'?drag.value:l.inPoint,outPoint:drag.edge==='out'?drag.value:l.outPoint};el.parentElement.insertAdjacentHTML('beforeend',clip(l,true,bounds));});
+    $('guide').hidden=guide===null;$('guide').style.left=(labelWidth+(guide||0)*pps)+'px';
+    const label=$('ghost-label');label.hidden=false;label.textContent=drag.kind==='move'?(delta>=0?'+':'')+Number((delta/fd).toFixed(3))+' кадров':(drag.edge==='in'?'In ':'Out ')+textTime(drag.value);
+    label.style.left=Math.min(labelWidth+Math.max(0,drag.layer.inPoint+delta)*pps,timeline.scrollLeft+timeline.clientWidth-130)+'px';
+  }
+  async function pointerUp(e){
+    if(!drag||drag.pointer!==e.pointerId)return;const d=drag;clearDrag();
+    if(d.kind==='seek'){action({op:'seek',time:d.time});return;}
+    if(d.selectionPromise){const selected=await d.selectionPromise;if(!selected||selected.failure)return;}
+    if(!d.moved)return;
+    if(d.kind==='move'&&Math.abs(d.delta)>1e-7)action({op:'move',ids:d.ids,deltaFrames:d.delta});
+    else if(d.kind==='trim')action({op:'trim',ids:d.ids,edge:d.edge,time:d.value});
+  }
+  function closeMenu(){if(menuOwner){menuOwner.setAttribute('aria-expanded','false');menuOwner=null;}$('menu').hidden=true;}
+  function openMenu(owner,items){
+    const was=menuOwner===owner;closeMenu();if(was)return;
+    menuOwner=owner;owner.setAttribute('aria-expanded','true');const menu=$('menu');menu.innerHTML='';
+    items.forEach(item=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitemradio');b.setAttribute('aria-checked',String(item.active));b.innerHTML='<span class="menu-copy"><span>'+esc(item.label)+'</span>'+(item.note?'<small>'+esc(item.note)+'</small>':'')+'</span>'+(item.active?icons('check'):'');b.onclick=()=>{item.onClick();closeMenu();owner.focus();};menu.append(b);});
+    menu.hidden=false;const rect=owner.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.min(rect.bottom+5,innerHeight-menu.offsetHeight-8)+'px';menu.querySelector('button').focus();
+  }
+  function openDialog(title,html){
+    closeMenu();if($('overlay').hidden)dialogFocus=document.activeElement;$('dialog-title').textContent=title;$('dialog-body').innerHTML=html;$('overlay').hidden=false;$('dialog').focus();
+  }
+  function closeDialog(){$('overlay').hidden=true;if(dialogFocus&&document.contains(dialogFocus))dialogFocus.focus();schedulePoll();}
+  function download(name,text){
+    const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type:'application/json;charset=utf-8'}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }
+  function choice(key,choices){return '<div class="settings-choice">'+choices.map(([v,label])=>'<button data-pref="'+key+'" data-value="'+v+'" class="'+(prefs[key]===v?'active':'')+'">'+esc(label)+'</button>').join('')+'</div>';}
+  function range(key,label){const [min,max]=M.ranges[key];return '<div class="setting-row"><label for="pref-'+key+'">'+label+'</label><div class="range-wrap"><input id="pref-'+key+'" data-range="'+key+'" type="range" min="'+min+'" max="'+max+'" value="'+prefs[key]+'"><output>'+prefs[key]+'</output></div></div>';}
+  function toggle(key,label){return '<label class="setting-row"><span>'+label+'</span><input type="checkbox" data-toggle="'+key+'" '+(prefs[key]?'checked':'')+'></label>';}
+  function showSettings(){
+    openDialog('Настройки','<h3>Внешний вид</h3>'+choice('theme',[['dark','Тёмная'],['light','Светлая'],['host','Как в AE']])+'<h3>Шрифт</h3>'+choice('font',[['system','Системный'],['sans','Arial'],['mono','Моноширинный']])+'<div class="settings-grid">'+range('fontSize','Размер текста')+range('rowHeight','Высота слоя')+range('spacing','Отступ в строке')+range('labelWidth','Ширина имён')+range('radius','Скругление')+'<div class="setting-row"><label for="pref-accent">Акцент</label><input id="pref-accent" type="color" value="'+prefs.accent+'"></div></div><h3>Время</h3>'+choice('units',[['timecode','Таймкод'],['frames','Кадры']])+'<p class="note">Таймкод NDF. Для 23.976 / 29.97 нумерация кадров; bare-число в таймкоде — секунды. Отрицательный Start поддерживается.</p><div class="settings-grid">'+toggle('snap','Привязка')+toggle('compMarkers','Маркеры композиции')+toggle('showKinds','Типы слоёв')+toggle('autoRefresh','Обновлять из AE')+toggle('motion','Анимация окон')+'<label class="setting-row"><span>Повышенный контраст</span><input type="checkbox" data-contrast="true" '+(prefs.contrast==='high'?'checked':'')+'></label>'+'</div><h3>Плотность</h3><div class="settings-choice"><button data-preset="compact">Компактно</button><button data-preset="balanced">Удобно</button><button data-preset="large">Крупнее</button></div><p id="settings-status" class="settings-status">'+esc(saveError||'Вид сохраняется автоматически. Сцена не меняется.')+'</p><div class="settings-actions"><button id="export-settings" class="secondary-button">Экспорт JSON</button><button id="import-settings" class="secondary-button">Импорт</button><button id="reset-appearance" class="quiet-button">Сбросить вид</button></div>');
+    const body=$('dialog-body');
+    body.querySelectorAll('[data-pref]').forEach(b=>b.onclick=()=>{if(change(b.dataset.pref,b.dataset.value)){body.querySelectorAll('[data-pref="'+b.dataset.pref+'"]').forEach(el=>el.classList.toggle('active',el===b));}});
+    body.querySelectorAll('[data-range]').forEach(input=>input.oninput=()=>{if(change(input.dataset.range,Number(input.value)))input.nextElementSibling.textContent=input.value;});
+    body.querySelectorAll('[data-toggle]').forEach(input=>input.onchange=()=>change(input.dataset.toggle,input.checked));
+    body.querySelector('[data-contrast]').onchange=e=>change('contrast',e.target.checked?'high':'normal');
+    $('pref-accent').oninput=e=>change('accent',e.target.value);
+    body.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p={compact:{rowHeight:32,fontSize:11,spacing:2},balanced:{rowHeight:38,fontSize:12,spacing:4},large:{rowHeight:48,fontSize:14,spacing:6}}[b.dataset.preset];prefs=M.validate(Object.assign({},prefs,p));applyAppearance();persist();render();showSettings();});
+    $('reset-appearance').onclick=()=>{for(const k of ['theme','font','fontSize','rowHeight','spacing','labelWidth','radius','accent','motion','contrast','showKinds'])prefs[k]=M.defaults[k];applyAppearance();persist();render();showSettings();};
+    $('export-settings').onclick=()=>download('FrameFlow-settings-v1.json',JSON.stringify(prefs,null,2));$('import-settings').onclick=()=>$('import-file').click();
+  }
+  function showReport(autoCopy=false){
+    openDialog('Отчёт FrameFlow','<p class="note">Отчёт остаётся на вашем компьютере. Просмотрите текст перед отправкой.</p><textarea id="report-text" class="report-text" readonly aria-label="Текст отчёта"></textarea><div class="settings-actions"><button id="copy-report" class="primary-button">Скопировать</button><button id="export-report" class="secondary-button">Сохранить TXT</button><span id="report-copy-state" class="note" role="status" aria-live="polite"></span></div>');
+    $('report-text').value=reportText();
+    const field=$('report-text'),copyState=$('report-copy-state');
+    function copied(message){if(document.contains(copyState))copyState.textContent=message;}
+    async function copy(){
+      field.focus();field.select();
+      // Synchronous copy preserves the user's click in CEP's older Chromium.
+      // navigator.clipboard can exist there but reject with NotAllowedError.
+      try{if(document.execCommand('copy')){copied('Скопировано');return;}}catch(e){}
+      try{if(!navigator.clipboard||typeof navigator.clipboard.writeText!=='function')throw Error('copy');await navigator.clipboard.writeText(field.value);copied('Скопировано');}
+      catch(e){copied('Копирование заблокировано. Текст выделен: Ctrl/Cmd+C.');}
+    }
+    $('copy-report').onclick=copy;$('export-report').onclick=()=>download('FrameFlow-'+M.VERSION+'-report.txt',field.value);
+    if(autoCopy)copy();
+  }
+  function showHelp(){openDialog('Работа с FrameFlow','<p class="help-text"><strong>Выделите → перенесите → Undo в AE.</strong><br>Щелчок по имени выделяет слой в AE. Ctrl/Cmd добавляет или снимает выделение, Shift выделяет диапазон.</p><p class="help-text">Потяните выбранный блок для переноса. Край блока меняет только In / Out этого слоя. Локальный предпросмотр записывается при отпускании мыши; Escape отменяет жест. Для точного ввода откройте панель значений справа.</p><table class="help-table"><tr><td>Сдвиг на кадр / на шаг</td><td>← → / Shift + ← →</td></tr><tr><td>Разделить по курсору</td><td>S</td></tr><tr><td>In / Out по курсору</td><td>[ / ]</td></tr><tr><td>Вся композиция / обновить</td><td>F / R</td></tr><tr><td>Привязка / временно без неё</td><td>N / Alt</td></tr><tr><td>Панорамирование</td><td>Средняя кнопка / Shift + колесо</td></tr><tr><td>Масштаб</td><td>Ctrl/Cmd + колесо</td></tr></table><p class="help-text">Горячие клавиши действуют при фокусе внутри панели. <strong>Undo / Redo выполняйте в AE</strong>: панель обновится автоматически или по R.</p><p class="help-text">Split не применяется к Parent / Track Matte связям. Time Remap и обратный Stretch допускают укорачивание; расширение проверяется по исходному медиа. Вложенные композиции изнутри не меняются.</p><p class="help-text">Режимы ключей используют выделение ключей в AE. По умолчанию любая недоступная цель блокирует всю операцию; перед записью данные проверяются заново. «Проверить» показывает план последнего направления.</p>');}
+  function offset(region,direction,preview){lastDirection=[region,direction];return action({op:'offset',ids:targetIds(),mode:prefs.mode,frames:readFrames(),region,direction,compMarkers:prefs.compMarkers,preview:!!preview}).then(result=>{if(preview&&result)showReport();});}
+  function readFrames(){const n=Number($('frames').value);if(!Number.isInteger(n)||n<1||n>1000000)throw Error('Шаг: целое число от 1 до 1000000.');return n;}
+  function safe(fn){return (...args)=>{try{const result=fn(...args);if(result&&result.catch)result.catch(e=>status(e.message,true));}catch(e){status(e.message,true);}};}
+  function moveStep(direction){const frames=readFrames();return action({op:'move',ids:targetIds(),deltaFrames:direction*frames});}
+  function trim(edge,value){return action({op:'trim',ids:M.selected(state).map(l=>l.id),edge,time:value===undefined?state.time:value});}
+  function keydown(e){
+    if(e.key==='Escape'){if(drag){clearDrag();status('Перетаскивание отменено · сцена не менялась');return;}if(!$('menu').hidden){const owner=menuOwner;closeMenu();owner.focus();return;}if(!$('overlay').hidden){closeDialog();return;}}
+    if(drag)return;
+    if(!$('overlay').hidden){if(e.key==='Tab'){const focus=[...$('dialog').querySelectorAll('button,input,textarea,[tabindex="0"]')].filter(el=>!el.disabled&&!el.hidden);if(focus.length){if(e.shiftKey&&(document.activeElement===focus[0]||document.activeElement===$('dialog'))){e.preventDefault();focus[focus.length-1].focus();}else if(!e.shiftKey&&document.activeElement===focus[focus.length-1]){e.preventDefault();focus[0].focus();}}}return;}
+    if(!$('menu').hidden){if(e.key==='Tab'){closeMenu();return;}const items=[...$('menu').querySelectorAll('button')],index=items.indexOf(document.activeElement);if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();items[e.key==='Home'?0:e.key==='End'?items.length-1:(index+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();}return;}
+    if(/INPUT|TEXTAREA/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
+    const key=e.key.toLowerCase();
+    if(key==='r'){e.preventDefault();refresh();}else if(key==='f'){e.preventDefault();setZoom(0);}else if(key==='n'){e.preventDefault();change('snap',!prefs.snap);}else if(key==='?')showHelp();
+    else if(ready()){
+      if(key==='s'){e.preventDefault();action({op:'split',ids:M.selected(state).map(l=>l.id),time:state.time});}
+      else if(key==='['){e.preventDefault();trim('in');}else if(key===']'){e.preventDefault();trim('out');}
+      else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();action({op:'move',ids:M.selected(state).map(l=>l.id),deltaFrames:(e.key==='ArrowLeft'?-1:1)*(e.shiftKey?readFrames():1)});}
+    }
+  }
+  function setup(){
+    try{preferenceStore=M.storage(localStorage);const loaded=preferenceStore.load();prefs=loaded.value;if(loaded.error)saveError=loaded.error;}catch(e){prefs=Object.assign({},M.defaults);saveError='Хранилище недоступно. Настройки действуют в этой сессии.';preferenceStore={save(){throw Error(saveError);}};}
+    applyAppearance();
+    if(false){bridge=FFBridge.createCEP(window.__adobe_cep__);refresh();}
+    else{bridge=FFBridge.create(()=>{throw Error('Откройте FrameFlow через Window → Extensions в After Effects.');});$('empty-title').textContent='Откройте панель в After Effects';$('empty-text').textContent='Этот файл — интерфейс CEP-расширения. Демо позволяет посмотреть управление без AE.';$('demo').hidden=false;status('Нет подключения к AE');renderControls();}
+    $('demo').onclick=()=>{bridge.dispose();bridge=FFDemo.create();isDemo=true;connectionFailed=false;readFailures=0;status('Демо · операции не затрагивают AE');refresh();};
+    if(true)$('demo').click();
+    $('refresh').onclick=()=>refresh();$('open-settings').onclick=showSettings;$('open-help').onclick=showHelp;$('open-report').onclick=()=>showReport(true);
+    $('mode').onclick=()=>openMenu($('mode'),Object.keys(modeNames).map(v=>({label:modeNames[v],note:modeNotes[v],active:prefs.mode===v,onClick:()=>change('mode',v)})));
+    $('scope').onclick=()=>openMenu($('scope'),[{label:'Выделенные слои',note:'Без выделения действие недоступно',active:prefs.scope==='selected',onClick:()=>change('scope','selected')},{label:'Вся композиция',note:'Включая скрытые и заблокированные слои',active:prefs.scope==='all',onClick:()=>change('scope','all')}]);
+    $('minus').onclick=safe(()=>moveStep(-1));$('plus').onclick=safe(()=>moveStep(1));$('frames').onchange=safe(()=>change('frames',readFrames()));
+    document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>change('frames',Number(b.dataset.step)));
+    document.querySelectorAll('[data-offset]').forEach(b=>b.onclick=safe(()=>{const [region,direction]=b.dataset.offset.split(':');return offset(region,Number(direction));}));
+    $('preview-plan').onclick=safe(()=>offset(lastDirection[0],lastDirection[1],true));
+    $('trim-in').onclick=safe(()=>trim('in'));$('trim-out').onclick=safe(()=>trim('out'));$('split').onclick=safe(()=>action({op:'split',ids:M.selected(state).map(l=>l.id),time:state.time}));
+    $('apply-in').onclick=safe(()=>trim('in',M.parseTime($('in-value').value,state.frameDuration,state.displayStart,prefs.units)));$('apply-out').onclick=safe(()=>trim('out',M.parseTime($('out-value').value,state.frameDuration,state.displayStart,prefs.units)));
+    $('apply-shift').onclick=safe(()=>{const n=Number($('exact-shift').value);if(!Number.isFinite(n)||!n||Math.abs(n)>1000000)throw Error('Введите ненулевое число кадров.');return action({op:'move',ids:M.selected(state).map(l=>l.id),deltaFrames:n});});
+    $('gap').onclick=safe(()=>action({op:'gap',scope:prefs.scope,compMarkers:prefs.compMarkers}));
+    $('inspect').onclick=()=>{$('inspector').hidden=!$('inspector').hidden;$('inspect').setAttribute('aria-pressed',String(!$('inspector').hidden));render();};$('close-inspector').onclick=()=>$('inspect').click();
+    $('cti').onkeydown=safe(e=>{if(e.key==='Enter'){const time=M.parseTime(e.target.value,state.frameDuration,state.displayStart,prefs.units);if(time<0||time>state.duration-state.frameDuration)throw Error('Курсор должен быть внутри композиции.');e.target.blur();return action({op:'seek',time});}if(e.key==='Escape'){e.target.blur();renderTime();}});
+    $('search').oninput=()=>{timeline.scrollTop=0;render();};$('only-selected').onchange=()=>{timeline.scrollTop=0;render();};
+    $('snap').onclick=()=>change('snap',!prefs.snap);$('fit').onclick=()=>setZoom(0);$('zoom').oninput=e=>setZoom(Number(e.target.value));$('zoom-in').onclick=()=>setZoom(zoom+10);$('zoom-out').onclick=()=>setZoom(zoom-10);
+    timeline.addEventListener('pointerdown',safe(pointerDown));timeline.addEventListener('pointermove',pointerMove);timeline.addEventListener('pointerup',safe(pointerUp));timeline.addEventListener('pointercancel',clearDrag);timeline.addEventListener('lostpointercapture',()=>{if(drag)clearDrag();});
+    timeline.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();if(state)setZoom(zoom+(e.deltaY<0?5:-5));}else if(e.shiftKey){e.preventDefault();timeline.scrollLeft+=e.deltaY+e.deltaX;}},{passive:false});
+    timeline.addEventListener('scroll',()=>{if(!rowFrame)rowFrame=requestAnimationFrame(()=>{rowFrame=0;if(drag&&drag.kind!=='pan')return;renderRows();if(state&&scrollX!==timeline.scrollLeft){scrollX=timeline.scrollLeft;renderRuler(Math.ceil(state.duration*pps)+40);}renderTime();});});
+    $('ruler').addEventListener('click',e=>{if(e.target.closest('#select-visible'))action({op:'select',ids:viewLayers.map(l=>l.id)});});
+    document.addEventListener('keydown',safe(keydown));document.addEventListener('pointerdown',e=>{if(menuOwner&&!$('menu').contains(e.target)&&!menuOwner.contains(e.target))closeMenu();});
+    $('close-dialog').onclick=closeDialog;$('overlay').onclick=e=>{if(e.target===$('overlay'))closeDialog();};
+    $('import-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>20000)throw Error('Файл настроек превышает 20 KB.');const next=M.validate(JSON.parse(await file.text()));prefs=next;applyAppearance();persist();render();showSettings();}catch(error){preferenceError(error.message);}finally{e.target.value='';}};
+    window.addEventListener('resize',()=>{closeMenu();if(drag)clearDrag();render();});window.addEventListener('focus',()=>{if(!busy&&!drag&&$('overlay').hidden)refresh(true);});
+    window.addEventListener('blur',()=>{if(drag){clearDrag();status('Жест отменён при смене окна.');}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)clearDrag();else schedulePoll();});
+    window.addEventListener('beforeunload',()=>{disposed=true;clearTimeout(pollTimer);clearTimeout(saveTimer);try{preferenceStore.save(prefs);}catch(e){}bridge.dispose();});
+    new ResizeObserver(()=>{if(!drag)render();}).observe(timeline);
+    schedulePoll();if(saveError)status(saveError,true);
+  }
+  setup();
+}());
+</script>
+</body></html>
