@@ -2,7 +2,7 @@
 
 A compact CEP 12 panel for timing commands around the After Effects playhead.
 
-**[Previous stable ZIP — 2.1.1](downloads/FrameFlow_AE_2.1.1.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
+**[Download installable ZIP — 2.2.0](downloads/FrameFlow_AE_2.2.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
 
 Close the FrameFlow panel, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Reopen **Window → Extensions (Legacy) → FrameFlow 2.2**. Target: AE 25.x–26.x / CEP 12. The installer backs up the previous extension and enables unsigned CEP 12 panels for the current account. This is a source distribution, not a signed ZXP or GitHub Release. Installed users need no Node, Python, server or network access from the panel.
 
@@ -33,7 +33,7 @@ Preferences v1/v2 migrate to v3. Existing step, presets, zero/false and customiz
 
 Maintainer tools need Node >=20 with Acorn 8.17.0 or bundled Acorn through `--expose-internals`, Python 3 and Bash. Read-only CI runs on main pushes and PRs, checks Chromium layout/interactions with a simulated AE transport, runs packaging and uploads a separate checked build plus browser screenshots. Browser tooling uses isolated Playwright 1.62.1 and is not part of the installed panel. Issued ZIPs remain unchanged under `downloads/`.
 
-The user reports 2.1.1 is working in AE 25.6.4x3. The original finite-media failure is reproduced in the regression suite. **2.2.0 host behavior, native Undo/Redo, clipboard and docking require an actual AE smoke test.** DOM tests simulate wiring; Chromium evidence is separately recorded when run. See [verification](VERIFICATION.json) and [smoke test](docs/AE_SMOKE_TEST_RU.md).
+The user reports 2.1.1 is working in AE 25.6.4x3. The original finite-media failure is reproduced in the regression suite. **2.2.0 host behavior, native Undo/Redo, clipboard and docking require an actual AE smoke test.** DOM tests simulate wiring; Chromium layout and interaction checks pass; their exact browser version, exercised files and source hashes are recorded separately in the verification metadata. See [verification](VERIFICATION.json) and [smoke test](docs/AE_SMOKE_TEST_RU.md).
 
 
 ## Roadmap and updates

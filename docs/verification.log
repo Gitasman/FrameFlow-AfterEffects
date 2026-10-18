@@ -56,949 +56,949 @@ TAP version 13
 # Subtest: the exact shipped host is plain ES3 with no directive stripping or preprocessing
 ok 1 - the exact shipped host is plain ES3 with no directive stripping or preprocessing
   ---
-  duration_ms: 65.18071
+  duration_ms: 93.203292
   type: 'test'
   ...
 # Subtest: native and file URI extension paths support Cyrillic, percent, drive and UNC names
 ok 2 - native and file URI extension paths support Cyrillic, percent, drive and UNC names
   ---
-  duration_ms: 0.689992
+  duration_ms: 0.67503
   type: 'test'
   ...
 # Subtest: exact bootstrap strings pass strict ES3 and cannot interpolate path text as code
 ok 3 - exact bootstrap strings pass strict ES3 and cannot interpolate path text as code
   ---
-  duration_ms: 7.622164
+  duration_ms: 9.404665
   type: 'test'
   ...
 # Subtest: cold CEP start loads exact installed bytes once, confirms version and reads before writes
 ok 4 - cold CEP start loads exact installed bytes once, confirms version and reads before writes
   ---
-  duration_ms: 5.679786
+  duration_ms: 5.958879
   type: 'test'
   ...
 # Subtest: old loaded host is replaced only during read handshake
 ok 5 - old loaded host is replaced only during read handshake
   ---
-  duration_ms: 1.643005
+  duration_ms: 2.440827
   type: 'test'
   ...
 # Subtest: load syntax errors preserve original message, stage, line and basename; dispatch is never sent
 ok 6 - load syntax errors preserve original message, stage, line and basename; dispatch is never sent
   ---
-  duration_ms: 1.273858
+  duration_ms: 1.35717
   type: 'test'
   ...
 # Subtest: missing file and post-load handshake failure are actionable bootstrap errors
 ok 7 - missing file and post-load handshake failure are actionable bootstrap errors
   ---
-  duration_ms: 1.895739
+  duration_ms: 2.57145
   type: 'test'
   ...
 # Subtest: no active composition remains a host error with environment confirmed independently
 ok 8 - no active composition remains a host error with environment confirmed independently
   ---
-  duration_ms: 2.085
+  duration_ms: 4.156028
   type: 'test'
   ...
 # Subtest: malformed bootstrap replies stay bounded and never expose raw response text
 ok 9 - malformed bootstrap replies stay bounded and never expose raw response text
   ---
-  duration_ms: 4.973229
+  duration_ms: 9.217549
   type: 'test'
   ...
 # Subtest: bootstrap timeout cannot write; late reply is ignored, explicit read can reconnect
 ok 10 - bootstrap timeout cannot write; late reply is ignored, explicit read can reconnect
   ---
-  duration_ms: 14.542648
+  duration_ms: 19.629717
   type: 'test'
   ...
 # Subtest: write timeout never replays the write or reloads a healthy host on explicit recovery
 ok 11 - write timeout never replays the write or reloads a healthy host on explicit recovery
   ---
-  duration_ms: 11.45951
+  duration_ms: 13.242882
   type: 'test'
   ...
 # Subtest: read timeout distinguishes metadata failure from an unconfirmed mutation
 ok 12 - read timeout distinguishes metadata failure from an unconfirmed mutation
   ---
-  duration_ms: 4.58924
+  duration_ms: 4.619435
   type: 'test'
   ...
 # Subtest: disposal rejects pending bootstrap and RPC promises without leaving timers
 ok 13 - disposal rejects pending bootstrap and RPC promises without leaving timers
   ---
-  duration_ms: 1.063656
+  duration_ms: 1.046912
   type: 'test'
   ...
 # Subtest: CEP environment is available in diagnostics even if ExtendScript never loads
 ok 14 - CEP environment is available in diagnostics even if ExtendScript never loads
   ---
-  duration_ms: 0.207267
+  duration_ms: 0.208859
   type: 'test'
   ...
 # Subtest: host registers explicitly from local evalFile scope and a detached global namespace
 ok 15 - host registers explicitly from local evalFile scope and a detached global namespace
   ---
-  duration_ms: 1.988416
+  duration_ms: 1.987335
   type: 'test'
   ...
 # Subtest: global and function-scoped evalFile loaders export the same host contract
 ok 16 - global and function-scoped evalFile loaders export the same host contract
   ---
-  duration_ms: 3.892197
+  duration_ms: 4.372208
   type: 'test'
   ...
 # Subtest: a local name shadowing FrameFlowCEP cannot intercept RPC
 ok 17 - a local name shadowing FrameFlowCEP cannot intercept RPC
   ---
-  duration_ms: 1.39689
+  duration_ms: 1.72736
   type: 'test'
   ...
 # Subtest: missing registration and version/dispatch mismatches report observed state, without invented source errors
 ok 18 - missing registration and version/dispatch mismatches report observed state, without invented source errors
   ---
-  duration_ms: 1.916149
+  duration_ms: 2.518372
   type: 'test'
   ...
 # Subtest: numeric ExtendScript script IDs are kept separately from the known loaded filename
 ok 19 - numeric ExtendScript script IDs are kept separately from the known loaded filename
   ---
-  duration_ms: 0.72213
+  duration_ms: 0.839975
   type: 'test'
   ...
 # Subtest: failed host construction never replaces an existing registered API
 ok 20 - failed host construction never replaces an existing registered API
   ---
-  duration_ms: 2.093983
+  duration_ms: 2.51025
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var x = { protected: true }; x.protected;
 ok 21 - strict ES3 rejects var x = { protected: true }; x.protected;
   ---
-  duration_ms: 3.561918
+  duration_ms: 4.646464
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var protected = 1;
 ok 22 - strict ES3 rejects var protected = 1;
   ---
-  duration_ms: 0.361605
+  duration_ms: 0.509936
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var const = 1;
 ok 23 - strict ES3 rejects var const = 1;
   ---
-  duration_ms: 0.66818
+  duration_ms: 0.911511
   type: 'test'
   ...
 # Subtest: strict ES3 rejects debugger;
 ok 24 - strict ES3 rejects debugger;
   ---
-  duration_ms: 0.189591
+  duration_ms: 0.255098
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var x = { class: 1 };
 ok 25 - strict ES3 rejects var x = { class: 1 };
   ---
-  duration_ms: 0.199386
+  duration_ms: 0.262269
   type: 'test'
   ...
 # Subtest: strict ES3 rejects let n=1;
 ok 26 - strict ES3 rejects let n=1;
   ---
-  duration_ms: 0.383919
+  duration_ms: 0.684284
   type: 'test'
   ...
 # Subtest: strict ES3 rejects const n=1;
 ok 27 - strict ES3 rejects const n=1;
   ---
-  duration_ms: 0.2494
+  duration_ms: 0.230732
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var f = () => 1;
 ok 28 - strict ES3 rejects var f = () => 1;
   ---
-  duration_ms: 1.159038
+  duration_ms: 1.704035
   type: 'test'
   ...
 # Subtest: strict ES3 rejects var x = `text`;
 ok 29 - strict ES3 rejects var x = `text`;
   ---
-  duration_ms: 0.349267
+  duration_ms: 0.356899
   type: 'test'
   ...
 # Subtest: quoted required keys, bracket access and protectedRegion pass
 ok 30 - quoted required keys, bracket access and protectedRegion pass
   ---
-  duration_ms: 1.497609
+  duration_ms: 1.247318
   type: 'test'
   ...
 # Subtest: directives are position-masked and errors keep original line numbers
 ok 31 - directives are position-masked and errors keep original line numbers
   ---
-  duration_ms: 0.775148
+  duration_ms: 0.830631
   type: 'test'
   ...
 # Subtest: unresolved includes remain blocked
 ok 32 - unresolved includes remain blocked
   ---
-  duration_ms: 0.230291
+  duration_ms: 0.280666
   type: 'test'
   ...
 # Subtest: unknown directives remain blocked
 ok 33 - unknown directives remain blocked
   ---
-  duration_ms: 0.746826
+  duration_ms: 0.278233
   type: 'test'
   ...
 # Subtest: a missing input cannot pass
 ok 34 - a missing input cannot pass
   ---
-  duration_ms: 0.250761
+  duration_ms: 0.29715
   type: 'test'
   ...
 # Subtest: analysis never executes scene mutations
 ok 35 - analysis never executes scene mutations
   ---
-  duration_ms: 0.643333
+  duration_ms: 0.846884
   type: 'test'
   ...
 # Subtest: preferences preserve zero, false, imported settings and unknown data
 ok 36 - preferences preserve zero, false, imported settings and unknown data
   ---
-  duration_ms: 1.988596
+  duration_ms: 2.825867
   type: 'test'
   ...
 # Subtest: storage acknowledges exact writes and protects concurrent/newer data
 ok 37 - storage acknowledges exact writes and protects concurrent/newer data
   ---
-  duration_ms: 0.352272
+  duration_ms: 0.711034
   type: 'test'
   ...
 # Subtest: storage failures preserve intended session values
 ok 38 - storage failures preserve intended session values
   ---
-  duration_ms: 0.212045
+  duration_ms: 0.406412
   type: 'test'
   ...
 # Subtest: timecode roundtrips at integer and fractional FPS with negative display start
 ok 39 - timecode roundtrips at integer and fractional FPS with negative display start
   ---
-  duration_ms: 0.511247
+  duration_ms: 0.883449
   type: 'test'
   ...
 # Subtest: frame input and invalid timecodes are handled explicitly
 ok 40 - frame input and invalid timecodes are handled explicitly
   ---
-  duration_ms: 0.248188
+  duration_ms: 0.336939
   type: 'test'
   ...
 # Subtest: snapping uses stable IDs, screen tolerance and can be disabled
 ok 41 - snapping uses stable IDs, screen tolerance and can be disabled
   ---
-  duration_ms: 0.267527
+  duration_ms: 0.485579
   type: 'test'
   ...
 # Subtest: trim respects finite source, one-frame minimum, remap and reverse stretch
 ok 42 - trim respects finite source, one-frame minimum, remap and reverse stretch
   ---
-  duration_ms: 1.388467
+  duration_ms: 0.376979
   type: 'test'
   ...
 # Subtest: bridge correlates host response and blocks parallel writes
 ok 43 - bridge correlates host response and blocks parallel writes
   ---
-  duration_ms: 2.455789
+  duration_ms: 4.295785
   type: 'test'
   ...
 # Subtest: host rejection surfaces original error without transport uncertainty
 ok 44 - host rejection surfaces original error without transport uncertainty
   ---
-  duration_ms: 0.902327
+  duration_ms: 1.889029
   type: 'test'
   ...
 # Subtest: timeout blocks edits until read resynchronizes; late result cannot overwrite
 ok 45 - timeout blocks edits until read resynchronizes; late result cannot overwrite
   ---
-  duration_ms: 15.570422
+  duration_ms: 22.831019
   type: 'test'
   ...
 # Subtest: empty, malformed and mismatched host responses require resync
 ok 46 - empty, malformed and mismatched host responses require resync
   ---
-  duration_ms: 0.545138
+  duration_ms: 1.082874
   type: 'test'
   ...
 # Subtest: exact encoded host payload is ES3 and cannot interpolate executable text
 ok 47 - exact encoded host payload is ES3 and cannot interpolate executable text
   ---
-  duration_ms: 6.608632
+  duration_ms: 13.314539
   type: 'test'
   ...
 # Subtest: preferences reject inherited/prototype keys and derive readable accent in each theme
 ok 48 - preferences reject inherited/prototype keys and derive readable accent in each theme
   ---
-  duration_ms: 0.579578
+  duration_ms: 1.293497
   type: 'test'
   ...
 # Subtest: v1 preferences migrate to v3 without changing explicit scope, mode or zero/false values
 ok 49 - v1 preferences migrate to v3 without changing explicit scope, mode or zero/false values
   ---
-  duration_ms: 0.36404
+  duration_ms: 0.312513
   type: 'test'
   ...
 # Subtest: new installs default to Auto and the original layer-and-key offset behavior
 ok 50 - new installs default to Auto and the original layer-and-key offset behavior
   ---
-  duration_ms: 0.315297
+  duration_ms: 0.348777
   type: 'test'
   ...
 # Subtest: quick steps accept useful presets and reject invalid bounds without modifying stored data
 ok 51 - quick steps accept useful presets and reject invalid bounds without modifying stored data
   ---
-  duration_ms: 0.288408
+  duration_ms: 0.36456
   type: 'test'
   ...
 # Subtest: startup resets context by default while preserving step, appearance and explicit opt-in
 ok 52 - startup resets context by default while preserving step, appearance and explicit opt-in
   ---
-  duration_ms: 0.205244
+  duration_ms: 0.391701
   type: 'test'
   ...
 # Subtest: old default density becomes compact; customized density and zero survive
 ok 53 - old default density becomes compact; customized density and zero survive
   ---
-  duration_ms: 0.113598
+  duration_ms: 0.207257
   type: 'test'
   ...
 # Subtest: media policy persists and rejects unsupported choices
 ok 54 - media policy persists and rejects unsupported choices
   ---
-  duration_ms: 0.102642
+  duration_ms: 0.18252
   type: 'test'
   ...
 # Subtest: custom accent remains readable on raised and selected surfaces without changing saved color
 ok 55 - custom accent remains readable on raised and selected surfaces without changing saved color
   ---
-  duration_ms: 0.667028
+  duration_ms: 0.883609
   type: 'test'
   ...
 # Subtest: read returns actual metadata without writes or Undo
 ok 56 - read returns actual metadata without writes or Undo
   ---
-  duration_ms: 7.506161
+  duration_ms: 4.815365
   type: 'test'
   ...
 # Subtest: move translates exact target and all its keys once, preserving selection
 ok 57 - move translates exact target and all its keys once, preserving selection
   ---
-  duration_ms: 8.541687
+  duration_ms: 7.359454
   type: 'test'
   ...
 # Subtest: stale token blocks edits after outside timing changes
 ok 58 - stale token blocks edits after outside timing changes
   ---
-  duration_ms: 2.28128
+  duration_ms: 1.51213
   type: 'test'
   ...
 # Subtest: composition identity checked even with reused IDs
 ok 59 - composition identity checked even with reused IDs
   ---
-  duration_ms: 1.827788
+  duration_ms: 1.130756
   type: 'test'
   ...
 # Subtest: reordered layers invalidate snapshot and cannot retarget by index
 ok 60 - reordered layers invalidate snapshot and cannot retarget by index
   ---
-  duration_ms: 2.051731
+  duration_ms: 1.103775
   type: 'test'
   ...
 # Subtest: locked target blocks the entire native move
 ok 61 - locked target blocks the entire native move
   ---
-  duration_ms: 2.985474
+  duration_ms: 1.57221
   type: 'test'
   ...
 # Subtest: duplicate mutation ID is acknowledged without applying twice
 ok 62 - duplicate mutation ID is acknowledged without applying twice
   ---
-  duration_ms: 4.569931
+  duration_ms: 2.780901
   type: 'test'
   ...
 # Subtest: trim changes only requested bound and preserves keys
 ok 63 - trim changes only requested bound and preserves keys
   ---
-  duration_ms: 3.507618
+  duration_ms: 1.644216
   type: 'test'
   ...
 # Subtest: trim failure restores every touched target and closes Undo
 ok 64 - trim failure restores every touched target and closes Undo
   ---
-  duration_ms: 5.264641
+  duration_ms: 1.495607
   type: 'test'
   ...
 # Subtest: trim cannot extend finite media or collapse a layer
 ok 65 - trim cannot extend finite media or collapse a layer
   ---
-  duration_ms: 2.342461
+  duration_ms: 1.404581
   type: 'test'
   ...
 # Subtest: Time Remap supports shortening but blocks extension
 ok 66 - Time Remap supports shortening but blocks extension
   ---
-  duration_ms: 1.871703
+  duration_ms: 1.506843
   type: 'test'
   ...
 # Subtest: split duplicates animation and trims original and copy
 ok 67 - split duplicates animation and trims original and copy
   ---
-  duration_ms: 1.608844
+  duration_ms: 1.331403
   type: 'test'
   ...
 # Subtest: split blocks parent and matte relationships before mutation
 ok 68 - split blocks parent and matte relationships before mutation
   ---
-  duration_ms: 4.268095
+  duration_ms: 2.783714
   type: 'test'
   ...
 # Subtest: split blocks layers with children and CTI outside
 ok 69 - split blocks layers with children and CTI outside
   ---
-  duration_ms: 3.062037
+  duration_ms: 1.900296
   type: 'test'
   ...
 # Subtest: preview move has no scene or Undo side effects
 ok 70 - preview move has no scene or Undo side effects
   ---
-  duration_ms: 2.535527
+  duration_ms: 1.608193
   type: 'test'
   ...
 # Subtest: unexpected preview on trim is rejected before mutation
 ok 71 - unexpected preview on trim is rejected before mutation
   ---
-  duration_ms: 1.41766
+  duration_ms: 1.021874
   type: 'test'
   ...
 # Subtest: empty explicit target never expands to all layers
 ok 72 - empty explicit target never expands to all layers
   ---
-  duration_ms: 1.040141
+  duration_ms: 0.982125
   type: 'test'
   ...
 # Subtest: selection synchronizes by stable ID and allows clearing
 ok 73 - selection synchronizes by stable ID and allows clearing
   ---
-  duration_ms: 1.532971
+  duration_ms: 1.615133
   type: 'test'
   ...
 # Subtest: seek updates CTI without modifying layer times
 ok 74 - seek updates CTI without modifying layer times
   ---
-  duration_ms: 1.803041
+  duration_ms: 1.271033
   type: 'test'
   ...
 # Subtest: malformed JSON, prototype keys and non-finite values never execute code
 ok 75 - malformed JSON, prototype keys and non-finite values never execute code
   ---
-  duration_ms: 1.003116
+  duration_ms: 1.070486
   type: 'test'
   ...
 # Subtest: unknown command, fields, duplicate IDs, NaN and huge payload are rejected
 ok 76 - unknown command, fields, duplicate IDs, NaN and huge payload are rejected
   ---
-  duration_ms: 3.575287
+  duration_ms: 4.565004
   type: 'test'
   ...
 # Subtest: negative and subframe moves preserve fractional timing
 ok 77 - negative and subframe moves preserve fractional timing
   ---
-  duration_ms: 1.610006
+  duration_ms: 1.643385
   type: 'test'
   ...
 # Subtest: scope-aware whole-layer command affects only before with direction -1
 ok 78 - scope-aware whole-layer command affects only before with direction -1
   ---
-  duration_ms: 1.77518
+  duration_ms: 2.721222
   type: 'test'
   ...
 # Subtest: scope-aware whole-layer command affects only before with direction 1
 ok 79 - scope-aware whole-layer command affects only before with direction 1
   ---
-  duration_ms: 1.45123
+  duration_ms: 1.806597
   type: 'test'
   ...
 # Subtest: scope-aware whole-layer command affects only after with direction -1
 ok 80 - scope-aware whole-layer command affects only after with direction -1
   ---
-  duration_ms: 1.519251
+  duration_ms: 2.313007
   type: 'test'
   ...
 # Subtest: scope-aware whole-layer command affects only after with direction 1
 ok 81 - scope-aware whole-layer command affects only after with direction 1
   ---
-  duration_ms: 1.530388
+  duration_ms: 2.455478
   type: 'test'
   ...
 # Subtest: Auto without selection acts on the entire composition
 ok 82 - Auto without selection acts on the entire composition
   ---
-  duration_ms: 1.59251
+  duration_ms: 2.441267
   type: 'test'
   ...
 # Subtest: Auto respects actual AE selection and All explicitly ignores it
 ok 83 - Auto respects actual AE selection and All explicitly ignores it
   ---
-  duration_ms: 2.071009
+  duration_ms: 3.282114
   type: 'test'
   ...
 # Subtest: explicit Selected with no selection and explicit empty IDs never expand scope
 ok 84 - explicit Selected with no selection and explicit empty IDs never expand scope
   ---
-  duration_ms: 1.5523
+  duration_ms: 2.540885
   type: 'test'
   ...
 # Subtest: gap supports Auto with no selection, independently of movement modes and frame step
 ok 85 - gap supports Auto with no selection, independently of movement modes and frame step
   ---
-  duration_ms: 1.88931
+  duration_ms: 3.358236
   type: 'test'
   ...
 # Subtest: Auto gap with a selection never widens to unrelated layers
 ok 86 - Auto gap with a selection never widens to unrelated layers
   ---
-  duration_ms: 3.226681
+  duration_ms: 1.940265
   type: 'test'
   ...
 # Subtest: a locked layer on the opposite side cannot block an offset
 ok 87 - a locked layer on the opposite side cannot block an offset
   ---
-  duration_ms: 3.695686
+  duration_ms: 3.404745
   type: 'test'
   ...
 # Subtest: a locked relevant target still blocks the entire operation before writes
 ok 88 - a locked relevant target still blocks the entire operation before writes
   ---
-  duration_ms: 1.509727
+  duration_ms: 10.11764
   type: 'test'
   ...
 # Subtest: locked keyless and out-of-side-key layers do not block key-only commands
 ok 89 - locked keyless and out-of-side-key layers do not block key-only commands
   ---
-  duration_ms: 1.979433
+  duration_ms: 2.717617
   type: 'test'
   ...
 # Subtest: key-only side boundaries include CTI after and exclude it before
 ok 90 - key-only side boundaries include CTI after and exclude it before
   ---
-  duration_ms: 3.066584
+  duration_ms: 4.42008
   type: 'test'
   ...
 # Subtest: media policy skips only the exhausted layer for reported after 1
 ok 91 - media policy skips only the exhausted layer for reported after 1
   ---
-  duration_ms: 3.663309
+  duration_ms: 11.633904
   type: 'test'
   ...
 # Subtest: media policy skips only the exhausted layer for reported before -1
 ok 92 - media policy skips only the exhausted layer for reported before -1
   ---
-  duration_ms: 2.796594
+  duration_ms: 4.410525
   type: 'test'
   ...
 # Subtest: stop policy and omitted legacy policy still cancel all writes on a media limit
 ok 93 - stop policy and omitted legacy policy still cancel all writes on a media limit
   ---
-  duration_ms: 6.095131
+  duration_ms: 10.317423
   type: 'test'
   ...
 # Subtest: preview shows the allowed media skip without writes or Undo
 ok 94 - preview shows the allowed media skip without writes or Undo
   ---
-  duration_ms: 2.774782
+  duration_ms: 5.344288
   type: 'test'
   ...
 # Subtest: media skip does not bypass another relevant locked target
 ok 95 - media skip does not bypass another relevant locked target
   ---
-  duration_ms: 2.648694
+  duration_ms: 3.967319
   type: 'test'
   ...
 # Subtest: only exhausted media is a visible no-op with no Undo group
 ok 96 - only exhausted media is a visible no-op with no Undo group
   ---
-  duration_ms: 1.439563
+  duration_ms: 1.537738
   type: 'test'
   ...
 # Subtest: invalid media policy is rejected before writing
 ok 97 - invalid media policy is rejected before writing
   ---
-  duration_ms: 4.715377
+  duration_ms: 6.240987
   type: 'test'
   ...
 # Subtest: media skip does not bypass an unsupported partial-key target
 ok 98 - media skip does not bypass an unsupported partial-key target
   ---
-  duration_ms: 2.550299
+  duration_ms: 3.067055
   type: 'test'
   ...
 # Subtest: a write failure still recovers changed targets when another layer is intentionally skipped
 ok 99 - a write failure still recovers changed targets when another layer is intentionally skipped
   ---
-  duration_ms: 3.781814
+  duration_ms: 4.350676
   type: 'test'
   ...
 # Subtest: structured preview has counts and exact bounds but never serializes native key values
 ok 100 - structured preview has counts and exact bounds but never serializes native key values
   ---
-  duration_ms: 1.971732
+  duration_ms: 2.074954
   type: 'test'
   ...
 # Subtest: applying a checked plan uses its captured targets and has one Undo group
 ok 101 - applying a checked plan uses its captured targets and has one Undo group
   ---
-  duration_ms: 3.296534
+  duration_ms: 2.874459
   type: 'test'
   ...
 # Subtest: cached plan rejects changed CTI, layer scope, source and composition before writes
 ok 102 - cached plan rejects changed CTI, layer scope, source and composition before writes
   ---
-  duration_ms: 7.955899
+  duration_ms: 9.493747
   type: 'test'
   ...
 # Subtest: key edits after preview fail native preflight even when metadata token stays unchanged
 ok 103 - key edits after preview fail native preflight even when metadata token stays unchanged
   ---
-  duration_ms: 8.109877
+  duration_ms: 7.736833
   type: 'test'
   ...
 # Subtest: preview plans expire after two minutes and a newer preview invalidates the old one
 ok 104 - preview plans expire after two minutes and a newer preview invalidates the old one
   ---
-  duration_ms: 3.633034
+  duration_ms: 4.979117
   type: 'test'
   ...
 # Subtest: preview apply duplicate RPC is acknowledged without repeating the mutation
 ok 105 - preview apply duplicate RPC is acknowledged without repeating the mutation
   ---
-  duration_ms: 2.581065
+  duration_ms: 5.196835
   type: 'test'
   ...
 # Subtest: gap preview exposes the actual interval and can apply the checked removal
 ok 106 - gap preview exposes the actual interval and can apply the checked removal
   ---
-  duration_ms: 3.001438
+  duration_ms: 5.531156
   type: 'test'
   ...
 # Subtest: media policy counts survive preview and applying the captured plan
 ok 107 - media policy counts survive preview and applying the captured plan
   ---
-  duration_ms: 16.014314
+  duration_ms: 9.230087
   type: 'test'
   ...
 # Subtest: blocked preview cannot be forced into an edit through applyPreview
 ok 108 - blocked preview cannot be forced into an edit through applyPreview
   ---
-  duration_ms: 8.224656
+  duration_ms: 13.421308
   type: 'test'
   ...
 # Subtest: preview target details are bounded while counts cover the whole planned operation
 ok 109 - preview target details are bounded while counts cover the whole planned operation
   ---
-  duration_ms: 13.95689
+  duration_ms: 23.316408
   type: 'test'
   ...
 # Subtest: a failed replacement preview also invalidates the previous cached plan
 ok 110 - a failed replacement preview also invalidates the previous cached plan
   ---
-  duration_ms: 2.580414
+  duration_ms: 3.932677
   type: 'test'
   ...
 # Subtest: selected-key mode plans one key and leaves layer boundaries untouched
 ok 111 - selected-key mode plans one key and leaves layer boundaries untouched
   ---
-  duration_ms: 4.84561
+  duration_ms: 5.641479
   type: 'test'
   ...
 # Subtest: key-only apply changes selected key time without moving layer or other keys
 ok 112 - key-only apply changes selected key time without moving layer or other keys
   ---
-  duration_ms: 1.658617
+  duration_ms: 3.004171
   type: 'test'
   ...
 # Subtest: empty selected-key mode never falls back to all keys
 ok 113 - empty selected-key mode never falls back to all keys
   ---
-  duration_ms: 0.760086
+  duration_ms: 1.135793
   type: 'test'
   ...
 # Subtest: all-keys mode moves only the requested CTI side
 ok 114 - all-keys mode moves only the requested CTI side
   ---
-  duration_ms: 0.925621
+  duration_ms: 1.224535
   type: 'test'
   ...
 # Subtest: legacy default still extends the crossing layer and shifts later keys
 ok 115 - legacy default still extends the crossing layer and shifts later keys
   ---
-  duration_ms: 1.171516
+  duration_ms: 1.556215
   type: 'test'
   ...
 # Subtest: whole-layer mode uses layer In as its anchor and includes crossing layers before CTI
 ok 116 - whole-layer mode uses layer In as its anchor and includes crossing layers before CTI
   ---
-  duration_ms: 0.853394
+  duration_ms: 2.085249
   type: 'test'
   ...
 # Subtest: whole-layer mode does not retime a crossing layer on the after side
 ok 117 - whole-layer mode does not retime a crossing layer on the after side
   ---
-  duration_ms: 0.666878
+  duration_ms: 1.116084
   type: 'test'
   ...
 # Subtest: strict preflight blocks every write when another requested target is locked
 ok 118 - strict preflight blocks every write when another requested target is locked
   ---
-  duration_ms: 4.327622
+  duration_ms: 2.857283
   type: 'test'
   ...
 # Subtest: collision blocks selected-key operation before writes
 ok 119 - collision blocks selected-key operation before writes
   ---
-  duration_ms: 0.992862
+  duration_ms: 2.256298
   type: 'test'
   ...
 # Subtest: subframe times and fractional FPS do not round to frames
 ok 120 - subframe times and fractional FPS do not round to frames
   ---
-  duration_ms: 1.044898
+  duration_ms: 1.492602
   type: 'test'
   ...
 # Subtest: roving partial move is rejected by the existing timing planner
 ok 121 - roving partial move is rejected by the existing timing planner
   ---
-  duration_ms: 0.732505
+  duration_ms: 1.402899
   type: 'test'
   ...
 # Subtest: unknown modes cannot cause legacy writes
 ok 122 - unknown modes cannot cause legacy writes
   ---
-  duration_ms: 0.869459
+  duration_ms: 1.567032
   type: 'test'
   ...
 # Subtest: advanced preferences roundtrip false and protect unknown data
 ok 123 - advanced preferences roundtrip false and protect unknown data
   ---
-  duration_ms: 0.691795
+  duration_ms: 1.44421
   type: 'test'
   ...
 # Subtest: whole-layer apply uses native translation exactly once
 ok 124 - whole-layer apply uses native translation exactly once
   ---
-  duration_ms: 0.946533
+  duration_ms: 2.169755
   type: 'test'
   ...
 # Subtest: failed key-only apply restores data and retains original property diagnostic
 ok 125 - failed key-only apply restores data and retains original property diagnostic
   ---
-  duration_ms: 1.190324
+  duration_ms: 3.763356
   type: 'test'
   ...
 # Subtest: changed lock after planning blocks writes
 ok 126 - changed lock after planning blocks writes
   ---
-  duration_ms: 0.836829
+  duration_ms: 1.99103
   type: 'test'
   ...
 # Subtest: unsupported selected property skips its complete layer
 ok 127 - unsupported selected property skips its complete layer
   ---
-  duration_ms: 0.727087
+  duration_ms: 1.778386
   type: 'test'
   ...
 # Subtest: unsupported unselected property does not block selected-key editing
 ok 128 - unsupported unselected property does not block selected-key editing
   ---
-  duration_ms: 0.563535
+  duration_ms: 1.553281
   type: 'test'
   ...
 # Subtest: strict skip also prevents composition marker writes
 ok 129 - strict skip also prevents composition marker writes
   ---
-  duration_ms: 0.815188
+  duration_ms: 1.901758
   type: 'test'
   ...
 # Subtest: close-gap retains its original mode-independent whole-layer plan
 ok 130 - close-gap retains its original mode-independent whole-layer plan
   ---
-  duration_ms: 1.23537
+  duration_ms: 2.206971
   type: 'test'
   ...
 # Subtest: compact panel has no duplicate timeline and always exposes all four side actions
 ok 131 - compact panel has no duplicate timeline and always exposes all four side actions
   ---
-  duration_ms: 142.586705
+  duration_ms: 175.246277
   type: 'test'
   ...
 # Subtest: frame presets, stepper, Shift, slider and wheel avoid manual typing
 ok 132 - frame presets, stepper, Shift, slider and wheel avoid manual typing
   ---
-  duration_ms: 120.471915
+  duration_ms: 127.399892
   type: 'test'
   ...
 # Subtest: UI before -1 changes only the correct AE side
 ok 133 - UI before -1 changes only the correct AE side
   ---
-  duration_ms: 218.432046
+  duration_ms: 220.739337
   type: 'test'
   ...
 # Subtest: UI before 1 changes only the correct AE side
 ok 134 - UI before 1 changes only the correct AE side
   ---
-  duration_ms: 215.366517
+  duration_ms: 215.73492
   type: 'test'
   ...
 # Subtest: UI after -1 changes only the correct AE side
 ok 135 - UI after -1 changes only the correct AE side
   ---
-  duration_ms: 214.703967
+  duration_ms: 215.041768
   type: 'test'
   ...
 # Subtest: UI after 1 changes only the correct AE side
 ok 136 - UI after 1 changes only the correct AE side
   ---
-  duration_ms: 213.765679
+  duration_ms: 214.958731
   type: 'test'
   ...
 # Subtest: Auto commands work with no selection and gap uses the same automatic scope
 ok 137 - Auto commands work with no selection and gap uses the same automatic scope
   ---
-  duration_ms: 209.977473
+  duration_ms: 211.883905
   type: 'test'
   ...
 # Subtest: commands refresh CTI before calculating the region without demanding manual refresh
 ok 138 - commands refresh CTI before calculating the region without demanding manual refresh
   ---
-  duration_ms: 212.163661
+  duration_ms: 213.669531
   type: 'test'
   ...
 # Subtest: Auto resolves a changed AE selection at action time, never cached UI IDs
 ok 139 - Auto resolves a changed AE selection at action time, never cached UI IDs
   ---
-  duration_ms: 209.143192
+  duration_ms: 212.430058
   type: 'test'
   ...
 # Subtest: Selected with empty selection is visibly unavailable without widening scope
 ok 140 - Selected with empty selection is visibly unavailable without widening scope
   ---
-  duration_ms: 208.46695
+  duration_ms: 209.458888
   type: 'test'
   ...
 # Subtest: invalid frame drafts survive; gap remains independent of step input
 ok 141 - invalid frame drafts survive; gap remains independent of step input
   ---
-  duration_ms: 209.713987
+  duration_ms: 209.015631
   type: 'test'
   ...
 # Subtest: Preview uses the last chosen side and never creates an Undo group
 ok 142 - Preview uses the last chosen side and never creates an Undo group
   ---
-  duration_ms: 320.074596
+  duration_ms: 313.135826
   type: 'test'
   ...
 # Subtest: removed timeline shortcuts cannot trigger whole-composition moves
 ok 143 - removed timeline shortcuts cannot trigger whole-composition moves
   ---
-  duration_ms: 207.056373
+  duration_ms: 206.236915
   type: 'test'
   ...
 # Subtest: Report opens and copies synchronously even if the browser clipboard would reject
 ok 144 - Report opens and copies synchronously even if the browser clipboard would reject
   ---
-  duration_ms: 108.395371
+  duration_ms: 109.794321
   type: 'test'
   ...
 # Subtest: Report falls back to the browser clipboard, and reports a blocked copy honestly
 ok 145 - Report falls back to the browser clipboard, and reports a blocked copy honestly
   ---
-  duration_ms: 418.250184
+  duration_ms: 415.736773
   type: 'test'
   ...
 # Subtest: settings save zero, theme and quick steps; appearance reset preserves timing choices
 ok 146 - settings save zero, theme and quick steps; appearance reset preserves timing choices
   ---
-  duration_ms: 374.372595
+  duration_ms: 372.933274
   type: 'test'
   ...
 # Subtest: menu keyboard, help and modal focus stay usable
 ok 147 - menu keyboard, help and modal focus stay usable
   ---
-  duration_ms: 111.009325
+  duration_ms: 109.496017
   type: 'test'
   ...
 # Subtest: cold startup works with scoped evalFile and a detached global namespace
 ok 148 - cold startup works with scoped evalFile and a detached global namespace
   ---
-  duration_ms: 108.867722
+  duration_ms: 108.615694
   type: 'test'
   ...
 # Subtest: connection failure stops background retries; explicit Refresh restores the compact controls
 ok 149 - connection failure stops background retries; explicit Refresh restores the compact controls
   ---
-  duration_ms: 2213.78774
+  duration_ms: 2212.841878
   type: 'test'
   ...
 # Subtest: invalid frame draft survives losing focus and a metadata refresh
 ok 150 - invalid frame draft survives losing focus and a metadata refresh
   ---
-  duration_ms: 214.388551
+  duration_ms: 211.772344
   type: 'test'
   ...
 # Subtest: an upgraded panel visibly starts Auto and layers-and-keys while preserving the frame step
 ok 151 - an upgraded panel visibly starts Auto and layers-and-keys while preserving the frame step
   ---
-  duration_ms: 109.079825
+  duration_ms: 108.181518
   type: 'test'
   ...
 # Subtest: remember-context is explicit and preserves a selected-only startup
 ok 152 - remember-context is explicit and preserves a selected-only startup
   ---
-  duration_ms: 111.083328
+  duration_ms: 110.589717
   type: 'test'
   ...
 # Subtest: default media skip is visible in status, report and history and can be changed to stop
 ok 153 - default media skip is visible in status, report and history and can be changed to stop
   ---
-  duration_ms: 349.537805
+  duration_ms: 319.32764
   type: 'test'
   ...
 # Subtest: preview-first toggle makes arrows read-only until the captured plan is applied
 ok 154 - preview-first toggle makes arrows read-only until the captured plan is applied
   ---
-  duration_ms: 321.697341
+  duration_ms: 315.406604
   type: 'test'
   ...
 # Subtest: gap participates in preview-first and applies its checked gap interval
 ok 155 - gap participates in preview-first and applies its checked gap interval
   ---
-  duration_ms: 314.599928
+  duration_ms: 311.143047
   type: 'test'
   ...
 # Subtest: changing CTI while the preview is open cannot apply a retargeted operation
 ok 156 - changing CTI while the preview is open cannot apply a retargeted operation
   ---
-  duration_ms: 316.201072
+  duration_ms: 312.906372
   type: 'test'
   ...
 # Subtest: blocked media preview has no enabled Apply and gives reasons without copying diagnostics
 ok 157 - blocked media preview has no enabled Apply and gives reasons without copying diagnostics
   ---
-  duration_ms: 211.587173
+  duration_ms: 208.63805
   type: 'test'
   ...
 # Subtest: preview escapes composition layer titles as text
 ok 158 - preview escapes composition layer titles as text
   ---
-  duration_ms: 210.028903
+  duration_ms: 212.073028
   type: 'test'
   ...
 1..158
@@ -1009,4 +1009,4 @@ ok 158 - preview escapes composition layer titles as text
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 8318.762891
+# duration_ms 8317.310283
