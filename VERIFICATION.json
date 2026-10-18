@@ -1,5 +1,116 @@
 {
+  "product": "FrameFlow AE",
   "version": "2.1.0",
-  "status": "Prerelease source under validation; no issued 2.1.0 download yet.",
-  "actualAE_CEP": "not_run for 2.1; 2.0.2 connection confirmed by user"
+  "checkedAt": "2026-10-18T02:07:45.080068+00:00",
+  "sourceRef": "local working tree before publication",
+  "target": "After Effects 25.x–26.x / CEP 12 / Windows and macOS",
+  "checks": {
+    "tests": {
+      "tests": 126,
+      "pass": 126,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "testScope": "strict ES3; pure timing; simulated AE/CEP/DOM; scoped evalFile; RPC; clipboard and connection recovery",
+    "hostSyntax": [
+      {
+        "file": "extension/jsx/host.jsx",
+        "sha256": "fff039b4b8e837e6a45a4361512575e5f0ced92c9045ad543c5537f7103253e8",
+        "parser": "Acorn 8.17.0",
+        "options": {
+          "ecmaVersion": 3,
+          "allowReserved": "never",
+          "sourceType": "script",
+          "locations": true,
+          "allowHashBang": false
+        },
+        "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+        "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+        "status": "pass",
+        "directives": []
+      },
+      {
+        "file": "src/core.jsxinc",
+        "sha256": "f900b573f8e0f86c404c2cb03c99f25e4bd41c58d3fe51883ae6c2e81b57628d",
+        "parser": "Acorn 8.17.0",
+        "options": {
+          "ecmaVersion": 3,
+          "allowReserved": "never",
+          "sourceType": "script",
+          "locations": true,
+          "allowHashBang": false
+        },
+        "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+        "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+        "status": "pass",
+        "directives": []
+      },
+      {
+        "file": "src/panel-host.jsxinc",
+        "sha256": "d1b43bc4b20ba4a1f0e166353f397f097aca1ecf32dda008243f991814ae630b",
+        "parser": "Acorn 8.17.0",
+        "options": {
+          "ecmaVersion": 3,
+          "allowReserved": "never",
+          "sourceType": "script",
+          "locations": true,
+          "allowHashBang": false
+        },
+        "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+        "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+        "status": "pass",
+        "directives": []
+      }
+    ],
+    "frontendSyntax": "node --check for all extension/js files passed",
+    "manifestAndLocalPaths": "passed",
+    "macOSInstallerSyntax": "bash -n passed",
+    "actualAE_CEP": "not_run: no actual AE connection",
+    "actualClipboard": "not_run: DOM/API simulations only",
+    "actualWindowsMacOSInstallers": "not_run: source and shell syntax only",
+    "realBrowserLayout": "not_run for this patch",
+    "review": "self-review only"
+  },
+  "sourceFiles": {
+    ".github/workflows/validate.yml": "b46a8af4b4c84521daf12e1e97bd5afd24c82b1a1ae088127a58e84379873da9",
+    ".gitignore": "8853fe1710f63b79e45901adca767b266ccdad7fb088a20f11003a91a6612ee9",
+    "CHANGELOG.md": "1187ae21056e689299188eec85ce854efe0d4c0a86df661bfdc86c3ae11c2932",
+    "PREVIEW.html": "d1cf84d2c4a9b035f490785fb261e196115fea7f4217f54362dfa5691128fc71",
+    "README.md": "a0bd672c88ad92bd5383889ac7b04ab71632350eddde74c3dc7020486cd7adc0",
+    "README_RU.md": "752ccec6443c2ea0bdc2c8ee46474a5e0e7976efecbddf8c65d823966c075cce",
+    "docs/AE_SMOKE_TEST_RU.md": "741dc5d56a42eb946fba2fbf8fd39f3f848633edb8980fff89ab950033fd4848",
+    "docs/SOURCES.md": "c67d268e6f94b4b7f7ab91f6fbaf68db3ee04ae4b3f0816b37ffe03543217c39",
+    "docs/STATUS.md": "c0b5cc2c2b25abf5f03873a783cc0a29c2becf3a81e5f847226c15287d494b21",
+    "docs/verification.log": "618ee81a3b229590948181cec7a2817c947b954969f039877b89c0c66ede9229",
+    "extension/CSXS/manifest.xml": "6fa6568f38edd4924dd78db29cb7ea0a466df3863fc0f69149f3365443fe3481",
+    "extension/css/panel.css": "791fd1c9e691e69743385273de7e18b7d13556af80214dd68b01291730b7f9ab",
+    "extension/index.html": "2249094aecf63cb23b6b9e2d9fb136c8c88b4e79547fb16964b1327b6d73125a",
+    "extension/js/bridge.js": "5481276a6b94cafe43207a8ddecf82ef7de4831cdbfcce4352a140146a760742",
+    "extension/js/demo.js": "8ae70f3e623f90fbecc09c1d37336bf940ddf9ae8302712bbd7fe84bef0e6860",
+    "extension/js/model.js": "fb9bdaf4094f4069ba3e5707904f23c44c7dec7db4ef28df59b40f07d8411d7e",
+    "extension/js/panel.js": "38b843435f71960b6e1236704dae0571f7bfa16d89abaed06381a8753298bdcb",
+    "extension/jsx/host.jsx": "fff039b4b8e837e6a45a4361512575e5f0ced92c9045ad543c5537f7103253e8",
+    "install/Install-Windows.cmd": "69261ffd90b8eb9c0ae854c9c704320df497f80a922cdb98dbd01ca6832dea6e",
+    "install/Install-Windows.ps1": "b9d6e0b7df300dd1f1fe1161cb1fa830eb557501c93a719be3312618c3172e8b",
+    "install/Install-macOS.command": "a84de01d46b728ebcb370bc03580b50175edad9994bc6ba2516fac4740b291c0",
+    "install/RESTORE_MACOS_RU.md": "e9cd081b33d397af9953a263f97df4c7bfd2d1cac43d1b049c12ed278ecaab56",
+    "install/Restore-Windows.cmd": "65b209c003922d123dbbdc4ef025936bf4fb3fccc1f1c7954c329c9d43fc4a06",
+    "install/Restore-Windows.ps1": "a82901cf3c73c8c3e023fbb12a30041d364f7b9bdc11b2dd576ef533d9a45b14",
+    "package.json": "e734fa5c6895dcca1b0328cc0c16ea6a41910d52ad3b13d8d0e0d3d07236c1c3",
+    "src/core.jsxinc": "f900b573f8e0f86c404c2cb03c99f25e4bd41c58d3fe51883ae6c2e81b57628d",
+    "src/panel-host.jsxinc": "d1b43bc4b20ba4a1f0e166353f397f097aca1ecf32dda008243f991814ae630b",
+    "tests/bootstrap.cjs": "bf6c6f26a80f70f86bfb19c12d7a8bbd2d03a738d4131bf685c8e2c49998e22e",
+    "tests/es3.cjs": "aabcbec36af13a6eef0a058f2785aa0ae2bd5fa7876e02a080f8b6b55589875a",
+    "tests/frontend.cjs": "cdac719a15ff35f277f9fce1c8e6368ce01f516052bc8a824c23f0743a6f8635",
+    "tests/host-fixture.cjs": "6ad8a7ad49d081a7821436e6483f6c6346955efd2a381bf85576c137a7eb2432",
+    "tests/host.cjs": "195abc63facdbca2859c4aec817f780b063cbe0529409a906eb4fa4619225179",
+    "tests/timing.cjs": "389b2f4a6cc520c573497562ec0a686da3bd3dd7749e5d6872258375f2210f06",
+    "tests/ui-dom.cjs": "743bf63a1d057386cdb052899d27e97b8afe599f4e4fccea27c70361363f698a",
+    "tools/build.cjs": "ae218d3a40233607988f1c90f0e556f17f4141c26e595b7ccce6282ccdda4409",
+    "tools/check.cjs": "c705082b34891d01528cc0badf216c20032ce63bbffc6c075ad90e108d72cfd1",
+    "tools/es3-check.cjs": "840365e68f7077a8da4b39e778102de6bc4ee6669b86dff2ca8e08199d3e66b9",
+    "tools/package.py": "d74a5ec3949ac0060cfe65fd5b6f567d989bba79292a72caddab01da44c437b8",
+    "tools/preview.cjs": "1981ec7f7acabcfa433b4f801216dcaaa8f135650d3333817607859c7d701112"
+  }
 }
