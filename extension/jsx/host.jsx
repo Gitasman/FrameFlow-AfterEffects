@@ -1,4 +1,23 @@
 $.global.FrameFlowCEP = (function () {
+/* Shared ES3 diagnostic catalog. Snapshot names and native values are never localized. */
+var FFText = (function () {
+    var pairs = [["Frames: enter a positive whole number.","Кадры: введите положительное целое число."],["Frames: expected 1 to 1000000.","Кадры: допустимо от 1 до 1000000."],["Range: enter a frame number, e.g. 24 or 24.5.","Диапазон: нужен номер кадра, например 24 или 24.5."],["Range: number is outside the allowed limits.","Диапазон: число вне допустимого предела."],["Direction is required","Не задано направление"],["Invalid shift interval","Некорректный интервал сдвига"],["Place the cursor inside the composition","Курсор должен быть внутри композиции"],["There are no layers in this scope","В выбранной области нет слоёв"],["Invalid layer time bounds","У слоя некорректные границы времени"],["The cursor overlaps a layer; there is no empty gap","Курсор находится на слое; пустого промежутка нет"],["There is no next layer inside the composition","После курсора нет следующего слоя внутри композиции"],["There is no gap between the layers","Между слоями нет паузы"],["A layer after the gap is locked","После паузы есть заблокированный слой (Locked)"],["Version","Версия"],["Format","Формат"],["Scope","Область"],["Markers","Маркеры"],["Unknown field","Неизвестное поле"],["Saved panel preferences were not recognized and were preserved. Changes apply to this session.","Сохранённые параметры панели не распознаны и оставлены без изменений. Значения действуют в этой сессии."],["Unknown scope","Неизвестная область"],["Mode","Режим"],["Strict preflight","Строгая проверка"],["Saved mode preferences were not recognized and were preserved. Session values are in use.","Параметры режимов не распознаны и сохранены без изменений. Используются значения этой сессии."],["Unknown mode parameters","Неизвестные параметры режима"],["Invalid layer bounds","Некорректные границы слоя"],["Layer bounds would exceed AE limits of ±10800 s","Границы слоя выйдут за диапазон AE ±10800 s"],["Choose a cursor side","Выберите сторону курсора"],["The shift would reverse or empty a layer","Сдвиг обнулит или перевернёт длительность слоя"],["Roving: all keys of this property must move uniformly","Roving: требуется равномерный перенос всех ключей свойства"],["Key time is outside AE bounds","Время ключа вне границ AE"],["Key collision: operation blocked","Коллизия ключей: операция заблокирована"],["Key order would change: operation blocked","Меняется порядок ключей: операция заблокирована"],["Favorites: at most 8 values.","Избранное: максимум 8 значений."],["Unknown settings version preserved. New settings apply to this session only.","Неизвестная версия настроек сохранена. Новые настройки действуют только в этой сессии."],["Invalid format","Повреждённый формат"],["Unknown parameter","Неизвестный параметр"],["Invalid settings preserved. Session defaults are in use.","Повреждённые настройки сохранены. Используются сессионные значения по умолчанию."],["Source Text: CharacterRange is required to verify formatting","Source Text: требуется CharacterRange для проверки форматирования"],["Source Text: over 2000 characters in a key; property excluded to bound verification cost","Source Text: более 2000 символов в ключе; свойство исключено для ограниченной стоимости проверки"],["Source Text: ParagraphRange is required to verify paragraphs","Source Text: требуется ParagraphRange для проверки абзацев"],["Unexpected Temporal Ease dimensions","Неожиданная размерность Temporal Ease"],["Time Remap: no key available for safe writing","Time Remap: нет ключа для безопасной записи"],["Time Remap: no free time for a temporary key","Time Remap: нет свободного времени для временного ключа"],["Expression text changed outside the operation","Текст Expression изменился вне операции"],["AE merged keys during the write","AE объединил ключи при записи"],["Key type or count changed","Изменились тип или число ключей"],["Expression changed","Изменился Expression"],["Key time ","Время ключа "],[" differs from the plan"," не совпадает с расчётом"],["Key value ","Значение ключа "],[" was not preserved"," не сохранилось"],["Key interpolation ","Interpolation ключа "],[" was not preserved"," не сохранилась"],[" key "," ключа "],["Cannot resolve property path","Не удалось определить путь свойства"],["Property unavailable: ","Свойство недоступно: "],["Too many properties; narrow the scope.","Слишком большой набор свойств; сузьте область."],["layer","слой"],["Open a composition in AE.","Откройте композицию в AE."],["Native key count changed","Изменилось число нативных ключей"],["Native key movement differs from the plan","Нативный перенос ключей не совпал с расчётом"],["Select layers or choose Auto / All layers.","Выделите слои или выберите Авто / Всю композицию."],["A composition marker is inside the gap. Disable marker movement or edit the markers.","В удаляемой паузе есть маркер композиции. Отключите их перенос или измените маркеры."],["Gap not removed: some targets are unavailable. See skipped targets for details.","Пауза не удалена: не все цели доступны. Причины — в пропусках."],["No available targets after the gap.","После паузы нет доступных целей."],["The cursor or gap scope changed; try again","Курсор или область паузы изменились; повторите действие"],["Layers around the gap changed; try again","Слои около паузы изменились; повторите действие"],["Source media limit: requested Out ","Предел исходного медиа: Out запрошен "],[" s, available until "," s, доступен до "],[" s. Entire layer skipped."," s. Весь слой пропущен."],["Source media limit: requested In ","Предел исходного медиа: In запрошен "],[" s, available from "," s, доступен от "],["Special property keys ","Специальные ключи свойства "],[" are not supported yet"," пока не поддержаны"],["Essential Properties: key movement is not supported yet","Essential Properties: перенос ключей пока не поддержан"],["Over 50000 keys: narrow the scope.","Более 50000 ключей: сузьте область."],["Protected Region: marker movement skipped","Protected Region: перенос маркера пропущен"],["Composition markers","Маркеры композиции"],[": entire layer skipped — ",": весь слой пропущен — "],["Composition markers: ","Маркеры композиции: "],["Strict preflight: some targets were skipped. Entire operation cancelled before writing.","Строгая проверка: есть пропуски. Вся операция отменена до записи."],["Only keys move; Start/In/Out remain unchanged. Expressions are preserved, but their visual results depend on time and external objects.","Переносятся только ключи; Start/In/Out не меняются. Expressions сохранены, но их визуальный результат зависит от времени и внешних объектов."],["Cursor side is required","Не задана сторона курсора"],["Unknown operation mode","Неизвестный режим операции"],["Invalid strict preflight setting","Некорректная строгая проверка"],["Unknown source media limit policy","Неизвестное правило предела исходника"],["Protected Region: partial layer movement skipped","Protected Region: перенос этой части слоя пропущен"],["Key time would exceed AE bounds","Время ключа выйдет за диапазон AE"],["Essential Properties: partial movement is not supported yet","Essential Properties: частичный перенос пока не поддержан"],["Layer bounds differ from the plan","Границы слоя не совпадают с расчётом"],["Failure: phase=","Сбой: phase="],["before target selection","до выбора цели"],["Before operation","До операции"],["Expected","Ожидалось"],["Actual at failure, BEFORE recovery","Фактически в момент сбоя, ДО отката"],["Deviation ","Отклонение "],["Layer structure changed","Состав слоёв изменился"],["Layer selection differs from the original","Выделение слоя не совпало с исходным"],["Active composition changed; try again","Активная композиция изменилась; повторите действие"],["Layer unavailable or locked","Слой недоступен или заблокирован"],["FrameFlow AE 2.3.0 — Close Gap","FrameFlow AE 2.3.0 — Убрать паузу"],["Date: ","Дата: "],[": unknown",": неизвестно"],["Planned changes: ","К изменению: "],["; Skipped: ","; Пропуски: "],["; Blockers: ","; Блокировки: "],["Insufficient source handles: ","Без запаса исходника: "],["These layers and all their keys remain unchanged; other targets pass strict preflight.","Эти слои и все их ключи оставлены без изменений; остальные цели проходят строгую проверку."],["Entire operation cancelled before writing.","Вся операция отменяется до записи."],["Close gap [","Удаление паузы ["],[") s; cursor before operation=",") s; курсор до операции="],["Range [","Диапазон ["],[") s; frames from the internal composition start",") s; кадры от внутреннего начала композиции"],["Shift plan — Layers: ","План сдвига — Слоёв: "],["; keys: ","; ключей: "],["; layers in scope: ","; слоёв в области: "],["Scene unchanged. Panel actions verify the current scene again before writing.","Сцена не изменена. Действие в панели заново проверит текущую сцену перед записью."],["Error: ","Ошибка: "],["unknown","неизвестно"],["Original data passed recovery readback verification.","Восстановление исходных данных прошло readback-проверку."],["Layer selection preserved.","Выделение слоёв сохранено."],["SELECTION NOT RESTORED: ","ВЫДЕЛЕНИЕ НЕ ВОССТАНОВЛЕНО: "],["Undo Group close error: ","Ошибка закрытия Undo Group: "],["RECOVERY NOT CONFIRMED: ","ВОССТАНОВЛЕНИЕ НЕ ПОДТВЕРЖДЕНО: "],["Target: ","Цель: "],["; keys ","; ключей "],["BLOCK: ","БЛОК: "],["SKIP: ","ПРОПУСК: "],["Details limited to 300 lines; narrow the scope for a full list.","Подробности ограничены 300 строками; сузьте область для полного списка."],["Readback verifies available data; visual results, unavailable attributes and external Expressions require a separate test in AE.","Readback проверяет доступные данные; визуальный результат, недоступные атрибуты и внешние Expressions требуют отдельного теста в AE."],["Invalid numeric value.","Некорректное числовое значение."],["Invalid layer list.","Некорректный список слоёв."],["Duplicate target.","Повтор цели."],["Open a composition in After Effects.","Откройте композицию в After Effects."],["Over 2000 layers: open a smaller composition.","Более 2000 слоёв: откройте меньшую композицию."],["Composition changed. Refresh the panel and try again.","Композиция изменилась. Обновите панель и повторите действие."],["Select at least one layer.","Выделите хотя бы один слой."],["Target layer no longer exists.","Целевой слой больше не существует."],["Locked layer: #","Заблокированный слой: #"],[". Unlock it in AE.",". Снимите блокировку в AE."],["Write verification differs from the plan.","Проверка записи не совпала с расчётом."],["Over 20000 properties: narrow the scope.","Более 20000 свойств: сузьте область."],["Choose In or Out.","Укажите In или Out."],["Reversed layer bounds are not supported yet.","Обратные границы слоя пока не поддержаны."],["Keep at least one frame of the layer.","Оставьте не менее одного кадра слоя."],["Time Remap and reverse Stretch only support shortening.","Для Time Remap и обратного Stretch доступно только укорачивание."],["The edge exceeds available source media.","Край выходит за доступное исходное медиа."],["Split: the cursor must leave at least one frame on each side of each selected layer.","Split: курсор должен оставлять хотя бы кадр с обеих сторон каждого выбранного слоя."],["Split: Parent and Track Matte relationships require a manual split in AE.","Split: связи Parent и Track Matte требуют ручного разделения в AE."],["Split: a selected layer has child layers.","Split: у выбранного слоя есть дочерние слои."],["Scope not recognized.","Область не распознана."],["Shift equals zero.","Сдвиг равен нулю."],["Mode not recognized.","Режим не распознан."],["Side not recognized.","Сторона не распознана."],["Direction not recognized.","Направление не распознано."],["Choose Auto, Selected or All layers.","Выберите Авто, выделенные слои или всю композицию."],["Unknown source media limit policy.","Неизвестное правило предела исходника."],["Selection updated","Выделение обновлено"],["Plan expired or changed. Run a new preview before applying.","План устарел. Повторите проверку перед применением."],["Apply checked plan","Применить проверенный план"],["PREVIEW","ПРОВЕРКА"],["Plan: ","План: "],["; skipped: ","; пропусков: "],[" · no handles: "," · без запаса: "],["Unknown operation.","Неизвестная операция."],["Write verification could not complete. Open the report.","Не удалось завершить проверку записи. Откройте отчёт."],["Done · changes: ","Готово · изменений: "],["Scene unchanged","Сцена не изменена"],[" · no matching targets"," · подходящих целей нет"],["Host busy. Wait for the operation to finish.","Host занят. Дождитесь завершения операции."],["Incompatible request version.","Несовместимая версия запроса."],["Panel closed.","Панель закрыта."],["Wait for the operation to finish.","Дождитесь завершения операции."],["The previous action has an unknown result. Click Refresh.","Результат предыдущего действия неизвестен. Нажмите «Обновить»."],["AE read timed out. No changes were sent. Click Refresh.","AE не ответил на чтение вовремя. Изменения не отправлялись. Нажмите «Обновить»."],["AE timed out. The operation may have completed. Click Refresh before the next action.","AE не ответил вовремя. Операция могла выполниться. Нажмите «Обновить» перед следующим действием."],["AE returned no FrameFlow data. Click Refresh to check the host loader.","AE не вернул данные FrameFlow. Нажмите «Обновить» для проверки загрузки ядра."],["AE returned a response outside the FrameFlow protocol (length ","AE вернул ответ вне протокола FrameFlow (длина "],["). Click Refresh.","). Нажмите «Обновить»."],["AE response does not match the request.","Ответ AE не соответствует запросу."],["AE error","Ошибка AE"],["AE response contains no data.","В ответе AE нет данных."],["CEP did not provide the extension folder.","CEP не сообщил папку расширения."],["CEP returned a relative extension path.","CEP вернул относительный путь расширения."],["not received","не получен"],["not received","не получена"],["AE loader check timed out. Scene unchanged. Close modal dialogs in AE and click Refresh.","AE не ответил на проверку загрузчика. Сцена не изменялась. Закройте модальные окна AE и нажмите «Обновить»."],["AE did not execute the FrameFlow loader. Click Refresh.","AE не выполнил загрузчик FrameFlow. Нажмите «Обновить»."],["AE returned an invalid loader response (length ","AE вернул некорректный ответ загрузчика (длина "],["Unknown AE loader response.","Неизвестный ответ загрузчика AE."],["Could not load the AE core: ","Не удалось загрузить ядро AE: "],["Panel and core versions differ. Reinstall FrameFlow ","Версии панели и ядра различаются. Переустановите FrameFlow "],["Click Refresh to connect to AE first.","Сначала нажмите «Обновить» для подключения к AE."],["Settings version unsupported. Original data preserved.","Версия настроек не поддерживается. Исходные данные сохранены."],["Unknown parameter: ","Неизвестный параметр: "],["Value out of range: ","Значение вне диапазона: "],["Invalid choice: ","Недопустимый вариант: "],["Choose a lighter accent color.","Выберите более светлый акцентный цвет."],["Invalid type: ","Неверный тип: "],["Quick steps: 1 to 8 whole numbers, each from 1 to 1000000.","Быстрые шаги: от 1 до 8 целых чисел, каждое от 1 до 1000000."],["Unknown scope.","Неизвестная область."],["Saved settings were not recognized; changes apply to this session. Export them to keep a copy.","Сохранённые настройки не распознаны; изменения действуют в этой сессии. Экспортируйте их для сохранения."],["Settings changed in another window. Restart the panel; current values apply to this session.","Настройки изменились в другом окне. Перезапустите панель; текущие значения действуют в этой сессии."],["Storage did not confirm the settings write.","Хранилище не подтвердило запись настроек."],["Time: HH:MM:SS:FF or a number of ","Время: HH:MM:SS:FF или число "],["frames","кадров"],["seconds","секунд"],["Choose Insert Time or Remove Time.","Выберите вставку или удаление времени."],["Choose a crossing-layer policy.","Выберите правило пересекающих слоёв."],["The interval must fit inside the composition.","Интервал должен помещаться в композицию."],["Composition duration is unchanged. No layers or keys are deleted. Kept crossing layers: ","Длительность композиции не меняется. Слои и ключи не удаляются. Оставлено пересекающих слоёв: "],["The interval or scope changed. Preview again.","Интервал или область изменились. Повторите проверку."],["An interval target changed. Preview again.","Цель интервала изменилась. Повторите проверку."],["Keyed properties changed after preview. Preview again.","Свойства с ключами изменились после проверки. Проверьте заново."],["Composition markers changed. Preview again.","Маркеры композиции изменились. Повторите проверку."],["A key lies inside the removed interval. No keys are deleted; move it or keep crossing layers.","Ключ внутри удаляемого интервала. Ключи не удаляются: перенесите его или оставьте пересекающие слои."],["A duration marker overlaps the interval. Adjust it in AE first.","Маркер с длительностью пересекает интервал. Сначала измените его в AE."],["Unknown interface language.","Неизвестный язык интерфейса."],["A layer boundary lies inside the removed interval. Split it in AE or keep crossing layers.","Граница слоя внутри удаляемого интервала. Разделите его в AE или оставьте пересекающие слои."],["Crossing video, audio, precomp, Time Remap or reverse-stretch layers require a manual split in AE.","Пересекающие видео, аудио, прекомпозиции, Time Remap или обратный Stretch требуют ручного разделения в AE."],["Layer is locked.","Слой заблокирован."],["Invalid interval layer bounds.","Некорректные границы слоя интервала."],["The interval would empty or reverse a layer.","Интервал обнулит или перевернёт длительность слоя."],["Interval actions require a preview.","Для интервала требуется план изменений."],["Interval","Интервал"],["originalCTI","исходный курсор"],["Layers + Keys","Слои и ключи"],["Whole Layers","Слои целиком"],["All Keys","Все ключи"],["Selected Keys","Выделенные ключи"],["Whole layers on the chosen side; edge and keys for layers crossing the cursor.","Слой целиком на выбранной стороне; край и ключи у пересекающего курсор слоя."],["Move the entire layer with all keys. The side is determined by its In point.","Перенос целого слоя со всеми ключами. Сторона определяется по In."],["Move keys on the chosen side. Layer bounds stay unchanged.","Перенос ключей выбранной стороны без изменения границ слоя."],["Only selected AE keys on the chosen side.","Только выделенные в AE ключи на выбранной стороне."],["Auto","Авто"],["Selected","Выделенные"],["All Layers","Все слои"],["DEMO · AE disconnected\n","ДЕМО · AE не подключён\n"],["AE: no confirmed connection\n","AE: нет подтверждённого соединения\n"],["Scope: ","Область: "],["mode: ","режим: "],["step: ","шаг: "],["media: ","исходник: "],["Loader: ","Загрузчик: "],[" / core: "," / ядро: "],["unconfirmed","не подтверждено"],["Auto refresh paused until Refresh.\n","Автообновление приостановлено до «Обновить».\n"],["Recent events:\n","Последние события:\n"],["Settings saved.","Настройки сохранены."],["Invalid composition state from AE.","Некорректное состояние композиции от AE."],["Invalid layer data.","Некорректные данные слоя."],["frames","кадров"],["Enter 1–1000000 whole frames.","Введите от 1 до 1000000 целых кадров."],["Before cursor","До курсора"],["After cursor","После курсора"],["frames","кадров"],["Quick range: 1–120 frames. Current step: ","Быстрый диапазон: 1–120 кадров. Текущий шаг: "],["Selected AE layers, or all layers if none are selected.","Выделенные в AE слои; без выделения — все слои."],["All composition layers.","Все слои композиции."],["Selected AE layers.","Выделенные в AE слои."],["No selected layers. Select them in AE or choose Auto.","Нет выделенных слоёв. Выделите их в AE или выберите Авто."],["Scope: ","Область: "],["Move: ","Переносить: "],["Demo","Демо"],["Offline","Сбой связи"],["No AE","Нет AE"],["No composition","Нет композиции"],["Click Refresh to connect to AE.","Нажмите «Обновить» для подключения к AE."],["Reading AE…","Читаем AE…"],["Checking AE…","Проверяем AE…"],["Demo · AE disconnected","Демо · AE не подключён"],["Synced with AE","Синхронизировано с AE"],["confirmed","подтверждено"],["FrameFlow Report","Отчёт FrameFlow"],["The report stays on your computer. Review it before sharing.","Отчёт остаётся на вашем компьютере. Просмотрите его перед отправкой."],["Report text","Текст отчёта"],["Copy","Скопировать"],["Save TXT","Сохранить TXT"],["Copied","Скопировано"],["Copied","Скопировано"],["Copy blocked. Text selected: Ctrl/Cmd+C.","Копирование заблокировано. Текст выделен: Ctrl/Cmd+C."],["Preview","Предпросмотр"],["Interface demo. Connect After Effects to calculate a real plan.","Демо интерфейса. Подключите After Effects для расчёта плана."],["AE returned no plan. Try again.","AE не вернул план. Повторите проверку."],["frames","кадров"],["Whole layer","Слой целиком"],["Edge + keys","Край и ключи"],["Keys","Ключи"],["Close Gap","Убрать паузу"],["Insert Time","Вставить время"],["Remove Time","Удалить время"],["Before cursor","До курсора"],["After cursor","После курсора"],["Composition markers","Маркеры композиции"],["keys","кл."],["Keep crossing layers","Оставить пересекающие слои"],["Retime crossing animation","Изменить тайминг анимации"],["Composition duration unchanged. No layers or keys are deleted.","Длительность композиции не меняется. Слои и ключи не удаляются."],["Change Plan","План изменений"],["layers","слоёв"],["keys","ключей"],["skipped","пропусков"],["kept","оставлено"],["Writing blocked. See the reasons below.","Запись заблокирована. Причины ниже."],["Nothing changed yet.","Пока ничего не изменено."],["No matching changes. Scene stays unchanged.","Подходящих изменений нет. Сцена останется прежней."],["Insufficient source handles: ","Без запаса исходника: "],["These layers and their keys stay in place.","Эти слои и все их ключи останутся на месте."],["More targets: ","Ещё целей: "],["See the report.","Подробности — в отчёте."],["Reasons & skipped targets","Причины и пропуски"],["More skipped: ","Ещё пропусков: "],["Apply Plan","Применить план"],["Technical Report","Технический отчёт"],["Valid for 2 minutes. AE rechecks the same targets before writing. Changes require a new preview.","План действует 2 минуты. AE повторно проверит те же цели перед записью. При изменениях потребуется новая проверка."],["Insert Time","Вставить время"],["Remove Time","Удалить время"],["frames at the AE cursor","кадров от курсора AE"],["Layers crossing the interval","Слои на пересечении интервала"],["Keep","Оставить"],["Retime Animation","Изменить анимацию"],["Later layers move with all their keys. Composition duration stays unchanged. No layers or keys are deleted.","Слои после интервала сдвигаются со всеми ключами. Длительность композиции не меняется. Слои и ключи не удаляются."],["Preview Changes","Показать план"],["Crossing layers and their keys remain entirely in place.","Пересекающие слои и все их ключи остаются на месте."],["Extends or shortens crossing animation. Video, audio, precomps and Time Remap need a manual split in AE. Keys inside a removed interval block writing.","Удлиняет или сокращает пересекающую анимацию. Видео, аудио, прекомпозиции и Time Remap требуют ручного разделения в AE. Ключи внутри удаляемого интервала блокируют запись."],["Settings","Настройки"],["Language","Язык"],["Workflow","Работа"],["Remember scope and mode","Запоминать область и режим"],["Refresh from AE automatically","Обновлять сведения из AE"],["Move composition markers","Переносить маркеры композиции"],["Starts in Auto · Layers + Keys unless remembered. Step and appearance are always saved.","Без запоминания открывается Авто · Слои и ключи. Шаг и внешний вид сохраняются всегда."],["When video source handles run out","Если закончились исходные кадры видео"],["Keep This Layer","Оставить этот слой"],["Cancel All","Отменить всё"],["Skipped layers keep all their keys. Other available targets move.","Пропущенный слой и все его ключи остаются на месте. Остальные доступные цели сдвигаются."],["Appearance","Внешний вид"],["Theme","Тема"],["Dark","Тёмная"],["Light","Светлая"],["Follow AE","Как в AE"],["Font","Шрифт"],["System","Системный"],["Mono","Моно"],["Text size","Размер текста"],["Shift button height","Размер кнопок сдвига"],["Button spacing","Интервал кнопок"],["Corner radius","Скругление"],["Accent","Акцент"],["Window animation","Анимация окон"],["High contrast","Повышенный контраст"],["Density","Плотность"],["Compact","Компактно"],["Balanced","Обычно"],["Large","Крупнее"],["Quick Steps","Быстрые шаги"],["Up to 8 frame values, separated by commas","До 8 значений в кадрах, через запятую"],["Changes save automatically.","Изменения сохраняются автоматически."],["Export JSON","Экспорт JSON"],["Import","Импорт"],["Reset Appearance","Сбросить вид"],["How FrameFlow Works","Как работает FrameFlow"],["1. Place the cursor in AE.","1. Поставьте курсор в таймлайне AE."],["Choose a frame step using presets, slider or − / +. Shift changes it by 10; the wheel works over the focused number.","Выберите шаг кнопкой, ползунком или − / +. Shift меняет шаг на 10 кадров; колесо работает над активным числом."],["2. Scope defaults to Auto.","2. По умолчанию — Авто."],["Auto uses selected AE layers, or all layers when none are selected. Selected never expands an empty selection.","Авто использует выделенные в AE слои; без выделения — всю композицию. «Выделенные» без выделения не расширяет область."],["3. Choose Before or After cursor, then an arrow.","3. Выберите До или После курсора и стрелку."],["Left moves earlier; right moves later. Before excludes a key at the cursor; After includes it. Each action reads the current AE cursor and selection.","Влево — раньше, вправо — позже. «До» не включает ключ на курсоре; «После» включает. Перед действием курсор и выделение перечитываются из AE."],["Close Gap","Убрать паузу"],["removes the empty gap under the cursor, independent of step and mode. Plan offers a preview for any direction or Close Gap. Apply Plan executes only the checked targets.","удаляет пустой промежуток под курсором независимо от шага и режима. Меню «План» проверяет любое направление или удаление паузы. «Применить план» выполняет только проверенные изменения."],["Time → Insert / Remove","Время → Вставить / Удалить"],["shifts later layers by the frame step. Keep leaves crossing layers intact; Retime Animation changes eligible animation only. Footage crossings need a manual AE split. No layers or keys are deleted; composition duration stays unchanged. Always preview the interval before applying.","сдвигает последующие слои на выбранный шаг. «Оставить» сохраняет пересекающие слои целиком. «Изменить анимацию» меняет только доступную анимацию. Видео и аудио на пересечении требуют ручного разделения в AE. Слои и ключи не удаляются; длительность композиции не меняется. Перед применением всегда показывается план."],["Insufficient video handles keep that entire layer in place by default. Settings can cancel the entire operation instead. Locked targets and key collisions block writing. Undo / Redo in AE. R refreshes; ? opens Help. Report opens and copies the diagnostics.","Если исходных кадров не хватает, весь этот слой по умолчанию остаётся на месте. В настройках можно выбрать «Отменить всё». Блокировки и коллизии ключей запрещают запись. Undo / Redo выполняйте в AE. R обновляет сведения; ? открывает справку. «Отчёт» открывает и копирует диагностику."],["Storage unavailable. Settings apply to this session.","Хранилище недоступно. Настройки действуют в этой сессии."],["Open FrameFlow via Window → Extensions in After Effects.","Откройте FrameFlow через Window → Extensions в After Effects."],["Open the panel in After Effects","Откройте панель в After Effects"],["Enter 1–1000000 whole frames.","Введите от 1 до 1000000 целых кадров."],["Close Gap","Убрать паузу"],["Insert Time","Вставить время"],["Remove Time","Удалить время"],["Settings file exceeds 20 KB.","Файл настроек превышает 20 KB."],["A layer starts or ends inside the interval. Trim/split it in AE or keep crossing layers.","Слой начинается или заканчивается внутри интервала. Разделите его в AE или оставьте пересекающие слои."],["Crossing video, audio, precomps, Time Remap and reverse Stretch require a split in AE. Choose Keep crossing layers to leave them unchanged.","Видео, аудио, прекомпозиции, Time Remap и обратный Stretch на пересечении требуют разделения в AE. Выберите «Оставить», чтобы сохранить их целиком."],["The interval would create invalid layer bounds.","Интервал создаст недопустимые границы слоя."],["Locked layer","Слой заблокирован"]];
+    var cache = {};
+    function message(value, language) {
+        var text = String(value), code = language === "ru" ? "ru" : "en";
+        if (cache[code]) return text.replace(cache[code].regex,function(s){return cache[code].map[s];});
+        var from = language === "ru" ? 0 : 1, to = 1-from, keys = [], map = {}, i;
+        for (i=0;i<pairs.length;i++) { if (!map[pairs[i][from]]) { keys.push(pairs[i][from]); map[pairs[i][from]]=pairs[i][to]; } }
+        keys.sort(function(a,b){return b.length-a.length;});
+        var escaped=[];
+        for(i=0;i<keys.length;i++)escaped.push(keys[i].replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+        cache[code] = {regex:new RegExp(escaped.join("|"),"g"),map:map};
+        return text.replace(cache[code].regex,function(s){return map[s];});
+    }
+    return {message:message};
+}());
+if (typeof module === "object" && module.exports) module.exports = FFText;
+
 var FFCore = (function () {
     function trim(v) { return String(v).replace(/^\s+|\s+$/g, ""); }
     function frames(v) {
@@ -111,6 +130,18 @@ var FFCore = (function () {
         if (Math.abs(st+d) > 10800 || Math.abs(a+d) > 10800 || Math.abs(b+d) > 10800) return {skip:"Границы слоя выйдут за диапазон AE ±10800 s"};
         return {kind:"layer",delta:d,start:st+d,inPoint:a+d,outPoint:b+d};
     }
+    function intervalLayerPlan(m, c, r) {
+        var a = r.interval.start, b = r.interval.end, d = offsetSeconds(c,r), remove = r.operation === "removeTime", edge;
+        if (m.outPoint <= a) return {kind:"none"};
+        if (m.inPoint >= (remove ? b : a)) return wholeLayerPlan(m,c,{region:"all",direction:r.direction,deltaSeconds:d,frames:r.frames});
+        if (r.interval.crossing === "keep") return {kind:"none",kept:true};
+        if (m.locked) return {skip:"Locked layer"};
+        if (remove && (m.inPoint >= a || m.outPoint < b)) return {skip:"A layer starts or ends inside the interval. Trim/split it in AE or keep crossing layers."};
+        if (m.movingSource || m.remap || m.stretch <= 0) return {skip:"Crossing video, audio, precomps, Time Remap and reverse Stretch require a split in AE. Choose Keep crossing layers to leave them unchanged."};
+        edge = {kind:"edge",delta:d,start:m.start,inPoint:m.inPoint,outPoint:m.outPoint+d};
+        if (edge.inPoint >= edge.outPoint || Math.abs(edge.outPoint) > 10800) return {skip:"The interval would create invalid layer bounds."};
+        return edge;
+    }
     function offsetLayerPlan(m, c, r) {
         var d = offsetSeconds(c,r), kind = "none", a = m.inPoint, b = m.outPoint, st = m.start;
         if (r.direction !== 1 && r.direction !== -1) throw new Error("Не задано направление");
@@ -191,12 +222,12 @@ var FFCore = (function () {
     function encodeSettings(s) {
         return "v1|density=" + s.density + "|spacing=" + s.spacing + "|logging=" + (s.logging ? "1" : "0") + "|favorites=" + s.favorites.join(",");
     }
-    return {validMode:validMode,wholeLayerPlan:wholeLayerPlan,parseAdvancedState:parseAdvancedState,encodeAdvancedState:encodeAdvancedState,
+    return {validMode:validMode,wholeLayerPlan:wholeLayerPlan,intervalLayerPlan:intervalLayerPlan,parseAdvancedState:parseAdvancedState,encodeAdvancedState:encodeAdvancedState,
         offsetSeconds:offsetSeconds,gapPlan:gapPlan,parsePanelState:parsePanelState,encodePanelState:encodePanelState,parseFrames:frames, parseDecimal:decimal, inRegion:inRegion, offsetLayerPlan:offsetLayerPlan, keyPlan:keyPlan,
         parseFavorites:favorites, defaults:defaults, parseSettings:parseSettings, encodeSettings:encodeSettings};
 }());
 
-/* FrameFlow AE 2.2.0. AE adapter; native values never pass through JSON. */
+/* FrameFlow AE 2.3.0. AE adapter; native values never pass through JSON. */
 var FFHost = (function () {
     var LIMITS = {properties:20000, keys:50000, reportLines:300, textCharacters:2000};
     var ROOTS = ["ADBE Transform Group", "ADBE Mask Parade", "ADBE Effect Parade", "ADBE MTrackers",
@@ -602,9 +633,56 @@ var FFHost = (function () {
         plan.notes.push("Переносятся только ключи; Start/In/Out не меняются. Expressions сохранены, но их визуальный результат зависит от времени и внешних объектов.");
         return plan;
     }
+    function intervalModel(layer) {
+        var source = layer.source || null;
+        return {layer:layer,start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked,
+            stretch:layer.stretch,remap:layer.timeRemapEnabled === true,source:source,
+            sourceDuration:source ? source.duration : null,still:source && source.mainSource ? source.mainSource.isStill === true : false,
+            movingSource:layer.hasAudio === true || !!(source && !(source.mainSource && source.mainSource.isStill === true))};
+    }
+    function intervalSignature(layer, props) {
+        var parts = [], i, total = 0; props = props || scanLayer(layer);
+        for (i = 0; i < props.length; i++) if (props[i].numKeys) {
+            total += props[i].numKeys; if (total > LIMITS.keys) throw new Error("More than 50000 keys: narrow the scope.");
+            parts.push(pathKey(pathOf(props[i],layer))+":"+props[i].numKeys);
+        }
+        return parts.join("|");
+    }
+    function prepareInterval(options) {
+        var context = readContext(), frames = FFCore.parseFrames(String(options.frames)), amount = frames*context.frameDuration;
+        var a = context.cti, remove = options.action === "remove", plan, layers, i, marker;
+        if (options.action !== "insert" && options.action !== "remove") throw new Error("Choose Insert Time or Remove Time.");
+        if (options.crossing !== "keep" && options.crossing !== "retime") throw new Error("Choose a crossing-layer policy.");
+        if (a < 0 || a >= context.duration || remove && a+amount > context.duration+context.frameDuration*0.000001) throw new Error("The interval must fit inside the composition.");
+        plan = prepare({operation:remove ? "removeTime" : "insertTime",scope:options.scope,mode:"offset",region:"after",
+            frames:frames,direction:remove ? -1 : 1,deltaSeconds:remove ? -amount : amount,strict:true,compMarkers:options.compMarkers === true,
+            originalCTI:a,interval:{start:a,end:a+amount,crossing:options.crossing}});
+        layers = selectedLayers(context.comp,options.scope); plan.intervalState = [];
+        for (i = 0; i < layers.length; i++) plan.intervalState.push(intervalModel(layers[i]));
+        marker = options.compMarkers === true ? context.comp.markerProperty || null : null;
+        plan.intervalMarker = marker; plan.intervalMarkerSnapshot = marker ? snapshotProperty(marker) : null;
+        plan.notes.push("Composition duration is unchanged. No layers or keys are deleted. Kept crossing layers: "+plan.keptCrossing.length+".");
+        return plan;
+    }
+    function validateIntervalPlan(plan) {
+        var context = readContext(), layers = selectedLayers(context.comp,plan.request.scope), i, a, b, field;
+        var names = ["start","inPoint","outPoint","locked","stretch","remap","source","sourceDuration","still","movingSource"];
+        if (context.comp !== plan.comp || context.cti !== plan.request.originalCTI || context.duration !== plan.context.duration || layers.length !== plan.intervalState.length) throw new Error("The interval or scope changed. Preview again.");
+        for (i = 0; i < layers.length; i++) {
+            a = intervalModel(layers[i]); b = plan.intervalState[i];
+            if (a.layer !== b.layer) throw new Error("The interval or scope changed. Preview again.");
+            for (field = 0; field < names.length; field++) if (a[names[field]] !== b[names[field]]) throw new Error("An interval target changed. Preview again.");
+        }
+        for (i = 0; i < plan.changes.length; i++) if (plan.changes[i].layer && intervalSignature(plan.changes[i].layer) !== plan.changes[i].intervalSignature) throw new Error("Keyed properties changed after preview. Preview again.");
+        if (plan.request.compMarkers) {
+            if ((plan.comp.markerProperty || null) !== plan.intervalMarker) throw new Error("Composition markers changed. Preview again.");
+            if (plan.intervalMarker) verifyProperty(plan.intervalMarker,plan.intervalMarkerSnapshot,originalTimes(plan.intervalMarkerSnapshot),context.frameDuration*0.000001);
+        }
+    }
     function prepare(request) {
         var context = readContext(), comp = context.comp, layers = [], i, j, k, layer, props, p, path, s, kp, lp, count = 0;
-        var plan = {comp:comp,context:context,request:request,changes:[],skips:[],errors:[],notes:[],layerCount:0,mediaLimits:[]};
+        var plan = {comp:comp,context:context,request:request,changes:[],skips:[],errors:[],notes:[],layerCount:0,mediaLimits:[],keptCrossing:[]};
+        var interval = request.operation === "insertTime" || request.operation === "removeTime";
         FFCore.offsetSeconds(context,request);
         if (request.direction !== 1 && request.direction !== -1) throw new Error("Не задано направление");
         if (request.region !== "before" && request.region !== "after" && request.region !== "all") throw new Error("Не задана сторона курсора");
@@ -616,6 +694,7 @@ var FFHost = (function () {
         layers = selectedLayers(comp,request.scope,request.layerIds);
         plan.layerCount = layers.length;
         if (request.operation === "closeGap") context.cti = request.gap.end;
+        if (interval && request.operation === "removeTime") context.cti = request.interval.end;
         function addCount(n) { count += n; if (count > LIMITS.keys) throw new Error("Более 50000 ключей: сузьте область."); }
         function relevant(prop) {
             var q;
@@ -633,10 +712,23 @@ var FFHost = (function () {
             if (info.skip) throw new Error(info.skip);
             return {snapshot:snap,times:info.times,moved:info.moved};
         }
+        function guardInterval(prop) {
+            var q, t, v, r = request.interval;
+            if (!interval) return;
+            for (q = 1; q <= prop.numKeys; q++) {
+                t = prop.keyTime(q);
+                if (request.operation === "removeTime" && t >= r.start && t < r.end) throw new Error("A key lies inside the removed interval. No keys are deleted; move it or keep crossing layers.");
+                if (prop.propertyValueType === PropertyValueType.MARKER) {
+                    v = prop.keyValue(q);
+                    if (v.duration > 0 && t < (request.operation === "removeTime" ? r.end : r.start) && t+v.duration > r.start) throw new Error("A duration marker overlaps the interval. Adjust it in AE first.");
+                }
+            }
+        }
         for (i = 0; i < layers.length; i++) {
             layer = layers[i];
             if (request.operation === "closeGap" && layer.inPoint < context.cti) continue;
-            lp = (request.mode === "layers" ? FFCore.wholeLayerPlan : FFCore.offsetLayerPlan)({start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked},context,request);
+            lp = interval ? FFCore.intervalLayerPlan(intervalModel(layer),context,request) : (request.mode === "layers" ? FFCore.wholeLayerPlan : FFCore.offsetLayerPlan)({start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked},context,request);
+            if (lp.kept) plan.keptCrossing.push(layer.id);
             if (lp.skip) { plan.skips.push(labelFor(layer,[])+": "+lp.skip); continue; }
             if (lp.kind === "none") continue;
             if (lp.kind === "edge") {
@@ -660,23 +752,25 @@ var FFHost = (function () {
                             if (Math.abs(kp.times[k]) > 10800) throw new Error("Время ключа выйдет за диапазон AE");
                         }
                     } else {
-                        if (!relevant(p)) continue;
+                        guardInterval(p);
+                        if (!interval && !relevant(p)) continue;
                         if (p.isSeparationLeader && p.dimensionsSeparated) continue;
                         if (p.propertyValueType !== PropertyValueType.MARKER && !allowedType(p.propertyValueType)) throw new Error("Специальные ключи свойства "+p.matchName+" пока не поддержаны");
                         for (k = 0; k < path.length; k++) if (path[k].match === "ADBE Layer Overrides") throw new Error("Essential Properties: частичный перенос пока не поддержан");
                         kp = partial(p);
-                        if (!kp.moved) continue;
+                        if (!interval && !kp.moved) continue;
                     }
                     entries.push({path:path,snapshot:kp.snapshot,times:kp.times,moved:kp.moved}); moved += kp.moved;
                 }
             } catch (captureError) { failed = errorInfo(captureError).message; }
             if (failed) { plan.skips.push(labelFor(layer,[])+": весь слой пропущен — "+failed); continue; }
             plan.changes.push({kind:lp.kind,layer:layer,before:{start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint},
-                after:{start:lp.start,inPoint:lp.inPoint,outPoint:lp.outPoint},properties:entries,delta:lp.delta,moved:moved,label:labelFor(layer,[])});
+                after:{start:lp.start,inPoint:lp.inPoint,outPoint:lp.outPoint},properties:entries,delta:lp.delta,moved:moved,label:labelFor(layer,[]),intervalSignature:interval ? intervalSignature(layer,props) : null});
         }
-        if (request.compMarkers && comp.markerProperty && comp.markerProperty.numKeys && relevant(comp.markerProperty)) {
+        if (request.compMarkers && comp.markerProperty && comp.markerProperty.numKeys && (interval || relevant(comp.markerProperty))) {
             layer = null;
             try {
+                guardInterval(comp.markerProperty);
                 kp = partial(comp.markerProperty);
                 if (kp.moved) plan.changes.push({kind:"property",layer:null,path:[],snapshot:kp.snapshot,times:kp.times,moved:kp.moved,label:"Маркеры композиции"});
             } catch (markerError) { plan.skips.push("Маркеры композиции: "+errorInfo(markerError).message); }
@@ -819,6 +913,7 @@ var FFHost = (function () {
             if (plan.errors.length) throw new Error(plan.errors.join("\n"));
             if (app.project.activeItem !== plan.comp) throw new Error("Активная композиция изменилась; повторите действие");
             if (plan.request.operation === "closeGap") validateGapPlan(plan);
+            if (plan.intervalState) validateIntervalPlan(plan);
             if (!plan.changes.length) { result.ok = true; return result; }
             phase = "captureSelection"; layerSelection = captureLayerSelection(plan.comp); phase = "preflight";
             for (i = 0; i < plan.changes.length; i++) {
@@ -827,14 +922,14 @@ var FFHost = (function () {
                 if (c.kind !== "property") { checkLayer(c,false,tolerance); verifyLayerProperties(c,false,tolerance); }
                 else verifyProperty(target(c,plan.comp),c.snapshot,originalTimes(c.snapshot),tolerance);
             }
-            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.2.0 — Убрать паузу" : "FrameFlow AE 2.2.0 — Time Offset"); opened = true;
+            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.3.0 — Убрать паузу" : "FrameFlow AE 2.3.0 — Time Offset"); opened = true;
             for (i = 0; i < plan.changes.length; i++) {
                 phase = "apply"; c = plan.changes[i]; currentChange = c; touched.push(c); result.attempted++;
                 if (c.kind === "layer") {
                     setBounds(c.layer,c.after,true);
                 } else if (c.kind === "edge") {
                     for (j = 0; j < c.properties.length; j++) {
-                        entry = c.properties[j]; restoreProperty(resolve(c.layer,entry.path),entry.snapshot,entry.times);
+                        entry = c.properties[j]; if (entry.moved) restoreProperty(resolve(c.layer,entry.path),entry.snapshot,entry.times);
                     }
                     setBounds(c.layer,c.after,false);
                 } else {
@@ -898,7 +993,7 @@ var FFHost = (function () {
         return result;
     }
     function environment() {
-        var lines = ["FrameFlow AE 2.2.0", "Дата: " + new Date().toString()];
+        var lines = ["FrameFlow AE 2.3.0", "Дата: " + new Date().toString()];
         function read(label,fn) { try { lines.push(label+": "+fn()); } catch (ignored) { lines.push(label+": неизвестно"); } }
         read("AE",function(){return app.version;}); read("Build",function(){return app.buildNumber;});
         read("OS",function(){return $.os;}); read("ExtendScript",function(){return $.version;});
@@ -913,6 +1008,7 @@ var FFHost = (function () {
             "К изменению: "+plan.changes.length+"; Пропуски: "+plan.skips.length+"; Блокировки: "+plan.errors.length);
         if (plan.mediaLimits && plan.mediaLimits.length) lines.push("Без запаса исходника: "+plan.mediaLimits.length+". "+(r.mediaPolicy === "skip" ? "Эти слои и все их ключи оставлены без изменений; остальные цели проходят строгую проверку." : "Вся операция отменяется до записи."));
         if (r.operation === "closeGap") lines.push("Удаление паузы ["+r.gap.start+", "+r.gap.end+") s; курсор до операции="+r.originalCTI+" s");
+        if (r.interval) lines.push("Interval ["+r.interval.start+", "+r.interval.end+") s; operation="+r.operation+"; crossing="+r.interval.crossing+"; kept="+plan.keptCrossing.length+"; originalCTI="+r.originalCTI+" s");
         if (r.region === "range") lines.push("Диапазон ["+r.from+", "+r.to+") s; кадры от внутреннего начала композиции");
         if (!result) {
             var plannedLayers = 0, plannedKeys = 0;
@@ -944,7 +1040,7 @@ var FFHost = (function () {
         lines.push("Readback проверяет доступные данные; визуальный результат, недоступные атрибуты и внешние Expressions требуют отдельного теста в AE.");
         return lines.join("\n");
     }
-    return {readContext:readContext,inspectGap:inspectGap,prepareGap:prepareGap, prepare:prepare, applyPlan:applyPlan, report:report, environment:environment,
+    return {readContext:readContext,inspectGap:inspectGap,prepareGap:prepareGap,prepareInterval:prepareInterval, prepare:prepare, applyPlan:applyPlan, report:report, environment:environment,
         snapshotProperty:snapshotProperty, restoreProperty:restoreProperty, verifyProperty:verifyProperty,
         scanLayer:scanLayer, pathOf:pathOf, errorInfo:errorInfo, originalTimes:originalTimes};
 }());
@@ -952,7 +1048,7 @@ var FFHost = (function () {
 
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.2.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.3.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false, prepared = null, planSerial = 0;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -1184,6 +1280,12 @@ var FFCEP = (function () {
     }
     function corePlan(c, r) {
         var request, plan;
+        if (r.op === "interval") {
+            schema(r,"|op||token||action||frames||scope||crossing||compMarkers||preview|");
+            if (r.preview !== true) fail("Interval operations require a preview before applying.");
+            if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Choose Auto, Selected or All layers.");
+            bool(r.compMarkers); return FFHost.prepareInterval(r);
+        }
         if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
         schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||mediaPolicy||preview|");
         if (r.op === "move") {
@@ -1218,14 +1320,15 @@ var FFCEP = (function () {
             if (change.kind !== "property") { item.before = change.before; item.after = change.after; }
             targets.push(item);
         }
-        return {id:id,operation:r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
+        return {id:id,operation:r.interval ? r.operation : r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
             region:r.region,direction:r.direction,frames:Math.abs(FFCore.offsetSeconds(c,r)/c.frameDuration),
-            delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" ? r.originalCTI : c.cti,
+            delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" || r.interval ? r.originalCTI : c.cti,
             frameDuration:c.frameDuration,displayStart:plan.comp.displayStartTime,blocked:plan.errors.length > 0,
             counts:{layers:layers,keys:keys,properties:properties,changes:plan.changes.length,skipped:plan.skips.length,
-                mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0,errors:plan.errors.length},targets:targets,
+                mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0,errors:plan.errors.length,keptCrossing:plan.keptCrossing ? plan.keptCrossing.length : 0},targets:targets,
             targetsOmitted:Math.max(0,plan.changes.length-targets.length),skips:plan.skips.slice(0,40),errors:plan.errors.slice(0,20),
-            skipsOmitted:Math.max(0,plan.skips.length-40),gap:r.operation === "closeGap" ? {start:r.gap.start,end:r.gap.end} : null};
+            skipsOmitted:Math.max(0,plan.skips.length-40),gap:r.operation === "closeGap" ? {start:r.gap.start,end:r.gap.end} : null,
+            interval:r.interval || null,keptTargets:plan.keptCrossing ? plan.keptCrossing.slice(0,100) : []};
     }
     function action(r) {
         var c, layers, i, on = {}, plan, result, report, state, id, pending;
@@ -1248,7 +1351,7 @@ var FFCEP = (function () {
             schema(r, "|op||token||previewId|"); pending = prepared; prepared = null;
             if (!pending || typeof r.previewId !== "string" || pending.id !== r.previewId || pending.token !== r.token) fail("План устарел. Повторите проверку перед применением.");
             plan = pending.plan; result = FFHost.applyPlan(plan); report = FFHost.report(plan,result,"Применить проверенный план");
-        } else if (r.op === "move" || r.op === "offset" || r.op === "gap") {
+        } else if (r.op === "move" || r.op === "offset" || r.op === "gap" || r.op === "interval") {
             if (typeof r.preview !== "undefined") bool(r.preview);
             plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
             if (r.preview) {
@@ -1266,13 +1369,32 @@ var FFCEP = (function () {
         if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
         return {state:snapshot(), result:result, report:report, warning:result.mediaSkipped > 0, message:(result.changed ? "Готово · изменений: " + result.changed : "Сцена не изменена") + (result.mediaSkipped ? " · без запаса: " + result.mediaSkipped : result.changed ? "" : " · подходящих целей нет")};
     }
+    // Localize diagnostics only. Artist-authored names and native values in state stay intact.
+    function localized(output, language) {
+        var data = output.data, i, p;
+        function text(v) { return FFText.message(v,language); }
+        function error(e) { if (e && typeof e.message === "string") e.message = text(e.message); }
+        error(output.error);
+        if (data) {
+            if (typeof data.message === "string") data.message = text(data.message);
+            if (typeof data.report === "string") data.report = text(data.report);
+            p = data.preview;
+            if (p) {
+                for (i=0;i<p.errors.length;i++) p.errors[i]=text(p.errors[i]);
+                for (i=0;i<p.skips.length;i++) p.skips[i]=text(p.skips[i]);
+                for (i=0;i<p.targets.length;i++) p.targets[i].label=text(p.targets[i].label);
+            }
+        }
+        return output;
+    }
     function dispatch(encoded) {
         var request, output, raw, i;
         try {
             if (busy) fail("Host занят. Дождитесь завершения операции.");
             if (typeof encoded !== "string" || encoded.length > 262144) fail("RPC size limit");
-            raw = decodeURIComponent(encoded); request = parse(raw); schema(request, "|id||version||data|");
+            raw = decodeURIComponent(encoded); request = parse(raw); schema(request, "|id||version||data||language|");
             if (request.version !== VERSION || typeof request.id !== "string" || !/^[A-Za-z0-9:_-]{1,100}$/.test(request.id)) fail("Несовместимая версия запроса.");
+            if (own(request,"language") && request.language !== "en" && request.language !== "ru") fail("Unknown interface language.");
             for (i = 0; i < recent.length; i++) if (recent[i].id === request.id) {
                 if (recent[i].raw !== raw) fail("RPC id collision"); return recent[i].output;
             }
@@ -1280,8 +1402,9 @@ var FFCEP = (function () {
             try { output = {id:request.id, ok:true, data:action(request.data)}; }
             catch (e) { output = {id:request.id, ok:false, error:FFHost.errorInfo(e)}; }
             finally { busy = false; }
+            if (request.language) output = localized(output,request.language);
             output = stringify(output); recent.push({id:request.id, raw:raw, output:output}); if (recent.length > 16) recent.shift(); return output;
-        } catch (outer) { return stringify({id:request ? request.id : null, ok:false, error:FFHost.errorInfo(outer)}); }
+        } catch (outer) { return stringify(localized({id:request ? request.id : null, ok:false, error:FFHost.errorInfo(outer)},request && request.language === "en" ? "en" : "ru")); }
     }
     return {dispatch:dispatch, version:VERSION};
 }());

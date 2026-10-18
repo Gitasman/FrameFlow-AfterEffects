@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0
+
+- Compact the panel to 360 × 290: Auto scope dropdown, smaller mode dropdown and arrow/count buttons. Remove duplicate direction/step labels, scope hint, CTI readout and preview-first toggle; preview any command through Plan.
+- Default to English and add immediate persisted English/Russian switching, including own diagnostics, while preserving artist names. Migrate v1–v3 preferences to v4.
+- Add Insert/Remove Time with mandatory checked preview and explicit Keep / Retime Animation crossing policy. Preserve composition duration and never delete layers or keys. Require a manual AE split for unsupported footage/audio/precomp/Remap crossings.
+- Guard removed-interval keys/boundaries, duration markers, source limits, native keyed-property structure and stale plans. Preserve strict checks, no-replay transport and bounded recovery. Shift later native layers only once.
+- Cover intervals, fractional timing, markers, language migration, compact menus and both languages in regression/browser checks. Native AE/Undo/Redo acceptance remains separate.
+
 ## 2.2.0
 
 - Reorganize timing controls and label Earlier/Later directions with arrows, frame counts and words; align themes, spacing, settings and text-size behavior.

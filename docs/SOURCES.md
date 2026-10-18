@@ -23,3 +23,7 @@ Clipboard paths are checked with DOM/API simulations; no source was sent to an e
 - https://extendscript.docsforadobe.dev/extendscript-tools-features/dollar-object/#global — `$.global` exposes the JavaScript global namespace. This is the community-maintained Adobe scripting guide; it is not evidence of the user's actual execution context.
 - The supplied 2.0.1 loader and host were inspected together. A function-scoped file evaluator reproduces the reported mismatch; the new explicit export works in both local and global loader simulations. The original test fixture had assumed global file evaluation.
 - GitHub's official actions/checkout, actions/setup-node and actions/upload-artifact action.yml and release refs were inspected for the pinned PR workflow. Tests use Node 24; no npm or installed-panel dependencies are introduced.
+
+## 2.3.0 intervals and compact UI
+
+Rechecked 2026-10-18: https://ae-scripting.docsforadobe.dev/layer/layer/ (Start/In/Out in composition seconds and native layer movement) and https://ae-scripting.docsforadobe.dev/property/property/ (key times, values and native key metadata). These references do not prove actual AE execution. Interval policies are project design decisions: no automatic Split/deletion or duration change. Browser checks use a simulated host.

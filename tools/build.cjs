@@ -8,5 +8,5 @@ const host = fs.readFileSync(path.join(root, 'src/panel-host.jsxinc'), 'utf8');
 // ScriptPath/string evaluation must not depend on preprocessing #target.
 // evalFile may inherit a function scope. Register the completed API explicitly;
 // a top-level `var` in the loaded file is not a cross-request export contract.
-fs.writeFileSync(path.join(root, 'extension/jsx/host.jsx'), '$.global.FrameFlowCEP = (function () {\n' + core + '\n' + host + '\nreturn FFCEP;\n}());\n');
+fs.writeFileSync(path.join(root, 'extension/jsx/host.jsx'), '$.global.FrameFlowCEP = (function () {\n' + fs.readFileSync(path.join(root,'extension/js/i18n.js'),'utf8') + '\n' + core + '\n' + host + '\nreturn FFCEP;\n}());\n');
 console.log('Built extension/jsx/host.jsx');

@@ -110,6 +110,18 @@ var FFCore = (function () {
         if (Math.abs(st+d) > 10800 || Math.abs(a+d) > 10800 || Math.abs(b+d) > 10800) return {skip:"Границы слоя выйдут за диапазон AE ±10800 s"};
         return {kind:"layer",delta:d,start:st+d,inPoint:a+d,outPoint:b+d};
     }
+    function intervalLayerPlan(m, c, r) {
+        var a = r.interval.start, b = r.interval.end, d = offsetSeconds(c,r), remove = r.operation === "removeTime", edge;
+        if (m.outPoint <= a) return {kind:"none"};
+        if (m.inPoint >= (remove ? b : a)) return wholeLayerPlan(m,c,{region:"all",direction:r.direction,deltaSeconds:d,frames:r.frames});
+        if (r.interval.crossing === "keep") return {kind:"none",kept:true};
+        if (m.locked) return {skip:"Locked layer"};
+        if (remove && (m.inPoint >= a || m.outPoint < b)) return {skip:"A layer starts or ends inside the interval. Trim/split it in AE or keep crossing layers."};
+        if (m.movingSource || m.remap || m.stretch <= 0) return {skip:"Crossing video, audio, precomps, Time Remap and reverse Stretch require a split in AE. Choose Keep crossing layers to leave them unchanged."};
+        edge = {kind:"edge",delta:d,start:m.start,inPoint:m.inPoint,outPoint:m.outPoint+d};
+        if (edge.inPoint >= edge.outPoint || Math.abs(edge.outPoint) > 10800) return {skip:"The interval would create invalid layer bounds."};
+        return edge;
+    }
     function offsetLayerPlan(m, c, r) {
         var d = offsetSeconds(c,r), kind = "none", a = m.inPoint, b = m.outPoint, st = m.start;
         if (r.direction !== 1 && r.direction !== -1) throw new Error("Не задано направление");
@@ -190,12 +202,12 @@ var FFCore = (function () {
     function encodeSettings(s) {
         return "v1|density=" + s.density + "|spacing=" + s.spacing + "|logging=" + (s.logging ? "1" : "0") + "|favorites=" + s.favorites.join(",");
     }
-    return {validMode:validMode,wholeLayerPlan:wholeLayerPlan,parseAdvancedState:parseAdvancedState,encodeAdvancedState:encodeAdvancedState,
+    return {validMode:validMode,wholeLayerPlan:wholeLayerPlan,intervalLayerPlan:intervalLayerPlan,parseAdvancedState:parseAdvancedState,encodeAdvancedState:encodeAdvancedState,
         offsetSeconds:offsetSeconds,gapPlan:gapPlan,parsePanelState:parsePanelState,encodePanelState:encodePanelState,parseFrames:frames, parseDecimal:decimal, inRegion:inRegion, offsetLayerPlan:offsetLayerPlan, keyPlan:keyPlan,
         parseFavorites:favorites, defaults:defaults, parseSettings:parseSettings, encodeSettings:encodeSettings};
 }());
 
-/* FrameFlow AE 2.2.0. AE adapter; native values never pass through JSON. */
+/* FrameFlow AE 2.3.0. AE adapter; native values never pass through JSON. */
 var FFHost = (function () {
     var LIMITS = {properties:20000, keys:50000, reportLines:300, textCharacters:2000};
     var ROOTS = ["ADBE Transform Group", "ADBE Mask Parade", "ADBE Effect Parade", "ADBE MTrackers",
@@ -601,9 +613,56 @@ var FFHost = (function () {
         plan.notes.push("Переносятся только ключи; Start/In/Out не меняются. Expressions сохранены, но их визуальный результат зависит от времени и внешних объектов.");
         return plan;
     }
+    function intervalModel(layer) {
+        var source = layer.source || null;
+        return {layer:layer,start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked,
+            stretch:layer.stretch,remap:layer.timeRemapEnabled === true,source:source,
+            sourceDuration:source ? source.duration : null,still:source && source.mainSource ? source.mainSource.isStill === true : false,
+            movingSource:layer.hasAudio === true || !!(source && !(source.mainSource && source.mainSource.isStill === true))};
+    }
+    function intervalSignature(layer, props) {
+        var parts = [], i, total = 0; props = props || scanLayer(layer);
+        for (i = 0; i < props.length; i++) if (props[i].numKeys) {
+            total += props[i].numKeys; if (total > LIMITS.keys) throw new Error("More than 50000 keys: narrow the scope.");
+            parts.push(pathKey(pathOf(props[i],layer))+":"+props[i].numKeys);
+        }
+        return parts.join("|");
+    }
+    function prepareInterval(options) {
+        var context = readContext(), frames = FFCore.parseFrames(String(options.frames)), amount = frames*context.frameDuration;
+        var a = context.cti, remove = options.action === "remove", plan, layers, i, marker;
+        if (options.action !== "insert" && options.action !== "remove") throw new Error("Choose Insert Time or Remove Time.");
+        if (options.crossing !== "keep" && options.crossing !== "retime") throw new Error("Choose a crossing-layer policy.");
+        if (a < 0 || a >= context.duration || remove && a+amount > context.duration+context.frameDuration*0.000001) throw new Error("The interval must fit inside the composition.");
+        plan = prepare({operation:remove ? "removeTime" : "insertTime",scope:options.scope,mode:"offset",region:"after",
+            frames:frames,direction:remove ? -1 : 1,deltaSeconds:remove ? -amount : amount,strict:true,compMarkers:options.compMarkers === true,
+            originalCTI:a,interval:{start:a,end:a+amount,crossing:options.crossing}});
+        layers = selectedLayers(context.comp,options.scope); plan.intervalState = [];
+        for (i = 0; i < layers.length; i++) plan.intervalState.push(intervalModel(layers[i]));
+        marker = options.compMarkers === true ? context.comp.markerProperty || null : null;
+        plan.intervalMarker = marker; plan.intervalMarkerSnapshot = marker ? snapshotProperty(marker) : null;
+        plan.notes.push("Composition duration is unchanged. No layers or keys are deleted. Kept crossing layers: "+plan.keptCrossing.length+".");
+        return plan;
+    }
+    function validateIntervalPlan(plan) {
+        var context = readContext(), layers = selectedLayers(context.comp,plan.request.scope), i, a, b, field;
+        var names = ["start","inPoint","outPoint","locked","stretch","remap","source","sourceDuration","still","movingSource"];
+        if (context.comp !== plan.comp || context.cti !== plan.request.originalCTI || context.duration !== plan.context.duration || layers.length !== plan.intervalState.length) throw new Error("The interval or scope changed. Preview again.");
+        for (i = 0; i < layers.length; i++) {
+            a = intervalModel(layers[i]); b = plan.intervalState[i];
+            if (a.layer !== b.layer) throw new Error("The interval or scope changed. Preview again.");
+            for (field = 0; field < names.length; field++) if (a[names[field]] !== b[names[field]]) throw new Error("An interval target changed. Preview again.");
+        }
+        for (i = 0; i < plan.changes.length; i++) if (plan.changes[i].layer && intervalSignature(plan.changes[i].layer) !== plan.changes[i].intervalSignature) throw new Error("Keyed properties changed after preview. Preview again.");
+        if (plan.request.compMarkers) {
+            if ((plan.comp.markerProperty || null) !== plan.intervalMarker) throw new Error("Composition markers changed. Preview again.");
+            if (plan.intervalMarker) verifyProperty(plan.intervalMarker,plan.intervalMarkerSnapshot,originalTimes(plan.intervalMarkerSnapshot),context.frameDuration*0.000001);
+        }
+    }
     function prepare(request) {
         var context = readContext(), comp = context.comp, layers = [], i, j, k, layer, props, p, path, s, kp, lp, count = 0;
-        var plan = {comp:comp,context:context,request:request,changes:[],skips:[],errors:[],notes:[],layerCount:0,mediaLimits:[]};
+        var plan = {comp:comp,context:context,request:request,changes:[],skips:[],errors:[],notes:[],layerCount:0,mediaLimits:[],keptCrossing:[]};
+        var interval = request.operation === "insertTime" || request.operation === "removeTime";
         FFCore.offsetSeconds(context,request);
         if (request.direction !== 1 && request.direction !== -1) throw new Error("Не задано направление");
         if (request.region !== "before" && request.region !== "after" && request.region !== "all") throw new Error("Не задана сторона курсора");
@@ -615,6 +674,7 @@ var FFHost = (function () {
         layers = selectedLayers(comp,request.scope,request.layerIds);
         plan.layerCount = layers.length;
         if (request.operation === "closeGap") context.cti = request.gap.end;
+        if (interval && request.operation === "removeTime") context.cti = request.interval.end;
         function addCount(n) { count += n; if (count > LIMITS.keys) throw new Error("Более 50000 ключей: сузьте область."); }
         function relevant(prop) {
             var q;
@@ -632,10 +692,23 @@ var FFHost = (function () {
             if (info.skip) throw new Error(info.skip);
             return {snapshot:snap,times:info.times,moved:info.moved};
         }
+        function guardInterval(prop) {
+            var q, t, v, r = request.interval;
+            if (!interval) return;
+            for (q = 1; q <= prop.numKeys; q++) {
+                t = prop.keyTime(q);
+                if (request.operation === "removeTime" && t >= r.start && t < r.end) throw new Error("A key lies inside the removed interval. No keys are deleted; move it or keep crossing layers.");
+                if (prop.propertyValueType === PropertyValueType.MARKER) {
+                    v = prop.keyValue(q);
+                    if (v.duration > 0 && t < (request.operation === "removeTime" ? r.end : r.start) && t+v.duration > r.start) throw new Error("A duration marker overlaps the interval. Adjust it in AE first.");
+                }
+            }
+        }
         for (i = 0; i < layers.length; i++) {
             layer = layers[i];
             if (request.operation === "closeGap" && layer.inPoint < context.cti) continue;
-            lp = (request.mode === "layers" ? FFCore.wholeLayerPlan : FFCore.offsetLayerPlan)({start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked},context,request);
+            lp = interval ? FFCore.intervalLayerPlan(intervalModel(layer),context,request) : (request.mode === "layers" ? FFCore.wholeLayerPlan : FFCore.offsetLayerPlan)({start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint,locked:layer.locked},context,request);
+            if (lp.kept) plan.keptCrossing.push(layer.id);
             if (lp.skip) { plan.skips.push(labelFor(layer,[])+": "+lp.skip); continue; }
             if (lp.kind === "none") continue;
             if (lp.kind === "edge") {
@@ -659,23 +732,25 @@ var FFHost = (function () {
                             if (Math.abs(kp.times[k]) > 10800) throw new Error("Время ключа выйдет за диапазон AE");
                         }
                     } else {
-                        if (!relevant(p)) continue;
+                        guardInterval(p);
+                        if (!interval && !relevant(p)) continue;
                         if (p.isSeparationLeader && p.dimensionsSeparated) continue;
                         if (p.propertyValueType !== PropertyValueType.MARKER && !allowedType(p.propertyValueType)) throw new Error("Специальные ключи свойства "+p.matchName+" пока не поддержаны");
                         for (k = 0; k < path.length; k++) if (path[k].match === "ADBE Layer Overrides") throw new Error("Essential Properties: частичный перенос пока не поддержан");
                         kp = partial(p);
-                        if (!kp.moved) continue;
+                        if (!interval && !kp.moved) continue;
                     }
                     entries.push({path:path,snapshot:kp.snapshot,times:kp.times,moved:kp.moved}); moved += kp.moved;
                 }
             } catch (captureError) { failed = errorInfo(captureError).message; }
             if (failed) { plan.skips.push(labelFor(layer,[])+": весь слой пропущен — "+failed); continue; }
             plan.changes.push({kind:lp.kind,layer:layer,before:{start:layer.startTime,inPoint:layer.inPoint,outPoint:layer.outPoint},
-                after:{start:lp.start,inPoint:lp.inPoint,outPoint:lp.outPoint},properties:entries,delta:lp.delta,moved:moved,label:labelFor(layer,[])});
+                after:{start:lp.start,inPoint:lp.inPoint,outPoint:lp.outPoint},properties:entries,delta:lp.delta,moved:moved,label:labelFor(layer,[]),intervalSignature:interval ? intervalSignature(layer,props) : null});
         }
-        if (request.compMarkers && comp.markerProperty && comp.markerProperty.numKeys && relevant(comp.markerProperty)) {
+        if (request.compMarkers && comp.markerProperty && comp.markerProperty.numKeys && (interval || relevant(comp.markerProperty))) {
             layer = null;
             try {
+                guardInterval(comp.markerProperty);
                 kp = partial(comp.markerProperty);
                 if (kp.moved) plan.changes.push({kind:"property",layer:null,path:[],snapshot:kp.snapshot,times:kp.times,moved:kp.moved,label:"Маркеры композиции"});
             } catch (markerError) { plan.skips.push("Маркеры композиции: "+errorInfo(markerError).message); }
@@ -818,6 +893,7 @@ var FFHost = (function () {
             if (plan.errors.length) throw new Error(plan.errors.join("\n"));
             if (app.project.activeItem !== plan.comp) throw new Error("Активная композиция изменилась; повторите действие");
             if (plan.request.operation === "closeGap") validateGapPlan(plan);
+            if (plan.intervalState) validateIntervalPlan(plan);
             if (!plan.changes.length) { result.ok = true; return result; }
             phase = "captureSelection"; layerSelection = captureLayerSelection(plan.comp); phase = "preflight";
             for (i = 0; i < plan.changes.length; i++) {
@@ -826,14 +902,14 @@ var FFHost = (function () {
                 if (c.kind !== "property") { checkLayer(c,false,tolerance); verifyLayerProperties(c,false,tolerance); }
                 else verifyProperty(target(c,plan.comp),c.snapshot,originalTimes(c.snapshot),tolerance);
             }
-            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.2.0 — Убрать паузу" : "FrameFlow AE 2.2.0 — Time Offset"); opened = true;
+            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.3.0 — Убрать паузу" : "FrameFlow AE 2.3.0 — Time Offset"); opened = true;
             for (i = 0; i < plan.changes.length; i++) {
                 phase = "apply"; c = plan.changes[i]; currentChange = c; touched.push(c); result.attempted++;
                 if (c.kind === "layer") {
                     setBounds(c.layer,c.after,true);
                 } else if (c.kind === "edge") {
                     for (j = 0; j < c.properties.length; j++) {
-                        entry = c.properties[j]; restoreProperty(resolve(c.layer,entry.path),entry.snapshot,entry.times);
+                        entry = c.properties[j]; if (entry.moved) restoreProperty(resolve(c.layer,entry.path),entry.snapshot,entry.times);
                     }
                     setBounds(c.layer,c.after,false);
                 } else {
@@ -897,7 +973,7 @@ var FFHost = (function () {
         return result;
     }
     function environment() {
-        var lines = ["FrameFlow AE 2.2.0", "Дата: " + new Date().toString()];
+        var lines = ["FrameFlow AE 2.3.0", "Дата: " + new Date().toString()];
         function read(label,fn) { try { lines.push(label+": "+fn()); } catch (ignored) { lines.push(label+": неизвестно"); } }
         read("AE",function(){return app.version;}); read("Build",function(){return app.buildNumber;});
         read("OS",function(){return $.os;}); read("ExtendScript",function(){return $.version;});
@@ -912,6 +988,7 @@ var FFHost = (function () {
             "К изменению: "+plan.changes.length+"; Пропуски: "+plan.skips.length+"; Блокировки: "+plan.errors.length);
         if (plan.mediaLimits && plan.mediaLimits.length) lines.push("Без запаса исходника: "+plan.mediaLimits.length+". "+(r.mediaPolicy === "skip" ? "Эти слои и все их ключи оставлены без изменений; остальные цели проходят строгую проверку." : "Вся операция отменяется до записи."));
         if (r.operation === "closeGap") lines.push("Удаление паузы ["+r.gap.start+", "+r.gap.end+") s; курсор до операции="+r.originalCTI+" s");
+        if (r.interval) lines.push("Interval ["+r.interval.start+", "+r.interval.end+") s; operation="+r.operation+"; crossing="+r.interval.crossing+"; kept="+plan.keptCrossing.length+"; originalCTI="+r.originalCTI+" s");
         if (r.region === "range") lines.push("Диапазон ["+r.from+", "+r.to+") s; кадры от внутреннего начала композиции");
         if (!result) {
             var plannedLayers = 0, plannedKeys = 0;
@@ -943,7 +1020,7 @@ var FFHost = (function () {
         lines.push("Readback проверяет доступные данные; визуальный результат, недоступные атрибуты и внешние Expressions требуют отдельного теста в AE.");
         return lines.join("\n");
     }
-    return {readContext:readContext,inspectGap:inspectGap,prepareGap:prepareGap, prepare:prepare, applyPlan:applyPlan, report:report, environment:environment,
+    return {readContext:readContext,inspectGap:inspectGap,prepareGap:prepareGap,prepareInterval:prepareInterval, prepare:prepare, applyPlan:applyPlan, report:report, environment:environment,
         snapshotProperty:snapshotProperty, restoreProperty:restoreProperty, verifyProperty:verifyProperty,
         scanLayer:scanLayer, pathOf:pathOf, errorInfo:errorInfo, originalTimes:originalTimes};
 }());

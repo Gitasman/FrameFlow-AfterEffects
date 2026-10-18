@@ -1,6 +1,6 @@
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.2.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.3.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false, prepared = null, planSerial = 0;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -232,6 +232,12 @@ var FFCEP = (function () {
     }
     function corePlan(c, r) {
         var request, plan;
+        if (r.op === "interval") {
+            schema(r,"|op||token||action||frames||scope||crossing||compMarkers||preview|");
+            if (r.preview !== true) fail("Interval operations require a preview before applying.");
+            if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Choose Auto, Selected or All layers.");
+            bool(r.compMarkers); return FFHost.prepareInterval(r);
+        }
         if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
         schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||mediaPolicy||preview|");
         if (r.op === "move") {
@@ -266,14 +272,15 @@ var FFCEP = (function () {
             if (change.kind !== "property") { item.before = change.before; item.after = change.after; }
             targets.push(item);
         }
-        return {id:id,operation:r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
+        return {id:id,operation:r.interval ? r.operation : r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
             region:r.region,direction:r.direction,frames:Math.abs(FFCore.offsetSeconds(c,r)/c.frameDuration),
-            delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" ? r.originalCTI : c.cti,
+            delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" || r.interval ? r.originalCTI : c.cti,
             frameDuration:c.frameDuration,displayStart:plan.comp.displayStartTime,blocked:plan.errors.length > 0,
             counts:{layers:layers,keys:keys,properties:properties,changes:plan.changes.length,skipped:plan.skips.length,
-                mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0,errors:plan.errors.length},targets:targets,
+                mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0,errors:plan.errors.length,keptCrossing:plan.keptCrossing ? plan.keptCrossing.length : 0},targets:targets,
             targetsOmitted:Math.max(0,plan.changes.length-targets.length),skips:plan.skips.slice(0,40),errors:plan.errors.slice(0,20),
-            skipsOmitted:Math.max(0,plan.skips.length-40),gap:r.operation === "closeGap" ? {start:r.gap.start,end:r.gap.end} : null};
+            skipsOmitted:Math.max(0,plan.skips.length-40),gap:r.operation === "closeGap" ? {start:r.gap.start,end:r.gap.end} : null,
+            interval:r.interval || null,keptTargets:plan.keptCrossing ? plan.keptCrossing.slice(0,100) : []};
     }
     function action(r) {
         var c, layers, i, on = {}, plan, result, report, state, id, pending;
@@ -296,7 +303,7 @@ var FFCEP = (function () {
             schema(r, "|op||token||previewId|"); pending = prepared; prepared = null;
             if (!pending || typeof r.previewId !== "string" || pending.id !== r.previewId || pending.token !== r.token) fail("План устарел. Повторите проверку перед применением.");
             plan = pending.plan; result = FFHost.applyPlan(plan); report = FFHost.report(plan,result,"Применить проверенный план");
-        } else if (r.op === "move" || r.op === "offset" || r.op === "gap") {
+        } else if (r.op === "move" || r.op === "offset" || r.op === "gap" || r.op === "interval") {
             if (typeof r.preview !== "undefined") bool(r.preview);
             plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
             if (r.preview) {
@@ -314,13 +321,32 @@ var FFCEP = (function () {
         if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
         return {state:snapshot(), result:result, report:report, warning:result.mediaSkipped > 0, message:(result.changed ? "Готово · изменений: " + result.changed : "Сцена не изменена") + (result.mediaSkipped ? " · без запаса: " + result.mediaSkipped : result.changed ? "" : " · подходящих целей нет")};
     }
+    // Localize diagnostics only. Artist-authored names and native values in state stay intact.
+    function localized(output, language) {
+        var data = output.data, i, p;
+        function text(v) { return FFText.message(v,language); }
+        function error(e) { if (e && typeof e.message === "string") e.message = text(e.message); }
+        error(output.error);
+        if (data) {
+            if (typeof data.message === "string") data.message = text(data.message);
+            if (typeof data.report === "string") data.report = text(data.report);
+            p = data.preview;
+            if (p) {
+                for (i=0;i<p.errors.length;i++) p.errors[i]=text(p.errors[i]);
+                for (i=0;i<p.skips.length;i++) p.skips[i]=text(p.skips[i]);
+                for (i=0;i<p.targets.length;i++) p.targets[i].label=text(p.targets[i].label);
+            }
+        }
+        return output;
+    }
     function dispatch(encoded) {
         var request, output, raw, i;
         try {
             if (busy) fail("Host занят. Дождитесь завершения операции.");
             if (typeof encoded !== "string" || encoded.length > 262144) fail("RPC size limit");
-            raw = decodeURIComponent(encoded); request = parse(raw); schema(request, "|id||version||data|");
+            raw = decodeURIComponent(encoded); request = parse(raw); schema(request, "|id||version||data||language|");
             if (request.version !== VERSION || typeof request.id !== "string" || !/^[A-Za-z0-9:_-]{1,100}$/.test(request.id)) fail("Несовместимая версия запроса.");
+            if (own(request,"language") && request.language !== "en" && request.language !== "ru") fail("Unknown interface language.");
             for (i = 0; i < recent.length; i++) if (recent[i].id === request.id) {
                 if (recent[i].raw !== raw) fail("RPC id collision"); return recent[i].output;
             }
@@ -328,8 +354,9 @@ var FFCEP = (function () {
             try { output = {id:request.id, ok:true, data:action(request.data)}; }
             catch (e) { output = {id:request.id, ok:false, error:FFHost.errorInfo(e)}; }
             finally { busy = false; }
+            if (request.language) output = localized(output,request.language);
             output = stringify(output); recent.push({id:request.id, raw:raw, output:output}); if (recent.length > 16) recent.shift(); return output;
-        } catch (outer) { return stringify({id:request ? request.id : null, ok:false, error:FFHost.errorInfo(outer)}); }
+        } catch (outer) { return stringify(localized({id:request ? request.id : null, ok:false, error:FFHost.errorInfo(outer)},request && request.language === "en" ? "en" : "ru")); }
     }
     return {dispatch:dispatch, version:VERSION};
 }());

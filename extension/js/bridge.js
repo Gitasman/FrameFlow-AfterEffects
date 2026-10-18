@@ -1,17 +1,17 @@
 (function(root) {
   'use strict';
-  const VERSION='2.2.0';
+  const VERSION='2.3.0';
   function uri(value) {return encodeURIComponent(value).replace(/[!'()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase());}
   function encode(request) {return '$.global.FrameFlowCEP.dispatch("'+uri(JSON.stringify(request))+'")';}
   function problem(message,code,stage,op) {const e=Error(message);e.code=code;e.stage=stage;e.operation=op;return e;}
-  function create(transport,timeout=15000) {
+  function create(transport,timeout=15000,language) {
     let pending=false,uncertain=false,count=0,disposed=false;
     const session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2), timers=new Set(),cancel=new Set();
     function call(data) {
       if(disposed) return Promise.reject(Error('Панель закрыта.'));
       if(pending) return Promise.reject(Error('Дождитесь завершения операции.'));
       if(uncertain&&data.op!=='read') return Promise.reject(Error('Результат предыдущего действия неизвестен. Нажмите «Обновить».'));
-      const id=session+':'+(++count), request={id,version:VERSION,data}; pending=true;
+      const id=session+':'+(++count), request={id,version:VERSION,data}; if(language)request.language=language(); pending=true;
       return new Promise((resolve,reject)=>{
         let done=false;
         function finish(error,value) {
@@ -90,7 +90,7 @@
     ].join('\n');
   }
   function createCEP(cep,options={}) {
-    const transport=(script,cb)=>cep.evalScript(script,cb),rpc=create(transport,options.timeout||15000);
+    const transport=(script,cb)=>cep.evalScript(script,cb),rpc=create(transport,options.timeout||15000,options.language);
     const diagnostics={stage:'not-started',hostVersion:'',environment:null,lastError:null};
     // CEP can identify AE even when the ExtendScript loader itself fails.
     try{const env=JSON.parse(cep.getHostEnvironment());if(typeof env.appVersion==='string')diagnostics.environment={ae:env.appVersion,build:'не получен',os:typeof cep.getOSInformation==='function'?String(cep.getOSInformation()).slice(0,300):'не получена'};}catch(e){}
