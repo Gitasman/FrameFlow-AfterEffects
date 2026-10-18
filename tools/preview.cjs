@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),extension=path.join(root,'extension');
 let html=fs.readFileSync(path.join(extension,'index.html'),'utf8');
-html=html.replace('<title>FrameFlow 2.0</title>','<title>FrameFlow 2.0 — Демо без AE</title>')
+html=html.replace('<title>FrameFlow 2.1</title>','<title>FrameFlow 2.1 — Демо без AE</title>')
   .replace("script-src 'self';","script-src 'self' 'unsafe-inline';")
   .replace('<link rel="stylesheet" href="css/panel.css">','<style>'+fs.readFileSync(path.join(extension,'css/panel.css'),'utf8')+'</style>');
 html=html.replace(/<script src="(js\/[a-z]+\.js)"><\/script>/g,(_,file)=>{

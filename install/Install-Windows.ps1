@@ -13,11 +13,11 @@ $hadValue = $null -ne $prior
 $priorValue = if ($hadValue) { $prior.PlayerDebugMode } else { $null }
 $priorKind = if ($hadValue) { (Get-Item $regPath).GetValueKind('PlayerDebugMode').ToString() } else { $null }
 if (!(Test-Path (Join-Path $extensionSource 'CSXS\manifest.xml'))) { throw 'Incomplete package: manifest missing.' }
-Write-Host 'FrameFlow 2.0.2 / After Effects 25-26 / CEP 12'
+Write-Host 'FrameFlow 2.1.0 / After Effects 25-26 / CEP 12'
 Write-Host 'Installs for this Windows account and enables unsigned CEP 12 panels.'
 Write-Host 'Existing FrameFlow and the prior development setting are backed up.'
 New-Item -ItemType Directory -Force -Path $extensionsRoot, $backup | Out-Null
-@{version='2.0.2';hadValue=$hadValue;priorValue=$priorValue;priorKind=$priorKind;hadExtension=(Test-Path $destination)} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $backup 'install-state.json') -Encoding UTF8
+@{version='2.1.0';hadValue=$hadValue;priorValue=$priorValue;priorKind=$priorKind;hadExtension=(Test-Path $destination)} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $backup 'install-state.json') -Encoding UTF8
 $movedOld = $false
 $placedNew = $false
 try {
@@ -31,7 +31,7 @@ try {
     New-Item -ItemType File -Path (Join-Path $backup 'install-complete.txt') | Out-Null
     Write-Host ('Installed: ' + $destination)
     Write-Host ('Backup: ' + $backup)
-    Write-Host 'Restart AE. Open Window > Extensions (or Extensions (Legacy)) > FrameFlow 2.0.'
+    Write-Host 'Restart AE. Open Window > Extensions (or Extensions (Legacy)) > FrameFlow 2.1.'
 } catch {
     $originalError = $_
     try {

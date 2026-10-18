@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.frameflow.ae" ExtensionBundleVersion="2.0.2" ExtensionBundleName="FrameFlow">
-  <ExtensionList><Extension Id="com.frameflow.ae.panel" Version="2.0.2"/></ExtensionList>
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.frameflow.ae" ExtensionBundleVersion="2.1.0" ExtensionBundleName="FrameFlow">
+  <ExtensionList><Extension Id="com.frameflow.ae.panel" Version="2.1.0"/></ExtensionList>
   <ExecutionEnvironment>
     <HostList><Host Name="AEFT" Version="[25.0,26.9]"/></HostList>
     <LocaleList><Locale Code="All"/></LocaleList>
@@ -9,9 +9,9 @@
   <DispatchInfoList><Extension Id="com.frameflow.ae.panel"><DispatchInfo>
     <Resources><MainPath>./index.html</MainPath></Resources>
     <Lifecycle><AutoVisible>true</AutoVisible></Lifecycle>
-    <UI><Type>Panel</Type><Menu>FrameFlow 2.0</Menu><Geometry>
-      <Size><Width>1060</Width><Height>540</Height></Size>
-      <MinSize><Width>420</Width><Height>300</Height></MinSize>
+    <UI><Type>Panel</Type><Menu>FrameFlow 2.1</Menu><Geometry>
+      <Size><Width>480</Width><Height>440</Height></Size>
+      <MinSize><Width>320</Width><Height>280</Height></MinSize>
       <MaxSize><Width>3840</Width><Height>2160</Height></MaxSize>
     </Geometry></UI>
   </DispatchInfo></Extension></DispatchInfoList>

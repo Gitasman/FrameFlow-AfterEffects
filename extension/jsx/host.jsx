@@ -115,7 +115,6 @@ var FFCore = (function () {
         var d = offsetSeconds(c,r), kind = "none", a = m.inPoint, b = m.outPoint, st = m.start;
         if (r.direction !== 1 && r.direction !== -1) throw new Error("Не задано направление");
         if (r.region !== "before" && r.region !== "after") throw new Error("Выберите сторону курсора");
-        if (m.locked) return {skip:"Locked layer"};
         if (r.region === "before") {
             if (b <= c.cti) kind = "layer";
             else if (a < c.cti) kind = "edge";
@@ -123,6 +122,8 @@ var FFCore = (function () {
             if (a >= c.cti) kind = "layer";
             else if (b > c.cti) kind = "edge";
         }
+        if (kind === "none") return {kind:"none"};
+        if (m.locked) return {skip:"Locked layer"};
         if (kind === "layer") { st += d; a += d; b += d; }
         else if (kind === "edge") { if (r.region === "before") a += d; else b += d; }
         if (kind !== "none" && (a >= b || b - a < c.frameDuration * 0.000001)) return {skip:"Сдвиг обнулит или перевернёт длительность слоя"};
@@ -195,7 +196,7 @@ var FFCore = (function () {
         parseFavorites:favorites, defaults:defaults, parseSettings:parseSettings, encodeSettings:encodeSettings};
 }());
 
-/* FrameFlow AE 2.0.2. AE adapter; native values never pass through JSON. */
+/* FrameFlow AE 2.1.0. AE adapter; native values never pass through JSON. */
 var FFHost = (function () {
     var LIMITS = {properties:20000, keys:50000, reportLines:300, textCharacters:2000};
     var ROOTS = ["ADBE Transform Group", "ADBE Mask Parade", "ADBE Effect Parade", "ADBE MTrackers",
@@ -574,9 +575,17 @@ var FFHost = (function () {
         }
         for (i = 0; i < layers.length; i++) {
             layer = layers[i]; pending = []; failed = "";
-            if (layer.locked) { plan.skips.push(labelFor(layer,[])+": Locked layer"); continue; }
             try {
                 props = scanLayer(layer);
+                if (layer.locked) {
+                    var hasTarget = false, pi, ki, candidate;
+                    for (pi = 0; pi < props.length && !hasTarget; pi++) {
+                        candidate = props[pi];
+                        for (ki = 1; ki <= candidate.numKeys; ki++) if ((!selectedOnly || candidate.keySelected(ki)) && FFCore.inRegion(candidate.keyTime(ki),{region:request.region,cti:context.cti})) { hasTarget = true; break; }
+                    }
+                    if (hasTarget) plan.skips.push(labelFor(layer,[])+": Locked layer");
+                    continue;
+                }
                 for (j = 0; j < props.length; j++) {
                     p = props[j]; if (!p.numKeys) continue;
                     path = pathOf(p,layer); p = entry(p,layer,path); if (p) pending.push(p);
@@ -816,7 +825,7 @@ var FFHost = (function () {
                 if (c.kind !== "property") { checkLayer(c,false,tolerance); verifyLayerProperties(c,false,tolerance); }
                 else verifyProperty(target(c,plan.comp),c.snapshot,originalTimes(c.snapshot),tolerance);
             }
-            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.0.2 — Убрать паузу" : "FrameFlow AE 2.0.2 — Time Offset"); opened = true;
+            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.1.0 — Убрать паузу" : "FrameFlow AE 2.1.0 — Time Offset"); opened = true;
             for (i = 0; i < plan.changes.length; i++) {
                 phase = "apply"; c = plan.changes[i]; currentChange = c; touched.push(c); result.attempted++;
                 if (c.kind === "layer") {
@@ -887,7 +896,7 @@ var FFHost = (function () {
         return result;
     }
     function environment() {
-        var lines = ["FrameFlow AE 2.0.2", "Дата: " + new Date().toString()];
+        var lines = ["FrameFlow AE 2.1.0", "Дата: " + new Date().toString()];
         function read(label,fn) { try { lines.push(label+": "+fn()); } catch (ignored) { lines.push(label+": неизвестно"); } }
         read("AE",function(){return app.version;}); read("Build",function(){return app.buildNumber;});
         read("OS",function(){return $.os;}); read("ExtendScript",function(){return $.version;});
@@ -940,7 +949,7 @@ var FFHost = (function () {
 
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.0.2", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.1.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -1171,17 +1180,23 @@ var FFCEP = (function () {
     }
     function corePlan(c, r) {
         var request, plan;
-        if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
-        schema(r, "|op||token||ids||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
-        targets(c, r.ids, false);
+        if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
+        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
         if (r.op === "move") {
+            targets(c, r.ids, false);
             number(r.deltaFrames, -1000000, 1000000, false); if (r.deltaFrames === 0) fail("Сдвиг равен нулю.");
             request = {mode:"layers", region:"all", scope:"selected", layerIds:r.ids, direction:r.deltaFrames > 0 ? 1 : -1, deltaSeconds:r.deltaFrames * c.frameDuration, frames:1, strict:true};
         } else {
             if (!FFCore.validMode(r.mode)) fail("Режим не распознан."); FFCore.parseFrames(String(r.frames));
             if (r.region !== "before" && r.region !== "after") fail("Сторона не распознана.");
             if (r.direction !== 1 && r.direction !== -1) fail("Направление не распознано."); bool(r.compMarkers);
-            request = {mode:r.mode, region:r.region, scope:"selected", layerIds:r.ids, direction:r.direction, frames:r.frames, strict:true, compMarkers:r.compMarkers};
+            if (own(r, "ids")) { targets(c, r.ids, false); request = {scope:"selected",layerIds:r.ids}; }
+            else {
+                if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Выберите Авто, выделенные слои или всю композицию.");
+                request = {scope:r.scope};
+            }
+            request.mode = r.mode; request.region = r.region; request.direction = r.direction;
+            request.frames = r.frames; request.strict = true; request.compMarkers = r.compMarkers;
         }
         plan = FFHost.prepare(request); return plan;
     }
@@ -1210,7 +1225,7 @@ var FFCEP = (function () {
             if (typeof r.preview !== "undefined") bool(r.preview);
             result = directEdit(c, layers, r); report = stringify(result);
         } else fail("Неизвестная операция.");
-        if (!result.ok) return {state:snapshot(), failure:result, report:report, message:result.error ? result.error.message : "Не удалось завершить проверку записи. Откройте отчёт."};
+        if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
         return {state:snapshot(), result:result, report:report, message:result.changed ? "Готово · изменений: " + result.changed : "Подходящих целей нет · сцена не изменена"};
     }
     function dispatch(encoded) {
