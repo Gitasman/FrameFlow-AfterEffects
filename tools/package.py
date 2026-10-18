@@ -66,6 +66,15 @@ def main():
     selected = [p for p in files() if output not in p.parents]
     source_hashes = {str(p.relative_to(ROOT)): digest(p.read_bytes()) for p in selected
                      if p.name not in {'CHECKSUMS.sha256', 'VERIFICATION.json'}}
+    browser_path = Path(os.environ.get('FRAMEFLOW_BROWSER_RESULT', str(ROOT / 'artifacts/browser-result.json')))
+    browser_evidence = 'not_run for this build'
+    if browser_path.is_file():
+        browser_evidence = json.loads(browser_path.read_text(encoding='utf-8'))
+        assert browser_evidence['status'] == 'pass'
+        assert browser_evidence['version'] == version
+        assert browser_evidence['sourceHashes']
+        for relative, expected in browser_evidence['sourceHashes'].items():
+            assert digest((ROOT / relative).read_bytes()) == expected, 'Stale browser evidence: ' + relative
     report = {
         'product': 'FrameFlow AE', 'version': version,
         'checkedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -80,7 +89,7 @@ def main():
             'actualAE_CEP': 'not_run: no actual AE connection',
             'actualClipboard': 'not_run: DOM/API simulations only',
             'actualWindowsMacOSInstallers': 'not_run: source and shell syntax only',
-            'realBrowserLayout': 'not_run for this patch', 'review': 'self-review only'
+            'realBrowserLayout': browser_evidence, 'review': 'self-review only'
         },
         'sourceFiles': source_hashes
     }

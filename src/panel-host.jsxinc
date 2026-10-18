@@ -1,7 +1,7 @@
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.1.1", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
-    var saved = null, recent = [], busy = false;
+    var VERSION = "2.2.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var saved = null, recent = [], busy = false, prepared = null, planSerial = 0;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
     function quote(s) {
@@ -125,6 +125,7 @@ var FFCEP = (function () {
         var c = getComp(), state = model(c), signature = stringify(state);
         if (!saved || saved.project !== app.project || saved.comp !== c || saved.signature !== signature) {
             saved = {project:app.project, comp:c, signature:signature, token:session + ":" + (++serial)};
+            prepared = null;
         }
         state.token = saved.token; state.version = VERSION;
         state.environment = {ae:String(app.version), build:String(app.buildNumber), os:String($.os)};
@@ -253,10 +254,33 @@ var FFCEP = (function () {
         }
         plan = FFHost.prepare(request); return plan;
     }
+    function planSummary(plan, id) {
+        var r = plan.request, c = plan.context, targets = [], seen = {}, layers = 0, keys = 0, properties = 0, i, change, item;
+        for (i = 0; i < plan.changes.length; i++) {
+            change = plan.changes[i]; keys += change.moved || 0;
+            if (change.kind === "property") properties++;
+            if (change.layer && !seen["k"+change.layer.id]) { seen["k"+change.layer.id] = true; layers++; }
+            if (targets.length >= 100) continue;
+            item = {layerId:change.layer ? change.layer.id : null,index:change.layer ? change.layer.index : null,
+                kind:change.kind,label:String(change.label).slice(0,500),keys:change.moved || 0};
+            if (change.kind !== "property") { item.before = change.before; item.after = change.after; }
+            targets.push(item);
+        }
+        return {id:id,operation:r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
+            region:r.region,direction:r.direction,frames:Number(r.operation === "closeGap" ? r.gap.frames : r.frames),
+            delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" ? r.originalCTI : c.cti,
+            frameDuration:c.frameDuration,displayStart:plan.comp.displayStartTime,blocked:plan.errors.length > 0,
+            counts:{layers:layers,keys:keys,properties:properties,changes:plan.changes.length,skipped:plan.skips.length,
+                mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0,errors:plan.errors.length},targets:targets,
+            targetsOmitted:Math.max(0,plan.changes.length-targets.length),skips:plan.skips.slice(0,40),errors:plan.errors.slice(0,20),
+            skipsOmitted:Math.max(0,plan.skips.length-40),gap:r.operation === "closeGap" ? {start:r.gap.start,end:r.gap.end} : null};
+    }
     function action(r) {
-        var c, layers, i, on = {}, plan, result, report;
+        var c, layers, i, on = {}, plan, result, report, state, id, pending;
+        if (prepared && new Date().getTime()-prepared.created > 120000) prepared = null;
         if (r.op === "read") { schema(r, "|op|"); return {state:snapshot()}; }
         c = current(r.token);
+        if (r.op !== "applyPreview" && r.preview !== true) prepared = null;
         if (r.op === "select") {
             schema(r, "|op||token||ids|"); layers = targets(c, r.ids, true);
             for (i = 0; i < layers.length; i++) on["k" + layers[i].id] = true;
@@ -268,10 +292,19 @@ var FFCEP = (function () {
         if (r.op === "seek") {
             schema(r, "|op||token||time|"); c.time = number(r.time, 0, Math.max(0, c.duration - c.frameDuration), false); return {state:snapshot()};
         }
-        if (r.op === "move" || r.op === "offset" || r.op === "gap") {
+        if (r.op === "applyPreview") {
+            schema(r, "|op||token||previewId|"); pending = prepared; prepared = null;
+            if (!pending || typeof r.previewId !== "string" || pending.id !== r.previewId || pending.token !== r.token) fail("План устарел. Повторите проверку перед применением.");
+            plan = pending.plan; result = FFHost.applyPlan(plan); report = FFHost.report(plan,result,"Применить проверенный план");
+        } else if (r.op === "move" || r.op === "offset" || r.op === "gap") {
             if (typeof r.preview !== "undefined") bool(r.preview);
             plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
-            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length + (plan.mediaLimits && plan.mediaLimits.length ? " · без запаса: " + plan.mediaLimits.length : "")};
+            if (r.preview) {
+                state = snapshot(); id = session + ":plan:" + (++planSerial);
+                prepared = {id:id,token:state.token,created:new Date().getTime(),plan:plan};
+                return {state:state,preview:planSummary(plan,id),report:report,blocked:plan.errors.length > 0,
+                    message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length + (plan.mediaLimits && plan.mediaLimits.length ? " · без запаса: " + plan.mediaLimits.length : "")};
+            }
             result = FFHost.applyPlan(plan); report = FFHost.report(plan, result, r.op);
         } else if (r.op === "trim" || r.op === "split") {
             schema(r, "|op||token||ids||time||edge|"); layers = targets(c, r.ids, false);

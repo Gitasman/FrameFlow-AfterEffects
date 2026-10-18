@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.0
+
+- Reorganize timing controls and label Earlier/Later directions with arrows, frame counts and words; align themes, spacing, settings and text-size behavior.
+- Add bounded human-readable preview details: target layers, native-plan bounds, key counts, media skips and blockers. Keep diagnostics separate.
+- Add preview-first for offset and gap removal, and apply a single cached native plan with a two-minute lifetime. Reject stale metadata/keys, expired/replaced plans and repeated application; keep no-replay transport and Undo/recovery.
+- Add real Chromium layout/interaction CI through an isolated pinned browser dependency and include matching source hashes in build evidence. This still uses a simulated AE transport.
+- Update the roadmap around the compact command panel, deferring interval operations and nested-comp analysis to their own stages.
+- Publish routine updates directly to main with expected-head fast-forward, preserving prior downloads. Allow closing only the panel for update, with AE restart as a recovery step.
+
+
 ## 2.1.1
 
 - Keep a finite-media crossing layer and all its keys unchanged when its source handles are exhausted; move other valid targets and report the count. Optional stop-all media policy; other strict checks remain atomic.
