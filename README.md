@@ -5,6 +5,21 @@ A compact CEP 12 panel for timing commands around the After Effects playhead. Th
 **[Download installable ZIP](downloads/FrameFlow_AE_2.1.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
 
 Close AE, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Open **Window → Extensions (Legacy) → FrameFlow 2.1**. Target: AE 25.x–26.x / CEP 12. Previous installation and preferences are preserved. The panel has no runtime npm dependencies, server, telemetry or CEP Node requirement.
+**Visual timeline panel for Adobe After Effects 25.x–26.x (Windows and macOS).** Move, trim and split layers or offset keyframes from a dockable panel.
+
+**[Download v2.0.2 ZIP](downloads/FrameFlow_AE_2.0.2.zip)** · [Quick start](#quick-start) · [Russian installation guide](README_RU.md) · [Offline HTML preview](PREVIEW.html) · [Changelog](CHANGELOG.md)
+
+## Quick start
+
+1. Download and extract the complete ZIP above.
+2. Close After Effects. Run `install/Install-Windows.cmd` (Windows) or `install/Install-macOS.command` (macOS).
+3. Restart After Effects; find **FrameFlow 2.0** under **Window → Extensions** or **Extensions (Legacy)**.
+
+This is an **unsigned CEP 12 extension**, not a signed ZXP. Read the [detailed installation guide](README_RU.md) before running the installer: it enables unsigned CEP extension loading for the current user and preserves an extension backup. [PREVIEW.html](PREVIEW.html) is an offline interface demo, not a working AE session.
+
+## Current status
+
+Version 2.0.2 addresses a host registration issue seen with `$.evalFile` in AE 25.6.4; the extension ID and preference storage are unchanged from 2.0.0. Startup and editing have **not** yet been confirmed in a real AE host; see [verification details](VERIFICATION.json) and the [smoke test](docs/AE_SMOKE_TEST_RU.md).
 
 ## Workflow
 
