@@ -1,7 +1,7 @@
 {
   "product": "FrameFlow AE",
   "version": "2.3.0",
-  "checkedAt": "2026-10-18T15:41:02.774627+00:00",
+  "checkedAt": "2026-10-18T15:47:32.658494+00:00",
   "sourceRef": "local working tree before publication",
   "target": "After Effects 25.x–26.x / CEP 12 / Windows and macOS",
   "checks": {
@@ -69,21 +69,108 @@
     "actualAE_CEP": "not_run: no actual AE connection",
     "actualClipboard": "not_run: DOM/API simulations only",
     "actualWindowsMacOSInstallers": "not_run: source and shell syntax only",
-    "realBrowserLayout": "not_run for this build",
+    "realBrowserLayout": {
+      "version": "2.3.0",
+      "sourceRef": "4f17bea9a71390aac1936d3ba083a8e689a0069f",
+      "engine": "Chromium",
+      "host": "simulated AE/CEP fixture; no actual Adobe connection",
+      "checks": [
+        {
+          "name": "English default and reduced controls",
+          "status": "pass"
+        },
+        {
+          "name": "all main commands fit the default 360x290 panel",
+          "status": "pass"
+        },
+        {
+          "name": "no horizontal overflow at 320",
+          "status": "pass"
+        },
+        {
+          "name": "no horizontal overflow at 360",
+          "status": "pass"
+        },
+        {
+          "name": "no horizontal overflow at 650",
+          "status": "pass"
+        },
+        {
+          "name": "preview is read-only and Apply executes the captured plan once",
+          "status": "pass"
+        },
+        {
+          "name": "changed AE cursor rejects the captured plan without writing",
+          "status": "pass"
+        },
+        {
+          "name": "Time menu opens an explicit interval policy before read-only preview",
+          "status": "pass"
+        },
+        {
+          "name": "language changes settings and main immediately and survives reopen",
+          "status": "pass"
+        },
+        {
+          "name": "large Russian text and settings fit 320x280 without horizontal overflow",
+          "status": "pass"
+        },
+        {
+          "name": "long mode labels and maximum frame step do not overflow",
+          "status": "pass"
+        },
+        {
+          "name": "mode menu stays inside 320x280 and Escape restores focus",
+          "status": "pass"
+        },
+        {
+          "name": "theme text contrast meets 4.5 to 1",
+          "status": "pass"
+        },
+        {
+          "name": "no unhandled browser errors",
+          "status": "pass"
+        }
+      ],
+      "screenshots": [
+        "main-dark.png",
+        "plan-dark.png",
+        "settings-light.png",
+        "main-russian.png"
+      ],
+      "sourceHashes": {
+        "extension/index.html": "bc277fb6af4d3eda23342efee0a61ef6c3d46a3ff60200b7957dea9f34218690",
+        "extension/css/panel.css": "6ba54fcba5942119db7c2ddc5961be38c9f0d62abf8f6011a6e31bdf947f6bc4",
+        "extension/js/bridge.js": "d9d7192a65256221b9e2d40a0b0aeceec17e79134b6560f7e234c854deae13a8",
+        "extension/js/demo.js": "cd5dc490e830c5a587145e51c04abd2d134ca869cbbdfe9aeb0fff9991bb09c5",
+        "extension/js/i18n.js": "64f7c620fc4192ea6f72dc97c263b08e37190e6f4ed8aac6c84c786ba9f5cc89",
+        "extension/js/model.js": "a290305ecd841e3616b343b3172514493df0cf4a34b555f19a16505a4389fd9a",
+        "extension/js/panel.js": "28b5552a3c263f583244091f2e62ef534e8caf2c12681bb7069f14e3e8afe2d5",
+        "extension/jsx/host.jsx": "4ff9713d5b1dc1e70f9a3cb988a09350ebd603a7bec216ab20caa1e9c5b98947",
+        "src/core.jsxinc": "0921cbdb1c5ee17018689dff8ad6a7035d2e6ac265abae9e656e9f3df1279dd6",
+        "src/panel-host.jsxinc": "7f334af5f92598ef0ca522b5eca72b60b0d8b7377f289805e710f4a4410cac4c",
+        "tests/host-fixture.cjs": "20db94b0bcefb3c71707c21e41aefb2deafe6a6e13c2a0421e3dd26ac2302003",
+        "tools/browser-check.cjs": "273f85f13fb1f83ccfe42516e4d159c78321a31113216340960535e91ef6f3ad"
+      },
+      "browserVersion": "151.0.7922.34",
+      "status": "pass",
+      "passed": 14,
+      "failed": 0
+    },
     "review": "self-review only"
   },
   "sourceFiles": {
     ".github/workflows/validate.yml": "1af88884117d42e532366c1af3414d6aaaac9ca9e04ab10288e58c7491b2c3a1",
     ".gitignore": "8853fe1710f63b79e45901adca767b266ccdad7fb088a20f11003a91a6612ee9",
     "CHANGELOG.md": "aa7bdbcc3fb9d897872594b1ac6c75f0b7bf7de92edf32e81a1b6fe5dccde416",
-    "PREVIEW.html": "fe401e0c0074bad48329a7898534dbb2e85d7a4f5fbd7ea455b4e201bb4f6719",
-    "README.md": "a6cd209e83e7a57a16328713a43dc0f7419608ad582cd1a8378c23f1822bee12",
+    "PREVIEW.html": "c62c7c1dc69699e5cb6225f87151c7f953a10c7340a5a7dbe227911011c6519a",
+    "README.md": "6fbdd764b1a69ff0ea976741c90dc7de887d6a72d1ca4ae18d75d8b10ddf538f",
     "README_RU.md": "1ef7be057d91875f3b381163270ac4578158a653c1ee4924c5cad2434fd31215",
     "ROADMAP_RU.md": "d65c77436b67b8786c15e4bc983943e2fd8d6f6c00fe2ddc9f8c8ffd8d540742",
-    "docs/AE_SMOKE_TEST_RU.md": "354db3b1181972038f2873a6ded47f6c1b088bd31c9ec2c1ad872b2174f438e8",
+    "docs/AE_SMOKE_TEST_RU.md": "6f58ae1533d8b160f678ec7ccce0ca40a8dbb0c3ca58117fd6a821e1ccf11c60",
     "docs/SOURCES.md": "be0a96b87c760d644ab6504b3a880a8ce9360084fa1af5040802462b05864c10",
     "docs/STATUS.md": "6eed314d327fb942e8471ba8768a9879ca729e5f7bbc55c5a9c554b90bfc9123",
-    "docs/verification.log": "bd7516a60f5748147df1783a57c843cc88ef4c1315484d6d5d4edc6b5463a256",
+    "docs/verification.log": "efc3b6ccd67b29c5bad559156d14e317fa59dc18b8cf157c5afb33b9c58e2609",
     "extension/CSXS/manifest.xml": "d99ef93b6e51be6f7f77f9cdc6bd24990c53f8843e3f919b4ba7abd18a953fcc",
     "extension/css/panel.css": "6ba54fcba5942119db7c2ddc5961be38c9f0d62abf8f6011a6e31bdf947f6bc4",
     "extension/index.html": "bc277fb6af4d3eda23342efee0a61ef6c3d46a3ff60200b7957dea9f34218690",
@@ -91,7 +178,7 @@
     "extension/js/demo.js": "cd5dc490e830c5a587145e51c04abd2d134ca869cbbdfe9aeb0fff9991bb09c5",
     "extension/js/i18n.js": "64f7c620fc4192ea6f72dc97c263b08e37190e6f4ed8aac6c84c786ba9f5cc89",
     "extension/js/model.js": "a290305ecd841e3616b343b3172514493df0cf4a34b555f19a16505a4389fd9a",
-    "extension/js/panel.js": "35871d287d6275917d06c56ea352d39d1f1b2309b2fea7480b86a6d81e355c41",
+    "extension/js/panel.js": "28b5552a3c263f583244091f2e62ef534e8caf2c12681bb7069f14e3e8afe2d5",
     "extension/jsx/host.jsx": "4ff9713d5b1dc1e70f9a3cb988a09350ebd603a7bec216ab20caa1e9c5b98947",
     "install/Install-Windows.cmd": "69261ffd90b8eb9c0ae854c9c704320df497f80a922cdb98dbd01ca6832dea6e",
     "install/Install-Windows.ps1": "771126bcc6afed22435b3336c204c7fd3dd15cceefc6f60be9e2e1ccf9b85ed7",

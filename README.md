@@ -2,7 +2,7 @@
 
 A compact CEP 12 panel for timing commands around the After Effects playhead.
 
-**[Download installable ZIP — 2.2.0](downloads/FrameFlow_AE_2.2.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
+**[Download installable ZIP — 2.3.0](downloads/FrameFlow_AE_2.3.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
 
 Close the FrameFlow panel, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Reopen **Window → Extensions (Legacy) → FrameFlow 2.3**. Target: AE 25.x–26.x / CEP 12. The installer backs up the previous extension and enables unsigned CEP 12 panels for the current account. This is a source distribution, not a signed ZXP or GitHub Release. Installed users need no Node, Python, server or network access from the panel.
 
