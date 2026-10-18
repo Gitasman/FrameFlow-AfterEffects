@@ -280,7 +280,7 @@ var FFCEP = (function () {
         if (prepared && new Date().getTime()-prepared.created > 120000) prepared = null;
         if (r.op === "read") { schema(r, "|op|"); return {state:snapshot()}; }
         c = current(r.token);
-        if (r.op !== "applyPreview" && r.preview !== true) prepared = null;
+        if (r.op !== "applyPreview") prepared = null;
         if (r.op === "select") {
             schema(r, "|op||token||ids|"); layers = targets(c, r.ids, true);
             for (i = 0; i < layers.length; i++) on["k" + layers[i].id] = true;

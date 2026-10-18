@@ -1,13 +1,13 @@
 {
   "product": "FrameFlow AE",
   "version": "2.2.0",
-  "checkedAt": "2026-10-18T02:58:52.842981+00:00",
+  "checkedAt": "2026-10-18T03:01:20.924138+00:00",
   "sourceRef": "local working tree before publication",
   "target": "After Effects 25.x–26.x / CEP 12 / Windows and macOS",
   "checks": {
     "tests": {
-      "tests": 157,
-      "pass": 157,
+      "tests": 158,
+      "pass": 158,
       "fail": 0,
       "skipped": 0,
       "cancelled": 0
@@ -16,7 +16,7 @@
     "hostSyntax": [
       {
         "file": "extension/jsx/host.jsx",
-        "sha256": "0823c5d5cf51a47fe2cfa460275d00b566f62db00528939b7d8853b9097787bb",
+        "sha256": "125011586c226e5078ebcadbd7e24740258fe7e9d91f8ca178e17161b4030f22",
         "parser": "Acorn 8.17.0",
         "options": {
           "ecmaVersion": 3,
@@ -48,7 +48,7 @@
       },
       {
         "file": "src/panel-host.jsxinc",
-        "sha256": "c1f136e222abc1c6d8030437f1941fad3f6b854a0b4794191ffe346d95f3ee6e",
+        "sha256": "b7336069ae95fcc43c8fc1d8889ddcda5ecb34e3af7a18fbe63e94b4838180b8",
         "parser": "Acorn 8.17.0",
         "options": {
           "ecmaVersion": 3,
@@ -82,8 +82,8 @@
     "ROADMAP_RU.md": "bfc82b95343d564c66ea2f256f03b82c6c73bd43af5a7536a417f11f92d28b21",
     "docs/AE_SMOKE_TEST_RU.md": "47e13484f39cbeb56b9792ad91b62c351cb2df138d2a85025c247e6c3a6c063f",
     "docs/SOURCES.md": "c67d268e6f94b4b7f7ab91f6fbaf68db3ee04ae4b3f0816b37ffe03543217c39",
-    "docs/STATUS.md": "772156eae32606539b7ad5ae9ef895b00af5f3e0b0216180eb3be6da654dc29b",
-    "docs/verification.log": "4b952692fd0f054be44b4dedaf1563c5bacccecc1a1870cb9b5cd017b040030d",
+    "docs/STATUS.md": "ba10db747515b2cce467ccde97cdef17f5b271dd9ae740d921fcb8163c81b0ab",
+    "docs/verification.log": "d9c0f7a321145779953fa2971c5e4e50cbbcd52ca0de05922e35361d348f683c",
     "extension/CSXS/manifest.xml": "695881aa53125558d9c9a73366551d09af3813db501462bea316618e7c188b3c",
     "extension/css/panel.css": "3020725a860596259d0dec433fdb7d7ea54c868ed657a1fb1efc802aef97beb1",
     "extension/index.html": "4599b79900bcd026be45b3d964a866ddf9eb960126c31f2130eeb838a0e438a9",
@@ -91,7 +91,7 @@
     "extension/js/demo.js": "542ed06a1cb27822a2adc5bc6f379b60a97f57ddb409835c0b37efc5aa516443",
     "extension/js/model.js": "e1ef988fb29a189607fc957b3770d99498fd5d46401d386b0a8e1cfa253a8d23",
     "extension/js/panel.js": "40d6c664ff887e5e6a92b1b1f3dbcf52c3666bd01b9933d42ca847eb3fb1bbd2",
-    "extension/jsx/host.jsx": "0823c5d5cf51a47fe2cfa460275d00b566f62db00528939b7d8853b9097787bb",
+    "extension/jsx/host.jsx": "125011586c226e5078ebcadbd7e24740258fe7e9d91f8ca178e17161b4030f22",
     "install/Install-Windows.cmd": "69261ffd90b8eb9c0ae854c9c704320df497f80a922cdb98dbd01ca6832dea6e",
     "install/Install-Windows.ps1": "515a045b1e467bfd9ed65cc8226124848be6298f02bec04c5ccf7a095557babe",
     "install/Install-macOS.command": "260d49f4a0fbcda289b199f4881981bc21d4978415ab8e88e06c9bcfb20799e7",
@@ -100,12 +100,12 @@
     "install/Restore-Windows.ps1": "a250f1f8d2488af2ce78003faffd20dd87ce2138b1fec506bde8e4be368ff901",
     "package.json": "a98c5dc500a73602d1a204bff19e560368d2c00d92db381c2c3443e0f9950126",
     "src/core.jsxinc": "cfba4d16a4a019cc43df50f88beb14992f9b103192731a80054717b670119dd5",
-    "src/panel-host.jsxinc": "c1f136e222abc1c6d8030437f1941fad3f6b854a0b4794191ffe346d95f3ee6e",
+    "src/panel-host.jsxinc": "b7336069ae95fcc43c8fc1d8889ddcda5ecb34e3af7a18fbe63e94b4838180b8",
     "tests/bootstrap.cjs": "bf6c6f26a80f70f86bfb19c12d7a8bbd2d03a738d4131bf685c8e2c49998e22e",
     "tests/es3.cjs": "aabcbec36af13a6eef0a058f2785aa0ae2bd5fa7876e02a080f8b6b55589875a",
     "tests/frontend.cjs": "73cc53e17c275b20defb2d7b8dcf0de10594cc829afda96d276173995d793337",
     "tests/host-fixture.cjs": "f4623d12c2aaf6baf1ffd20e06be461d6a126d779be09104d1dc2b89e0375600",
-    "tests/host.cjs": "f7716300158b31ebe59126bbddf37d7c81f23365de2e57a14377878c10764fa1",
+    "tests/host.cjs": "8376a239e3bbc18576654806b80691f31169dbb2fb2ab6495def1e49fc355ce9",
     "tests/timing.cjs": "389b2f4a6cc520c573497562ec0a686da3bd3dd7749e5d6872258375f2210f06",
     "tests/ui-dom.cjs": "906958c20ce2d29eacab24dc362b2a908f965d9b8f90e59c8a7766a7e0441808",
     "tools/browser-check.cjs": "50c622b782754335e483366c9b6b50d11b9ec175e23c9337cc5ef7be397a4962",
