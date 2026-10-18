@@ -1,0 +1,700 @@
+Built extension/jsx/host.jsx
+{
+  "reports": [
+    {
+      "file": "extension/jsx/host.jsx",
+      "sha256": "0a0e0891a0f078e31bbd6b10eafd5e391ed68b5631f5bf630c8342d0965bf46d",
+      "parser": "Acorn 8.17.0",
+      "options": {
+        "ecmaVersion": 3,
+        "allowReserved": "never",
+        "sourceType": "script",
+        "locations": true,
+        "allowHashBang": false
+      },
+      "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+      "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+      "status": "pass",
+      "directives": []
+    },
+    {
+      "file": "src/core.jsxinc",
+      "sha256": "77588e80c7099ea13a0645464b58acf8dfd0d73f27ec726d2b86a58292eced9a",
+      "parser": "Acorn 8.17.0",
+      "options": {
+        "ecmaVersion": 3,
+        "allowReserved": "never",
+        "sourceType": "script",
+        "locations": true,
+        "allowHashBang": false
+      },
+      "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+      "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+      "status": "pass",
+      "directives": []
+    },
+    {
+      "file": "src/panel-host.jsxinc",
+      "sha256": "534d87eb876d846f8064c95d37570c404db65b2269f54bc1f87538b3741c3e10",
+      "parser": "Acorn 8.17.0",
+      "options": {
+        "ecmaVersion": 3,
+        "allowReserved": "never",
+        "sourceType": "script",
+        "locations": true,
+        "allowHashBang": false
+      },
+      "reservedIdentifierPolicy": "ECMA-262 edition 3 keywords/future reserved words; v1",
+      "profile": "conservative ES3 syntax; not ExtendScript or AE runtime verification",
+      "status": "pass",
+      "directives": []
+    }
+  ],
+  "hostTests": "not_run"
+}
+TAP version 13
+# Subtest: the exact shipped host is plain ES3 with no directive stripping or preprocessing
+ok 1 - the exact shipped host is plain ES3 with no directive stripping or preprocessing
+  ---
+  duration_ms: 42.582489
+  type: 'test'
+  ...
+# Subtest: native and file URI extension paths support Cyrillic, percent, drive and UNC names
+ok 2 - native and file URI extension paths support Cyrillic, percent, drive and UNC names
+  ---
+  duration_ms: 0.650424
+  type: 'test'
+  ...
+# Subtest: exact bootstrap strings pass strict ES3 and cannot interpolate path text as code
+ok 3 - exact bootstrap strings pass strict ES3 and cannot interpolate path text as code
+  ---
+  duration_ms: 6.435355
+  type: 'test'
+  ...
+# Subtest: cold CEP start loads exact installed bytes once, confirms version and reads before writes
+ok 4 - cold CEP start loads exact installed bytes once, confirms version and reads before writes
+  ---
+  duration_ms: 4.665925
+  type: 'test'
+  ...
+# Subtest: old loaded host is replaced only during read handshake
+ok 5 - old loaded host is replaced only during read handshake
+  ---
+  duration_ms: 1.435096
+  type: 'test'
+  ...
+# Subtest: load syntax errors preserve original message, stage, line and basename; dispatch is never sent
+ok 6 - load syntax errors preserve original message, stage, line and basename; dispatch is never sent
+  ---
+  duration_ms: 0.919853
+  type: 'test'
+  ...
+# Subtest: missing file and post-load handshake failure are actionable bootstrap errors
+ok 7 - missing file and post-load handshake failure are actionable bootstrap errors
+  ---
+  duration_ms: 1.775902
+  type: 'test'
+  ...
+# Subtest: no active composition remains a host error with environment confirmed independently
+ok 8 - no active composition remains a host error with environment confirmed independently
+  ---
+  duration_ms: 1.723153
+  type: 'test'
+  ...
+# Subtest: malformed bootstrap replies stay bounded and never expose raw response text
+ok 9 - malformed bootstrap replies stay bounded and never expose raw response text
+  ---
+  duration_ms: 4.397776
+  type: 'test'
+  ...
+# Subtest: bootstrap timeout cannot write; late reply is ignored, explicit read can reconnect
+ok 10 - bootstrap timeout cannot write; late reply is ignored, explicit read can reconnect
+  ---
+  duration_ms: 12.242521
+  type: 'test'
+  ...
+# Subtest: write timeout never replays the write or reloads a healthy host on explicit recovery
+ok 11 - write timeout never replays the write or reloads a healthy host on explicit recovery
+  ---
+  duration_ms: 12.152168
+  type: 'test'
+  ...
+# Subtest: read timeout distinguishes metadata failure from an unconfirmed mutation
+ok 12 - read timeout distinguishes metadata failure from an unconfirmed mutation
+  ---
+  duration_ms: 5.49291
+  type: 'test'
+  ...
+# Subtest: disposal rejects pending bootstrap and RPC promises without leaving timers
+ok 13 - disposal rejects pending bootstrap and RPC promises without leaving timers
+  ---
+  duration_ms: 0.909217
+  type: 'test'
+  ...
+# Subtest: CEP environment is available in diagnostics even if ExtendScript never loads
+ok 14 - CEP environment is available in diagnostics even if ExtendScript never loads
+  ---
+  duration_ms: 0.199316
+  type: 'test'
+  ...
+# Subtest: host registers explicitly from local evalFile scope and a detached global namespace
+ok 15 - host registers explicitly from local evalFile scope and a detached global namespace
+  ---
+  duration_ms: 1.812595
+  type: 'test'
+  ...
+# Subtest: global and function-scoped evalFile loaders export the same host contract
+ok 16 - global and function-scoped evalFile loaders export the same host contract
+  ---
+  duration_ms: 3.700524
+  type: 'test'
+  ...
+# Subtest: a local name shadowing FrameFlowCEP cannot intercept RPC
+ok 17 - a local name shadowing FrameFlowCEP cannot intercept RPC
+  ---
+  duration_ms: 1.428056
+  type: 'test'
+  ...
+# Subtest: missing registration and version/dispatch mismatches report observed state, without invented source errors
+ok 18 - missing registration and version/dispatch mismatches report observed state, without invented source errors
+  ---
+  duration_ms: 1.920976
+  type: 'test'
+  ...
+# Subtest: numeric ExtendScript script IDs are kept separately from the known loaded filename
+ok 19 - numeric ExtendScript script IDs are kept separately from the known loaded filename
+  ---
+  duration_ms: 0.663834
+  type: 'test'
+  ...
+# Subtest: failed host construction never replaces an existing registered API
+ok 20 - failed host construction never replaces an existing registered API
+  ---
+  duration_ms: 1.860717
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var x = { protected: true }; x.protected;
+ok 21 - strict ES3 rejects var x = { protected: true }; x.protected;
+  ---
+  duration_ms: 3.359328
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var protected = 1;
+ok 22 - strict ES3 rejects var protected = 1;
+  ---
+  duration_ms: 0.28332
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var const = 1;
+ok 23 - strict ES3 rejects var const = 1;
+  ---
+  duration_ms: 0.663082
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects debugger;
+ok 24 - strict ES3 rejects debugger;
+  ---
+  duration_ms: 0.184814
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var x = { class: 1 };
+ok 25 - strict ES3 rejects var x = { class: 1 };
+  ---
+  duration_ms: 0.200808
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects let n=1;
+ok 26 - strict ES3 rejects let n=1;
+  ---
+  duration_ms: 0.409356
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects const n=1;
+ok 27 - strict ES3 rejects const n=1;
+  ---
+  duration_ms: 0.174639
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var f = () => 1;
+ok 28 - strict ES3 rejects var f = () => 1;
+  ---
+  duration_ms: 1.169513
+  type: 'test'
+  ...
+# Subtest: strict ES3 rejects var x = `text`;
+ok 29 - strict ES3 rejects var x = `text`;
+  ---
+  duration_ms: 0.358391
+  type: 'test'
+  ...
+# Subtest: quoted required keys, bracket access and protectedRegion pass
+ok 30 - quoted required keys, bracket access and protectedRegion pass
+  ---
+  duration_ms: 0.854156
+  type: 'test'
+  ...
+# Subtest: directives are position-masked and errors keep original line numbers
+ok 31 - directives are position-masked and errors keep original line numbers
+  ---
+  duration_ms: 0.54661
+  type: 'test'
+  ...
+# Subtest: unresolved includes remain blocked
+ok 32 - unresolved includes remain blocked
+  ---
+  duration_ms: 0.182521
+  type: 'test'
+  ...
+# Subtest: unknown directives remain blocked
+ok 33 - unknown directives remain blocked
+  ---
+  duration_ms: 0.160689
+  type: 'test'
+  ...
+# Subtest: a missing input cannot pass
+ok 34 - a missing input cannot pass
+  ---
+  duration_ms: 0.203862
+  type: 'test'
+  ...
+# Subtest: analysis never executes scene mutations
+ok 35 - analysis never executes scene mutations
+  ---
+  duration_ms: 0.463617
+  type: 'test'
+  ...
+# Subtest: preferences preserve zero, false, imported settings and unknown data
+ok 36 - preferences preserve zero, false, imported settings and unknown data
+  ---
+  duration_ms: 1.801559
+  type: 'test'
+  ...
+# Subtest: storage acknowledges exact writes and protects concurrent/newer data
+ok 37 - storage acknowledges exact writes and protects concurrent/newer data
+  ---
+  duration_ms: 0.427844
+  type: 'test'
+  ...
+# Subtest: storage failures preserve intended session values
+ok 38 - storage failures preserve intended session values
+  ---
+  duration_ms: 0.302318
+  type: 'test'
+  ...
+# Subtest: timecode roundtrips at integer and fractional FPS with negative display start
+ok 39 - timecode roundtrips at integer and fractional FPS with negative display start
+  ---
+  duration_ms: 0.62082
+  type: 'test'
+  ...
+# Subtest: frame input and invalid timecodes are handled explicitly
+ok 40 - frame input and invalid timecodes are handled explicitly
+  ---
+  duration_ms: 0.262299
+  type: 'test'
+  ...
+# Subtest: snapping uses stable IDs, screen tolerance and can be disabled
+ok 41 - snapping uses stable IDs, screen tolerance and can be disabled
+  ---
+  duration_ms: 0.306955
+  type: 'test'
+  ...
+# Subtest: trim respects finite source, one-frame minimum, remap and reverse stretch
+ok 42 - trim respects finite source, one-frame minimum, remap and reverse stretch
+  ---
+  duration_ms: 0.230972
+  type: 'test'
+  ...
+# Subtest: bridge correlates host response and blocks parallel writes
+ok 43 - bridge correlates host response and blocks parallel writes
+  ---
+  duration_ms: 3.47554
+  type: 'test'
+  ...
+# Subtest: host rejection surfaces original error without transport uncertainty
+ok 44 - host rejection surfaces original error without transport uncertainty
+  ---
+  duration_ms: 1.132228
+  type: 'test'
+  ...
+# Subtest: timeout blocks edits until read resynchronizes; late result cannot overwrite
+ok 45 - timeout blocks edits until read resynchronizes; late result cannot overwrite
+  ---
+  duration_ms: 16.350388
+  type: 'test'
+  ...
+# Subtest: empty, malformed and mismatched host responses require resync
+ok 46 - empty, malformed and mismatched host responses require resync
+  ---
+  duration_ms: 0.628922
+  type: 'test'
+  ...
+# Subtest: exact encoded host payload is ES3 and cannot interpolate executable text
+ok 47 - exact encoded host payload is ES3 and cannot interpolate executable text
+  ---
+  duration_ms: 7.973565
+  type: 'test'
+  ...
+# Subtest: preferences reject inherited/prototype keys and derive readable accent in each theme
+ok 48 - preferences reject inherited/prototype keys and derive readable accent in each theme
+  ---
+  duration_ms: 0.501764
+  type: 'test'
+  ...
+# Subtest: read returns actual metadata without writes or Undo
+ok 49 - read returns actual metadata without writes or Undo
+  ---
+  duration_ms: 5.51318
+  type: 'test'
+  ...
+# Subtest: move translates exact target and all its keys once, preserving selection
+ok 50 - move translates exact target and all its keys once, preserving selection
+  ---
+  duration_ms: 5.607789
+  type: 'test'
+  ...
+# Subtest: stale token blocks edits after outside timing changes
+ok 51 - stale token blocks edits after outside timing changes
+  ---
+  duration_ms: 2.324164
+  type: 'test'
+  ...
+# Subtest: composition identity checked even with reused IDs
+ok 52 - composition identity checked even with reused IDs
+  ---
+  duration_ms: 1.314728
+  type: 'test'
+  ...
+# Subtest: reordered layers invalidate snapshot and cannot retarget by index
+ok 53 - reordered layers invalidate snapshot and cannot retarget by index
+  ---
+  duration_ms: 1.411141
+  type: 'test'
+  ...
+# Subtest: locked target blocks the entire native move
+ok 54 - locked target blocks the entire native move
+  ---
+  duration_ms: 1.644156
+  type: 'test'
+  ...
+# Subtest: duplicate mutation ID is acknowledged without applying twice
+ok 55 - duplicate mutation ID is acknowledged without applying twice
+  ---
+  duration_ms: 1.716534
+  type: 'test'
+  ...
+# Subtest: trim changes only requested bound and preserves keys
+ok 56 - trim changes only requested bound and preserves keys
+  ---
+  duration_ms: 2.068045
+  type: 'test'
+  ...
+# Subtest: trim failure restores every touched target and closes Undo
+ok 57 - trim failure restores every touched target and closes Undo
+  ---
+  duration_ms: 3.565204
+  type: 'test'
+  ...
+# Subtest: trim cannot extend finite media or collapse a layer
+ok 58 - trim cannot extend finite media or collapse a layer
+  ---
+  duration_ms: 1.495776
+  type: 'test'
+  ...
+# Subtest: Time Remap supports shortening but blocks extension
+ok 59 - Time Remap supports shortening but blocks extension
+  ---
+  duration_ms: 1.574804
+  type: 'test'
+  ...
+# Subtest: split duplicates animation and trims original and copy
+ok 60 - split duplicates animation and trims original and copy
+  ---
+  duration_ms: 2.826559
+  type: 'test'
+  ...
+# Subtest: split blocks parent and matte relationships before mutation
+ok 61 - split blocks parent and matte relationships before mutation
+  ---
+  duration_ms: 3.027906
+  type: 'test'
+  ...
+# Subtest: split blocks layers with children and CTI outside
+ok 62 - split blocks layers with children and CTI outside
+  ---
+  duration_ms: 1.99758
+  type: 'test'
+  ...
+# Subtest: preview move has no scene or Undo side effects
+ok 63 - preview move has no scene or Undo side effects
+  ---
+  duration_ms: 1.641453
+  type: 'test'
+  ...
+# Subtest: unexpected preview on trim is rejected before mutation
+ok 64 - unexpected preview on trim is rejected before mutation
+  ---
+  duration_ms: 1.238695
+  type: 'test'
+  ...
+# Subtest: empty explicit target never expands to all layers
+ok 65 - empty explicit target never expands to all layers
+  ---
+  duration_ms: 1.278244
+  type: 'test'
+  ...
+# Subtest: selection synchronizes by stable ID and allows clearing
+ok 66 - selection synchronizes by stable ID and allows clearing
+  ---
+  duration_ms: 1.537348
+  type: 'test'
+  ...
+# Subtest: seek updates CTI without modifying layer times
+ok 67 - seek updates CTI without modifying layer times
+  ---
+  duration_ms: 1.107531
+  type: 'test'
+  ...
+# Subtest: malformed JSON, prototype keys and non-finite values never execute code
+ok 68 - malformed JSON, prototype keys and non-finite values never execute code
+  ---
+  duration_ms: 1.075463
+  type: 'test'
+  ...
+# Subtest: unknown command, fields, duplicate IDs, NaN and huge payload are rejected
+ok 69 - unknown command, fields, duplicate IDs, NaN and huge payload are rejected
+  ---
+  duration_ms: 3.411555
+  type: 'test'
+  ...
+# Subtest: negative and subframe moves preserve fractional timing
+ok 70 - negative and subframe moves preserve fractional timing
+  ---
+  duration_ms: 2.262272
+  type: 'test'
+  ...
+# Subtest: selected-key mode plans one key and leaves layer boundaries untouched
+ok 71 - selected-key mode plans one key and leaves layer boundaries untouched
+  ---
+  duration_ms: 5.442184
+  type: 'test'
+  ...
+# Subtest: key-only apply changes selected key time without moving layer or other keys
+ok 72 - key-only apply changes selected key time without moving layer or other keys
+  ---
+  duration_ms: 2.128113
+  type: 'test'
+  ...
+# Subtest: empty selected-key mode never falls back to all keys
+ok 73 - empty selected-key mode never falls back to all keys
+  ---
+  duration_ms: 0.703332
+  type: 'test'
+  ...
+# Subtest: all-keys mode moves only the requested CTI side
+ok 74 - all-keys mode moves only the requested CTI side
+  ---
+  duration_ms: 0.981404
+  type: 'test'
+  ...
+# Subtest: legacy default still extends the crossing layer and shifts later keys
+ok 75 - legacy default still extends the crossing layer and shifts later keys
+  ---
+  duration_ms: 1.378703
+  type: 'test'
+  ...
+# Subtest: whole-layer mode uses layer In as its anchor and includes crossing layers before CTI
+ok 76 - whole-layer mode uses layer In as its anchor and includes crossing layers before CTI
+  ---
+  duration_ms: 1.088694
+  type: 'test'
+  ...
+# Subtest: whole-layer mode does not retime a crossing layer on the after side
+ok 77 - whole-layer mode does not retime a crossing layer on the after side
+  ---
+  duration_ms: 0.835287
+  type: 'test'
+  ...
+# Subtest: strict preflight blocks every write when another requested target is locked
+ok 78 - strict preflight blocks every write when another requested target is locked
+  ---
+  duration_ms: 2.568576
+  type: 'test'
+  ...
+# Subtest: collision blocks selected-key operation before writes
+ok 79 - collision blocks selected-key operation before writes
+  ---
+  duration_ms: 1.211014
+  type: 'test'
+  ...
+# Subtest: subframe times and fractional FPS do not round to frames
+ok 80 - subframe times and fractional FPS do not round to frames
+  ---
+  duration_ms: 0.960142
+  type: 'test'
+  ...
+# Subtest: roving partial move is rejected by the existing timing planner
+ok 81 - roving partial move is rejected by the existing timing planner
+  ---
+  duration_ms: 0.889148
+  type: 'test'
+  ...
+# Subtest: unknown modes cannot cause legacy writes
+ok 82 - unknown modes cannot cause legacy writes
+  ---
+  duration_ms: 1.352494
+  type: 'test'
+  ...
+# Subtest: advanced preferences roundtrip false and protect unknown data
+ok 83 - advanced preferences roundtrip false and protect unknown data
+  ---
+  duration_ms: 0.889838
+  type: 'test'
+  ...
+# Subtest: whole-layer apply uses native translation exactly once
+ok 84 - whole-layer apply uses native translation exactly once
+  ---
+  duration_ms: 1.351743
+  type: 'test'
+  ...
+# Subtest: failed key-only apply restores data and retains original property diagnostic
+ok 85 - failed key-only apply restores data and retains original property diagnostic
+  ---
+  duration_ms: 1.649134
+  type: 'test'
+  ...
+# Subtest: changed lock after planning blocks writes
+ok 86 - changed lock after planning blocks writes
+  ---
+  duration_ms: 1.024849
+  type: 'test'
+  ...
+# Subtest: unsupported selected property skips its complete layer
+ok 87 - unsupported selected property skips its complete layer
+  ---
+  duration_ms: 0.805844
+  type: 'test'
+  ...
+# Subtest: unsupported unselected property does not block selected-key editing
+ok 88 - unsupported unselected property does not block selected-key editing
+  ---
+  duration_ms: 0.744844
+  type: 'test'
+  ...
+# Subtest: strict skip also prevents composition marker writes
+ok 89 - strict skip also prevents composition marker writes
+  ---
+  duration_ms: 0.798453
+  type: 'test'
+  ...
+# Subtest: close-gap retains its original mode-independent whole-layer plan
+ok 90 - close-gap retains its original mode-independent whole-layer plan
+  ---
+  duration_ms: 0.886394
+  type: 'test'
+  ...
+# Subtest: UI boots into explicitly requested demo and renders metadata/rows
+ok 91 - UI boots into explicitly requested demo and renders metadata/rows
+  ---
+  duration_ms: 134.918561
+  type: 'test'
+  ...
+# Subtest: mode menu changes controls and exposes keyed actions
+ok 92 - mode menu changes controls and exposes keyed actions
+  ---
+  duration_ms: 113.723374
+  type: 'test'
+  ...
+# Subtest: settings save zero/false, switch theme, reset only appearance and restore focus
+ok 93 - settings save zero/false, switch theme, reset only appearance and restore focus
+  ---
+  duration_ms: 375.052662
+  type: 'test'
+  ...
+# Subtest: step Move and precise inspector action are wired end to end in demo
+ok 94 - step Move and precise inspector action are wired end to end in demo
+  ---
+  duration_ms: 322.757181
+  type: 'test'
+  ...
+# Subtest: search, empty state, Escape, report and help surfaces are wired
+ok 95 - search, empty state, Escape, report and help surfaces are wired
+  ---
+  duration_ms: 112.854416
+  type: 'test'
+  ...
+# Subtest: UI → encoded CEP RPC → ES3 host → confirmed UI state (all simulated)
+ok 96 - UI → encoded CEP RPC → ES3 host → confirmed UI state (all simulated)
+  ---
+  duration_ms: 320.118462
+  type: 'test'
+  ...
+# Subtest: drag cancellation and shortcuts cannot mutate a host scene mid-gesture
+ok 97 - drag cancellation and shortcuts cannot mutate a host scene mid-gesture
+  ---
+  duration_ms: 213.809798
+  type: 'test'
+  ...
+# Subtest: drop applies a group move once after the visual preview (simulated DOM/AE)
+ok 98 - drop applies a group move once after the visual preview (simulated DOM/AE)
+  ---
+  duration_ms: 210.971516
+  type: 'test'
+  ...
+# Subtest: Report click opens and copies synchronously, even when navigator clipboard would reject
+ok 99 - Report click opens and copies synchronously, even when navigator clipboard would reject
+  ---
+  duration_ms: 107.9433
+  type: 'test'
+  ...
+# Subtest: Report uses asynchronous clipboard if synchronous CEP copy fails
+ok 100 - Report uses asynchronous clipboard if synchronous CEP copy fails
+  ---
+  duration_ms: 207.463289
+  type: 'test'
+  ...
+# Subtest: Report does not falsely claim copied when both clipboard routes are blocked
+ok 101 - Report does not falsely claim copied when both clipboard routes are blocked
+  ---
+  duration_ms: 208.077418
+  type: 'test'
+  ...
+# Subtest: a cold UI startup loads the exact host bytes before sending any scene RPC
+ok 102 - a cold UI startup loads the exact host bytes before sending any scene RPC
+  ---
+  duration_ms: 108.188549
+  type: 'test'
+  ...
+# Subtest: failed bootstrap pauses polling and focus retries; explicit Refresh reconnects
+ok 103 - failed bootstrap pauses polling and focus retries; explicit Refresh reconnects
+  ---
+  duration_ms: 2311.593318
+  type: 'test'
+  ...
+# Subtest: host load failure diagnostics and source line survive into the copied report
+ok 104 - host load failure diagnostics and source line survive into the copied report
+  ---
+  duration_ms: 106.500261
+  type: 'test'
+  ...
+# Subtest: UI cold startup also works when evalFile has local scope and the engine global is detached
+ok 105 - UI cold startup also works when evalFile has local scope and the engine global is detached
+  ---
+  duration_ms: 213.717664
+  type: 'test'
+  ...
+# Subtest: a failed registration report retains AE build and OS and describes the observed namespace
+ok 106 - a failed registration report retains AE build and OS and describes the observed namespace
+  ---
+  duration_ms: 107.050142
+  type: 'test'
+  ...
+1..106
+# tests 106
+# suites 0
+# pass 106
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5255.607995

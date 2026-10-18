@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>FrameFlow 2.0</title><link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true"><defs>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M5.5 8a7 7 0 0 1 11.7-3L20 8M4 16l2.8 3A7 7 0 0 0 18.5 16"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v6M12 7v1"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24"><path d="M12 3v18M8 7H4v10h4M16 7h4v10h-4"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M7 4v16M11 7h9v10h-9M3 12h9m-3-3 3 3-3 3"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M17 4v16M13 7H4v10h9M21 12h-9m3-3-3 3 3 3"/></symbol>
+  <symbol id="i-snap" viewBox="0 0 24 24"><path d="M6 4v10a6 6 0 0 0 12 0V4h-4v10a2 2 0 0 1-4 0V4zM6 8h4m4 0h4"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 5v14M20 5v14M9 8l-4 4 4 4M15 8l4 4-4 4M5 12h14"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m13 5-7 7 7 7M6 12h14"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m11 5 7 7-7 7M18 12H4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><path d="m12 3 8 9-8 9-8-9z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 .5-1 1-1 2M12 17v1"/></symbol>
+</defs></svg>
+<main id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span><strong>FrameFlow</strong><span class="version">2.0</span></div>
+    <span class="separator"></span><div class="composition"><span id="comp-name">Нет композиции</span><span id="comp-meta" class="muted"></span></div>
+    <span id="connection" class="connection">Подключение</span>
+    <button class="icon-button" id="refresh" aria-label="Обновить из AE" title="Обновить из AE · R"><svg><use href="#i-refresh"/></svg></button>
+    <button class="icon-button" id="open-settings" aria-label="Настройки" title="Настройки"><svg><use href="#i-settings"/></svg></button>
+    <button class="icon-button" id="open-help" aria-label="Как пользоваться" title="Как пользоваться · ?"><svg><use href="#i-help"/></svg></button>
+  </header>
+  <section class="toolbar" aria-label="Инструменты времени">
+    <div class="menu-control"><button id="mode" class="menu-trigger" aria-haspopup="menu" aria-expanded="false">Слои целиком<svg><use href="#i-chevron"/></svg></button></div>
+    <div class="menu-control"><button id="scope" class="menu-trigger secondary" aria-haspopup="menu" aria-expanded="false">Выделенные<svg><use href="#i-chevron"/></svg></button></div>
+    <span class="separator"></span>
+    <div class="step-group"><button id="minus" class="icon-button" aria-label="Перенести назад на шаг" title="Перенести назад на шаг"><svg><use href="#i-left"/></svg></button><label class="step-input"><input id="frames" aria-label="Шаг в кадрах" type="number" min="1" max="1000000" value="12"><span>кадр.</span></label><button id="plus" class="icon-button" aria-label="Перенести вперёд на шаг" title="Перенести вперёд на шаг"><svg><use href="#i-right"/></svg></button></div>
+    <div class="presets" aria-label="Быстрый шаг"><button data-step="1">1</button><button data-step="5">5</button><button data-step="12" class="active">12</button><button data-step="24">24</button></div>
+    <span class="separator edit-divider"></span>
+    <button id="trim-in" class="tool-button" title="Обрезать In по курсору · ["><svg><use href="#i-in"/></svg><span>In</span></button>
+    <button id="trim-out" class="tool-button" title="Обрезать Out по курсору · ]"><svg><use href="#i-out"/></svg><span>Out</span></button>
+    <button id="split" class="tool-button" title="Разделить выбранные слои по курсору · S"><svg><use href="#i-split"/></svg><span>Split</span></button>
+    <div class="toolbar-end"><button id="inspect" class="icon-button" aria-label="Точные значения" aria-pressed="false" title="Точные значения"><svg><use href="#i-panel"/></svg></button></div>
+  </section>
+  <section id="offset-controls" class="offset-controls" hidden><span id="offset-hint">Сторона курсора</span><div class="segmented"><button data-offset="before:-1">До −</button><button data-offset="before:1">До +</button><button data-offset="after:-1">После −</button><button data-offset="after:1">После +</button></div><button id="preview-plan" class="quiet-button" title="Показать план последнего выбранного направления, без записи">Проверить</button></section>
+  <div class="workspace">
+    <section class="timeline-section" aria-label="Таймлайн композиции">
+      <div class="timeline-toolbar"><label class="search"><svg><use href="#i-search"/></svg><input id="search" placeholder="Найти слой" aria-label="Найти слой по имени"></label><label class="only-selected"><input id="only-selected" type="checkbox"> Только выделенные</label><div class="timeline-tools"><button id="snap" class="icon-button active" aria-pressed="true" aria-label="Привязка" title="Привязка · N; Alt временно отключает"><svg><use href="#i-snap"/></svg></button><button id="fit" class="icon-button" aria-label="Вся композиция" title="Вся композиция · F"><svg><use href="#i-fit"/></svg></button><button id="zoom-out" class="icon-button zoom-button" aria-label="Уменьшить масштаб">−</button><input id="zoom" type="range" min="0" max="100" value="0" aria-label="Масштаб таймлайна"><button id="zoom-in" class="icon-button zoom-button" aria-label="Увеличить масштаб">+</button></div></div>
+      <div id="timeline" class="timeline" tabindex="0" role="region" aria-label="Слои. Стрелки влево и вправо — сдвиг на кадр; Shift — на шаг. Escape отменяет перетаскивание.">
+        <div id="surface" class="surface"><div id="ruler" class="ruler"></div><div id="rows" class="rows"></div><div id="playhead" class="playhead" hidden><span></span></div><div id="guide" class="snap-guide" hidden></div><div id="ghost-label" class="ghost-label" hidden></div></div>
+      </div>
+      <div id="empty" class="empty"><div class="empty-mark"><svg><use href="#i-panel"/></svg></div><strong id="empty-title">Подключение к After Effects</strong><p id="empty-text">Откройте композицию, затем нажмите «Обновить».</p><button id="demo" class="secondary-button" hidden>Посмотреть демо</button></div>
+      <footer class="timeline-footer"><div class="time-entry"><label for="cti">Курсор</label><input id="cti" value="00:00:00:00" aria-label="Время курсора"><span id="frame-label" class="muted"></span></div><span id="selection-count" class="muted">0 слоёв</span><span class="footer-spacer"></span><button id="gap" class="quiet-button" title="Убрать пустой промежуток под курсором в выбранной области">Убрать паузу</button></footer>
+    </section>
+    <aside id="inspector" class="inspector" hidden aria-label="Точные значения"><div class="pane-title"><strong>Точные значения</strong><button id="close-inspector" class="icon-button" aria-label="Закрыть точные значения"><svg><use href="#i-close"/></svg></button></div><p id="inspect-name" class="inspect-name">Выберите слой</p><div class="field-line"><label for="in-value">In</label><input id="in-value" placeholder="00:00:00:00"><button id="apply-in" class="small-button">Применить</button></div><div class="field-line"><label for="out-value">Out</label><input id="out-value" placeholder="00:00:00:00"><button id="apply-out" class="small-button">Применить</button></div><dl><dt>Длительность</dt><dd id="inspect-duration">—</dd><dt>Start</dt><dd id="inspect-start">—</dd></dl><p class="note">In / Out меняют край слоя. Время ключей сохраняется.</p><div class="inspector-shift"><label for="exact-shift">Перенос, кадров</label><input id="exact-shift" type="number" value="12" min="-1000000" max="1000000"><button id="apply-shift" class="primary-button">Перенести</button></div><p class="note">Отрицательное число — назад. Перемещается весь слой вместе с анимацией.</p></aside>
+  </div>
+  <div class="statusbar"><span id="status-icon" class="status-dot"></span><span id="status" role="status" aria-live="polite">Готовим соединение…</span><button id="open-report" class="quiet-button" title="Открыть и скопировать отчёт">Отчёт</button><span class="status-shortcut">Одна операция — один Undo в AE</span></div>
+</main>
+<div id="menu" class="popup-menu" role="menu" hidden></div>
+<div id="overlay" class="overlay" hidden>
+  <section id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header><strong id="dialog-title"></strong><button id="close-dialog" class="icon-button" aria-label="Закрыть окно"><svg><use href="#i-close"/></svg></button></header><div id="dialog-body" class="dialog-body"></div></section>
+</div>
+<input id="import-file" type="file" accept="application/json,.json" hidden>
+<script src="js/model.js"></script><script src="js/bridge.js"></script><script src="js/demo.js"></script><script src="js/panel.js"></script>
+</body></html>
