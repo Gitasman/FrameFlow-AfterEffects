@@ -6,7 +6,16 @@
   const choices = {theme:['dark','light','host'],font:['system','sans','mono'],mode:['layers','keys','selectedKeys','offset'],scope:['auto','selected','all'],mediaPolicy:['skip','stop'],units:['timecode','frames'],contrast:['normal','high']};
   function luminance(hex) { const channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)); return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722; }
   function contrast(a,b) { const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
-  function accentFor(hex,light) {if(!light)return hex; let channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)),out=hex;while(contrast(out,'#f4f4f4')<4.5){channels=channels.map(n=>Math.floor(n*.8));out='#'+channels.map(n=>n.toString(16).padStart(2,'0')).join('');}return out;}
+  function accentFor(hex,light) {
+    let channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)),out=hex;
+    const surfaces=light?['#f4f4f5','#eaeaec','#ffffff']:['#17181a','#212225','#292a2e'];
+    const encode=c=>'#'+c.map(n=>n.toString(16).padStart(2,'0')).join('');
+    const tinted=bg=>encode([1,3,5].map((n,i)=>Math.round(parseInt(bg.slice(n,n+2),16)*.87+channels[i]*.13)));
+    while(surfaces.some(bg=>contrast(out,bg)<4.5||contrast(out,tinted(bg))<4.5)){
+      channels=channels.map(n=>light?Math.floor(n*.8):Math.ceil(n+(255-n)*.08));out=encode(channels);
+    }
+    return out;
+  }
   function validate(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || ![1,2,3].includes(value.version)) throw Error('Версия настроек не поддерживается. Исходные данные сохранены.');
     const out = Object.assign({}, defaults);

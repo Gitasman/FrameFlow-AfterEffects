@@ -10,7 +10,7 @@
     <Resources><MainPath>./index.html</MainPath></Resources>
     <Lifecycle><AutoVisible>true</AutoVisible></Lifecycle>
     <UI><Type>Panel</Type><Menu>FrameFlow 2.2</Menu><Geometry>
-      <Size><Width>400</Width><Height>420</Height></Size>
+      <Size><Width>400</Width><Height>400</Height></Size>
       <MinSize><Width>320</Width><Height>280</Height></MinSize>
       <MaxSize><Width>3840</Width><Height>2160</Height></MaxSize>
     </Geometry></UI>

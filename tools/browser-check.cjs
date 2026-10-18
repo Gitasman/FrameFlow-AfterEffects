@@ -13,19 +13,19 @@ function logScreenshot(name){const data=fs.readFileSync(path.join(output,name)).
 (async()=>{
   const browser=await chromium.launch({headless:true});results.browserVersion=browser.version();
   try{
-    const context=await browser.newContext({viewport:{width:400,height:420},reducedMotion:'reduce'}),page=await context.newPage(),pageErrors=[];
+    const context=await browser.newContext({viewport:{width:400,height:400},reducedMotion:'reduce'}),page=await context.newPage(),pageErrors=[];
     page.on('pageerror',e=>pageErrors.push(e.message));
     const host=fixture();host.comp.name='Монтаж · основной вариант с длинным названием';host.comp.items[0].name='Заставка / текст';host.comp.items[1].name='Сцена 02 · анимация';host.comp.items[0].inPoint=0;host.comp.items[0].outPoint=2;host.comp.items[1].inPoint=6;host.comp.items[1].outPoint=8;
     await page.exposeFunction('__ffHostEval',script=>vm.runInContext(script,host.ctx));
     await page.addInitScript(()=>{window.__adobe_cep__={getSystemPath:()=>'/test/FrameFlow',evalScript(script,cb){window.__ffHostEval(script).then(cb);},getHostEnvironment:()=>JSON.stringify({appSkinInfo:{panelBackgroundColor:{color:{red:24,green:24,blue:26}}}})};});
     await page.goto('file://'+path.join(root,'extension/index.html'));await page.waitForFunction(()=>document.getElementById('connection').textContent==='AE подключён');
     await screenshot(page,'main-dark');
-    await check('all main commands fit the default 400x420 panel',async()=>{const fit=await page.evaluate(()=>{const box=document.querySelector('.content').getBoundingClientRect(),gap=document.getElementById('gap').getBoundingClientRect();return {bottom:gap.bottom,limit:box.bottom,scroll:document.querySelector('.content').scrollHeight,client:document.querySelector('.content').clientHeight};});assert.ok(fit.bottom<=fit.limit+1,JSON.stringify(fit));});
+    await check('all main commands fit the default 400x400 panel',async()=>{const fit=await page.evaluate(()=>{const box=document.querySelector('.content').getBoundingClientRect(),gap=document.getElementById('gap').getBoundingClientRect();return {bottom:gap.bottom,limit:box.bottom,scroll:document.querySelector('.content').scrollHeight,client:document.querySelector('.content').clientHeight};});assert.ok(fit.bottom<=fit.limit+1,JSON.stringify(fit));});
     for(const width of [320,400,650]){
-      await page.setViewportSize({width,height:420});
+      await page.setViewportSize({width,height:400});
       await check('no horizontal overflow at '+width,async()=>{assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.querySelector('.content').scrollWidth<=document.querySelector('.content').clientWidth),true);});
     }
-    await page.setViewportSize({width:400,height:420});
+    await page.setViewportSize({width:400,height:400});
     await page.locator('#preview-toggle').click();await page.locator('#after-plus').click();await page.waitForSelector('#apply-preview');
     await screenshot(page,'plan-dark');
     await check('preview leaves scene untouched and Apply executes the captured plan',async()=>{assert.equal(host.groups(),0);assert.equal(await page.locator('#apply-preview').isEnabled(),true);await page.locator('#apply-preview').click();await page.waitForFunction(()=>document.getElementById('overlay').hidden&&document.getElementById('status').textContent.includes('Готово'));assert.equal(host.groups(),1);assert.equal(host.comp.items[1].inPoint,6.5);});

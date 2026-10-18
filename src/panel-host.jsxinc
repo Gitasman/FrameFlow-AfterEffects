@@ -267,7 +267,7 @@ var FFCEP = (function () {
             targets.push(item);
         }
         return {id:id,operation:r.operation === "closeGap" ? "gap" : "offset",scope:r.scope,mode:r.mode || "offset",
-            region:r.region,direction:r.direction,frames:Number(r.operation === "closeGap" ? r.gap.frames : r.frames),
+            region:r.region,direction:r.direction,frames:Math.abs(FFCore.offsetSeconds(c,r)/c.frameDuration),
             delta:FFCore.offsetSeconds(c,r),cti:r.operation === "closeGap" ? r.originalCTI : c.cti,
             frameDuration:c.frameDuration,displayStart:plan.comp.displayStartTime,blocked:plan.errors.length > 0,
             counts:{layers:layers,keys:keys,properties:properties,changes:plan.changes.length,skipped:plan.skips.length,

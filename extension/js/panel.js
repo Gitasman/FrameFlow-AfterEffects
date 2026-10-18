@@ -104,8 +104,9 @@
       else if(t.kind==='layer')description+=' · In '+time(t.before.inPoint)+' → '+time(t.after.inPoint);
       return '<div class="plan-target"><div class="plan-target-title"><strong>'+esc(title)+'</strong><span>'+(t.index?'#'+t.index+' · ':'')+t.keys+' кл.</span></div><p>'+esc(description)+'</p></div>';
     }).join('');
+    const noun=(n,one,few,many)=>{const a=Math.abs(n)%100,b=a%10;return a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many;};
     const warning=p.counts.mediaSkipped?'Без запаса исходника: '+p.counts.mediaSkipped+'. Эти слои и все их ключи останутся на месте.':'';
-    openDialog('План изменений','<p class="plan-context"><strong>'+esc(operation)+'</strong><br>Курсор '+esc(time(p.cti))+' · '+esc(p.scope==='auto'?'Авто':p.scope==='all'?'Все слои':'Выделенные')+'</p><div class="plan-summary"><span><strong>'+p.counts.layers+'</strong> слоёв</span><span><strong>'+p.counts.keys+'</strong> ключей</span><span><strong>'+p.counts.skipped+'</strong> пропусков</span></div>'+
+    openDialog('План изменений','<p class="plan-context"><strong>'+esc(operation)+'</strong><br>Курсор '+esc(time(p.cti))+' · '+esc(p.scope==='auto'?'Авто':p.scope==='all'?'Все слои':'Выделенные')+'</p><div class="plan-summary"><span><strong>'+p.counts.layers+'</strong> '+noun(p.counts.layers,'слой','слоя','слоёв')+'</span><span><strong>'+p.counts.keys+'</strong> '+noun(p.counts.keys,'ключ','ключа','ключей')+'</span><span><strong>'+p.counts.skipped+'</strong> '+noun(p.counts.skipped,'пропуск','пропуска','пропусков')+'</span></div>'+
       (p.blocked?'<p class="plan-message error">Запись заблокирована. Причины ниже.</p>':p.counts.changes?'<p class="plan-message">Пока ничего не изменено.</p>':'<p class="plan-message">Подходящих изменений нет. Сцена останется прежней.</p>')+
       (warning?'<p class="plan-message warning">'+esc(warning)+'</p>':'')+
       '<div class="plan-targets">'+rows+'</div>'+(p.targetsOmitted?'<p class="note">Ещё целей: '+p.targetsOmitted+'. Полный расчёт ограничен лимитами операции; подробности — в отчёте.</p>':'')+
@@ -113,7 +114,7 @@
       (p.skipsOmitted?'<p class="note">Ещё пропусков: '+p.skipsOmitted+'.</p>':'')+
       '<div class="plan-actions"><button id="apply-preview" class="primary-button" '+(p.blocked||!p.counts.changes||isDemo?'disabled':'')+'>Применить план</button><button id="plan-report" class="quiet-button">Технический отчёт</button></div><p class="plan-footnote">План действует 2 минуты. Перед записью AE повторно проверит цели. При изменениях потребуется новая проверка.</p>');
     activePreview=p;
-    $('apply-preview').onclick=safe(()=>{const id=p.id;closeDialog();return request({op:'applyPreview',previewId:id});});$('plan-report').onclick=()=>showReport(false);
+    $('apply-preview').onclick=safe(()=>{const id=p.id;closeDialog();return request({op:'applyPreview',previewId:id});});$('plan-report').onclick=()=>showReport(true);
   }
   function showSettings(){
     openDialog('Настройки',
