@@ -1,14 +1,14 @@
 (function (root) {
   'use strict';
-  const VERSION = '2.1.0';
-  const defaults = {version:2, theme:'dark', font:'system', fontSize:12, rowHeight:38, spacing:4, labelWidth:226, radius:6, accent:'#a7c7ff', motion:false, snap:true, autoRefresh:true, poll:1800, frames:12, mode:'offset', scope:'auto', compMarkers:false, units:'timecode', showKinds:true, contrast:'normal', quickSteps:[1,2,5,10,12,24,48]};
+  const VERSION = '2.1.1';
+  const defaults = {version:3, theme:'dark', font:'system', fontSize:12, rowHeight:32, spacing:3, labelWidth:226, radius:6, accent:'#a7c7ff', motion:false, snap:true, autoRefresh:true, poll:1800, frames:12, mode:'offset', scope:'auto', compMarkers:false, mediaPolicy:'skip', rememberContext:false, units:'timecode', showKinds:true, contrast:'normal', quickSteps:[1,2,5,10,12,24,48]};
   const ranges = {fontSize:[11,16], rowHeight:[30,58], spacing:[0,12], labelWidth:[150,340], radius:[0,12], poll:[1000,5000], frames:[1,1000000]};
-  const choices = {theme:['dark','light','host'],font:['system','sans','mono'],mode:['layers','keys','selectedKeys','offset'],scope:['auto','selected','all'],units:['timecode','frames'],contrast:['normal','high']};
+  const choices = {theme:['dark','light','host'],font:['system','sans','mono'],mode:['layers','keys','selectedKeys','offset'],scope:['auto','selected','all'],mediaPolicy:['skip','stop'],units:['timecode','frames'],contrast:['normal','high']};
   function luminance(hex) { const channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)); return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722; }
   function contrast(a,b) { const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
   function accentFor(hex,light) {if(!light)return hex; let channels=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)),out=hex;while(contrast(out,'#f4f4f4')<4.5){channels=channels.map(n=>Math.floor(n*.8));out='#'+channels.map(n=>n.toString(16).padStart(2,'0')).join('');}return out;}
   function validate(value) {
-    if (!value || typeof value !== 'object' || Array.isArray(value) || (value.version !== 1 && value.version !== 2)) throw Error('Версия настроек не поддерживается. Исходные данные сохранены.');
+    if (!value || typeof value !== 'object' || Array.isArray(value) || ![1,2,3].includes(value.version)) throw Error('Версия настроек не поддерживается. Исходные данные сохранены.');
     const out = Object.assign({}, defaults);
     Object.keys(value).forEach(k => {
       if (!Object.prototype.hasOwnProperty.call(defaults,k)) throw Error('Неизвестный параметр: ' + k);
@@ -17,11 +17,14 @@
       if (k in ranges) { const r = ranges[k]; if (!Number.isInteger(v) || v < r[0] || v > r[1]) throw Error('Значение вне диапазона: ' + k); }
       else if (k in choices) { if (!choices[k].includes(v)) throw Error('Недопустимый вариант: ' + k); }
       else if (k === 'accent') { if (typeof v !== 'string' || !/^#[0-9a-f]{6}$/i.test(v) || contrast(v,'#151515') < 4.5) throw Error('Выберите более светлый акцентный цвет.'); }
-      else if (typeof v !== typeof defaults[k] || (k === 'version' && v !== 1 && v !== 2)) throw Error('Неверный тип: ' + k);
+      else if (typeof v !== typeof defaults[k] || (k === 'version' && ![1,2,3].includes(v))) throw Error('Неверный тип: ' + k);
       out[k] = v;
     });
-    out.version=2; return out;
+    if(value.version<3 && value.rowHeight===38)out.rowHeight=defaults.rowHeight;
+    if(value.version<3 && value.spacing===4)out.spacing=defaults.spacing;
+    out.version=3; return out;
   }
+  function startup(value) {const out=validate(value);if(!out.rememberContext){out.scope='auto';out.mode='offset';}return out;}
   function parseSteps(value) {
     const list=Array.isArray(value)?value:String(value).trim().split(/[,;\s]+/).map(Number);
     if(!list.length||list.length>8||list.some(n=>!Number.isInteger(n)||n<1||n>1000000))throw Error('Быстрые шаги: от 1 до 8 целых чисел, каждое от 1 до 1000000.');
@@ -77,6 +80,6 @@
     else if(l.sourceDuration!==null&&!l.still) {lower=Math.max(lower,Math.min(l.inPoint,l.start));upper=Math.min(upper,Math.max(l.outPoint,l.start+l.sourceDuration*l.stretch/100));}
     return Math.max(lower,Math.min(upper,value));
   }
-  const api={VERSION,contrast,accentFor,defaults,ranges,choices,validate,storage,parseSteps,effectiveScope,selected,frame,timecode,parseTime,snapDelta,trimLimit};
+  const api={VERSION,contrast,accentFor,defaults,ranges,choices,validate,startup,storage,parseSteps,effectiveScope,selected,frame,timecode,parseTime,snapDelta,trimLimit};
   if(typeof module==='object'&&module.exports) module.exports=api; else root.FFModel=api;
 }(typeof window==='object'?window:this));

@@ -1,6 +1,6 @@
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.1.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.1.1", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -232,7 +232,7 @@ var FFCEP = (function () {
     function corePlan(c, r) {
         var request, plan;
         if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
-        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
+        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||mediaPolicy||preview|");
         if (r.op === "move") {
             targets(c, r.ids, false);
             number(r.deltaFrames, -1000000, 1000000, false); if (r.deltaFrames === 0) fail("Сдвиг равен нулю.");
@@ -247,6 +247,8 @@ var FFCEP = (function () {
                 request = {scope:r.scope};
             }
             request.mode = r.mode; request.region = r.region; request.direction = r.direction;
+            if (typeof r.mediaPolicy !== "undefined" && r.mediaPolicy !== "skip" && r.mediaPolicy !== "stop") fail("Неизвестное правило предела исходника.");
+            request.mediaPolicy = r.mediaPolicy || "stop";
             request.frames = r.frames; request.strict = true; request.compMarkers = r.compMarkers;
         }
         plan = FFHost.prepare(request); return plan;
@@ -269,7 +271,7 @@ var FFCEP = (function () {
         if (r.op === "move" || r.op === "offset" || r.op === "gap") {
             if (typeof r.preview !== "undefined") bool(r.preview);
             plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
-            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length};
+            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length + (plan.mediaLimits && plan.mediaLimits.length ? " · без запаса: " + plan.mediaLimits.length : "")};
             result = FFHost.applyPlan(plan); report = FFHost.report(plan, result, r.op);
         } else if (r.op === "trim" || r.op === "split") {
             schema(r, "|op||token||ids||time||edge|"); layers = targets(c, r.ids, false);
@@ -277,7 +279,7 @@ var FFCEP = (function () {
             result = directEdit(c, layers, r); report = stringify(result);
         } else fail("Неизвестная операция.");
         if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
-        return {state:snapshot(), result:result, report:report, message:result.changed ? "Готово · изменений: " + result.changed : "Подходящих целей нет · сцена не изменена"};
+        return {state:snapshot(), result:result, report:report, warning:result.mediaSkipped > 0, message:(result.changed ? "Готово · изменений: " + result.changed : "Сцена не изменена") + (result.mediaSkipped ? " · без запаса: " + result.mediaSkipped : result.changed ? "" : " · подходящих целей нет")};
     }
     function dispatch(encoded) {
         var request, output, raw, i;

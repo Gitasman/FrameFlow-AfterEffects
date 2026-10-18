@@ -1,43 +1,36 @@
-# FrameFlow AE 2.1.0
+# FrameFlow AE 2.1.1
 
-A compact CEP 12 panel for timing commands around the After Effects playhead. The duplicate timeline, layer list, drag editing and trim/split inspector have been removed from the UI.
+A compact CEP 12 panel for timing commands around the After Effects playhead.
 
-**[Download installable ZIP](downloads/FrameFlow_AE_2.1.0.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
+**[Download installable ZIP](downloads/FrameFlow_AE_2.1.1.zip)** · **[Installation and usage in Russian](README_RU.md)** · [Changelog](CHANGELOG.md)
 
-Close AE, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Open **Window → Extensions (Legacy) → FrameFlow 2.1**. Target: AE 25.x–26.x / CEP 12. Previous installation and preferences are preserved. The panel has no runtime npm dependencies, server, telemetry or CEP Node requirement.
-**Visual timeline panel for Adobe After Effects 25.x–26.x (Windows and macOS).** Move, trim and split layers or offset keyframes from a dockable panel.
-
-**[Download v2.0.2 ZIP](downloads/FrameFlow_AE_2.0.2.zip)** · [Quick start](#quick-start) · [Russian installation guide](README_RU.md) · [Offline HTML preview](PREVIEW.html) · [Changelog](CHANGELOG.md)
-
-## Quick start
-
-1. Download and extract the complete ZIP above.
-2. Close After Effects. Run `install/Install-Windows.cmd` (Windows) or `install/Install-macOS.command` (macOS).
-3. Restart After Effects; find **FrameFlow 2.0** under **Window → Extensions** or **Extensions (Legacy)**.
-
-This is an **unsigned CEP 12 extension**, not a signed ZXP. Read the [detailed installation guide](README_RU.md) before running the installer: it enables unsigned CEP extension loading for the current user and preserves an extension backup. [PREVIEW.html](PREVIEW.html) is an offline interface demo, not a working AE session.
-
-## Current status
-
-Version 2.0.2 addresses a host registration issue seen with `$.evalFile` in AE 25.6.4; the extension ID and preference storage are unchanged from 2.0.0. Startup and editing have **not** yet been confirmed in a real AE host; see [verification details](VERIFICATION.json) and the [smoke test](docs/AE_SMOKE_TEST_RU.md).
+Close AE, extract the complete ZIP and run `install/Install-Windows.cmd` or `install/Install-macOS.command`. Open **Window → Extensions (Legacy) → FrameFlow 2.1**. Target: AE 25.x–26.x / CEP 12. The installer backs up the previous extension and enables unsigned CEP 12 panels for the current account. This is a source distribution, not a signed ZXP or GitHub Release. Installed users need no Node, Python, server or network access from the panel.
 
 ## Workflow
 
-Choose Auto, Selected Layers or Entire Composition. Choose frames using presets, stepper, slider or rounded half/one-second shortcuts. Use one of the four always-visible Before − / Before + / After − / After + actions. Auto uses AE's selected layers, or the entire composition when none are selected. Each command refreshes AE state before mutation and retains the kernel's stale-state checks.
+The panel starts in **Auto / Layers and Keys**, including after upgrading. Auto uses the selected AE layers, or all composition layers when none are selected. Explicit Selected never expands scope. Enable “Remember scope and mode” in settings to retain a different startup context. Frame step, presets and appearance remain saved independently.
 
-Offset preserves the original crossing-layer edge/key behavior; whole-layer mode uses layer In as its side anchor. Key modes preserve layer bounds. Close Gap uses the same scope independently of frame step/mode. Preview plans the last direction without writing. Undo/Redo remains native to AE.
+Choose frames with presets, stepper, Shift, wheel, slider or half/one-second shortcuts. Use **Before − / Before + / After − / After +**. Minus moves earlier; plus moves later. In Layers and Keys, layers entirely on that side move together with their keys; crossing layers change the edge and keys on that side. Each command reads current CTI and selection before planning, then checks the host snapshot again before writing. Close Gap uses the same scope independently of step and mode. Preview plans the last direction without writing. Undo/Redo is native to AE.
 
-Preference schema v2 migrates v1 without broadening explicit Selected scope or resetting timing choices/appearance. Obsolete timeline preference values are retained for reversible migration; their old controls are not shown.
+**Finite-footage limits:** by default, a crossing layer requiring unavailable source frames stays completely unchanged, including all its keys. Other valid targets proceed. The status, preview, report and event history show the number of layers without source handles. Select “Cancel everything” in settings for the previous all-or-nothing media policy. Relevant locks, unsupported partial-key targets, collisions and runtime verification failures still block or recover the operation. The panel does not extend footage with invented frames.
 
-## Development and checks
+The default panel is 420 × 360 px with smaller controls and a single composition/CTI row. Settings and help scroll within the panel. The duplicate AE timeline and layer list remain removed.
 
-`src/core.jsxinc` contains timing and bounded recovery. `src/panel-host.jsxinc` is the data-only RPC/AE adapter. `extension/js/bridge.js` retains the explicit global bootstrap validated by the user in AE 25.6.4 on 2.0.2. `extension/js/panel.js` implements the compact controls and acknowledged preference writes.
+## Settings and diagnostics
+
+Preferences v1/v2 migrate to v3. Existing step, presets, zero/false and customized appearance survive. Previous default density becomes compact. Context starts Auto / Layers and Keys unless explicitly opted into remembering it. Import retains the imported context in the current session; the startup rule applies on the next open. Unknown, corrupt or concurrently changed storage stays protected. Export is JSON.
+
+“Report” opens and copies diagnostics on click, with Clipboard API fallback and selected text if both methods fail. Transport failures pause polling until Refresh; uncertain writes are never automatically replayed.
+
+## Development and validation
+
+`src/core.jsxinc` contains timing and bounded recovery. `src/panel-host.jsxinc` is the data-only AE/RPC adapter. `extension/js/bridge.js` retains explicit global registration and single-flight transport. `extension/js/panel.js` implements the controls and acknowledged settings writes.
 
 - `node tools/build.cjs`: generate the complete ES3 host.
-- `node tools/check.cjs`: strict ES3, calculations and simulated AE/CEP/DOM regressions.
-- `node tools/preview.cjs`: standalone, explicitly read-only browser demo.
-- `python3 tools/package.py`: checks, preview, path/shell validation and hash-verified versioned ZIP in `artifacts/`.
+- `node tools/check.cjs`: strict ES3, pure timing and simulated AE/CEP/DOM regressions.
+- `node tools/preview.cjs`: regenerate the standalone read-only UI demo.
+- `python3 tools/package.py`: checks, preview, local paths, shell syntax and checksum-verified ZIP in `artifacts/`.
 
-Maintainer tooling needs Node >=20 with Acorn 8.17.0 or bundled Acorn through `--expose-internals`; packaging also uses Python 3 and Bash. Installed-panel users need none of these tools. Read-only PR CI runs the package command and uploads a separate build; downloads are checked source distributions, not signed ZXP files or GitHub Releases.
+Maintainer tools need Node >=20 with Acorn 8.17.0 or bundled Acorn through `--expose-internals`, Python 3 and Bash. Read-only PR CI runs packaging and uploads a separate checked build. Issued ZIPs remain unchanged under `downloads/`.
 
-Tests simulate AE, scoped evalFile, CEP and the DOM. They cover all four directions, Auto/no-selection, explicit scope safety, stale CTI/selection, gap, lock relevance, key collisions, preference migration, frame controls, clipboard and connection recovery. See `VERIFICATION.json`. **New 2.1 behavior, clipboard, docking, layout and Undo/Redo still require real AE testing.** Use [the smoke test](docs/AE_SMOKE_TEST_RU.md) on a copy of a project.
+The user confirmed 2.1.0 starts and Close Gap works in AE 25.6.4x3, and supplied the finite-media failure reproduced in these tests. **2.1.1 host behavior, native Undo/Redo, clipboard, docking and layout require an actual AE smoke test.** Local DOM tests are not browser/layout evidence. See [verification](VERIFICATION.json) and [smoke test](docs/AE_SMOKE_TEST_RU.md).

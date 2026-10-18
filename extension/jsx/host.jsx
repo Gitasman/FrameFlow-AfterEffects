@@ -196,7 +196,7 @@ var FFCore = (function () {
         parseFavorites:favorites, defaults:defaults, parseSettings:parseSettings, encodeSettings:encodeSettings};
 }());
 
-/* FrameFlow AE 2.1.0. AE adapter; native values never pass through JSON. */
+/* FrameFlow AE 2.1.1. AE adapter; native values never pass through JSON. */
 var FFHost = (function () {
     var LIMITS = {properties:20000, keys:50000, reportLines:300, textCharacters:2000};
     var ROOTS = ["ADBE Transform Group", "ADBE Mask Parade", "ADBE Effect Parade", "ADBE MTrackers",
@@ -611,6 +611,7 @@ var FFHost = (function () {
         if (request.scope !== "auto" && request.scope !== "all" && request.scope !== "selected") throw new Error("Неизвестная область");
         if (typeof request.mode !== "undefined" && !FFCore.validMode(request.mode)) throw new Error("Неизвестный режим операции");
         if (typeof request.strict !== "undefined" && typeof request.strict !== "boolean") throw new Error("Некорректная строгая проверка");
+        if (typeof request.mediaPolicy !== "undefined" && request.mediaPolicy !== "skip" && request.mediaPolicy !== "stop") throw new Error("Неизвестное правило предела исходника");
         if (request.mode === "keys" || request.mode === "selectedKeys") return prepareKeys(request,context);
         layers = selectedLayers(comp,request.scope,request.layerIds);
         plan.layerCount = layers.length;
@@ -680,7 +681,8 @@ var FFHost = (function () {
                 if (kp.moved) plan.changes.push({kind:"property",layer:null,path:[],snapshot:kp.snapshot,times:kp.times,moved:kp.moved,label:"Маркеры композиции"});
             } catch (markerError) { plan.skips.push("Маркеры композиции: "+errorInfo(markerError).message); }
         }
-        if (request.strict === true && plan.skips.length) plan.errors.push("Строгая проверка: есть пропуски. Вся операция отменена до записи.");
+        /* Only finite-media limits may be intentionally left unchanged. All other skips stay atomic. */
+        if (request.strict === true && plan.skips.length > (request.mediaPolicy === "skip" ? plan.mediaLimits.length : 0)) plan.errors.push("Строгая проверка: есть пропуски. Вся операция отменена до записи.");
         return plan;
     }
     function target(change, comp) { return change.layer ? resolve(change.layer,change.path) : comp.markerProperty; }
@@ -810,7 +812,7 @@ var FFHost = (function () {
         if (failures.length) throw new Error(failures.join("\n"));
     }
     function applyPlan(plan) {
-        var result = {ok:false,partial:false,selectionRestored:null,changed:0,changedLayers:0,movedKeys:0,attempted:0,restored:false,recoveryErrors:[],skipped:plan.skips.length};
+        var result = {ok:false,partial:false,selectionRestored:null,changed:0,changedLayers:0,movedKeys:0,attempted:0,restored:false,recoveryErrors:[],skipped:plan.skips.length,mediaSkipped:plan.mediaLimits ? plan.mediaLimits.length : 0};
         var phase = "preflight", currentChange = null, layerSelection = null, recovering = false;
         var opened = false, touched = [], tolerance = plan.context.frameDuration * 0.000001, i, j, c, p, entry;
         try {
@@ -825,7 +827,7 @@ var FFHost = (function () {
                 if (c.kind !== "property") { checkLayer(c,false,tolerance); verifyLayerProperties(c,false,tolerance); }
                 else verifyProperty(target(c,plan.comp),c.snapshot,originalTimes(c.snapshot),tolerance);
             }
-            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.1.0 — Убрать паузу" : "FrameFlow AE 2.1.0 — Time Offset"); opened = true;
+            app.beginUndoGroup(plan.request.operation === "closeGap" ? "FrameFlow AE 2.1.1 — Убрать паузу" : "FrameFlow AE 2.1.1 — Time Offset"); opened = true;
             for (i = 0; i < plan.changes.length; i++) {
                 phase = "apply"; c = plan.changes[i]; currentChange = c; touched.push(c); result.attempted++;
                 if (c.kind === "layer") {
@@ -896,7 +898,7 @@ var FFHost = (function () {
         return result;
     }
     function environment() {
-        var lines = ["FrameFlow AE 2.1.0", "Дата: " + new Date().toString()];
+        var lines = ["FrameFlow AE 2.1.1", "Дата: " + new Date().toString()];
         function read(label,fn) { try { lines.push(label+": "+fn()); } catch (ignored) { lines.push(label+": неизвестно"); } }
         read("AE",function(){return app.version;}); read("Build",function(){return app.buildNumber;});
         read("OS",function(){return $.os;}); read("ExtendScript",function(){return $.version;});
@@ -905,10 +907,11 @@ var FFHost = (function () {
     function report(plan, result, heading) {
         var lines = environment(), i, r = plan.request, c = plan.context;
         lines.push(heading, "Scope="+r.scope+"; Region="+r.region,
-            "Mode="+(r.mode || "offset")+"; Strict="+(r.strict === true),
+            "Mode="+(r.mode || "offset")+"; Strict="+(r.strict === true)+"; MediaPolicy="+(r.mediaPolicy || "stop"),
             "Frames="+(r.operation === "closeGap" ? r.gap.frames : r.frames)+"; Direction="+r.direction+"; Delta="+FFCore.offsetSeconds(c,r)+" s",
             "Comp id="+plan.comp.id+"; FPS="+(1/c.frameDuration)+"; CTI="+c.cti+" s; Duration="+c.duration+" s",
             "К изменению: "+plan.changes.length+"; Пропуски: "+plan.skips.length+"; Блокировки: "+plan.errors.length);
+        if (plan.mediaLimits && plan.mediaLimits.length) lines.push("Без запаса исходника: "+plan.mediaLimits.length+". "+(r.mediaPolicy === "skip" ? "Эти слои и все их ключи оставлены без изменений; остальные цели проходят строгую проверку." : "Вся операция отменяется до записи."));
         if (r.operation === "closeGap") lines.push("Удаление паузы ["+r.gap.start+", "+r.gap.end+") s; курсор до операции="+r.originalCTI+" s");
         if (r.region === "range") lines.push("Диапазон ["+r.from+", "+r.to+") s; кадры от внутреннего начала композиции");
         if (!result) {
@@ -949,7 +952,7 @@ var FFHost = (function () {
 
 /* FrameFlow CEP host. Data-only RPC; no eval, command IDs, network or file writes. */
 var FFCEP = (function () {
-    var VERSION = "2.1.0", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
+    var VERSION = "2.1.1", serial = 0, session = String(new Date().getTime()) + "-" + String(Math.random());
     var saved = null, recent = [], busy = false;
     function fail(message) { throw new Error(message); }
     function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -1181,7 +1184,7 @@ var FFCEP = (function () {
     function corePlan(c, r) {
         var request, plan;
         if (r.op === "gap") { schema(r, "|op||token||scope||compMarkers||preview|"); if (r.scope !== "auto" && r.scope !== "all" && r.scope !== "selected") fail("Область не распознана."); bool(r.compMarkers); return FFHost.prepareGap(r); }
-        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||preview|");
+        schema(r, "|op||token||ids||scope||deltaFrames||mode||frames||region||direction||compMarkers||mediaPolicy||preview|");
         if (r.op === "move") {
             targets(c, r.ids, false);
             number(r.deltaFrames, -1000000, 1000000, false); if (r.deltaFrames === 0) fail("Сдвиг равен нулю.");
@@ -1196,6 +1199,8 @@ var FFCEP = (function () {
                 request = {scope:r.scope};
             }
             request.mode = r.mode; request.region = r.region; request.direction = r.direction;
+            if (typeof r.mediaPolicy !== "undefined" && r.mediaPolicy !== "skip" && r.mediaPolicy !== "stop") fail("Неизвестное правило предела исходника.");
+            request.mediaPolicy = r.mediaPolicy || "stop";
             request.frames = r.frames; request.strict = true; request.compMarkers = r.compMarkers;
         }
         plan = FFHost.prepare(request); return plan;
@@ -1218,7 +1223,7 @@ var FFCEP = (function () {
         if (r.op === "move" || r.op === "offset" || r.op === "gap") {
             if (typeof r.preview !== "undefined") bool(r.preview);
             plan = corePlan(c, r); report = FFHost.report(plan, null, "ПРОВЕРКА");
-            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length};
+            if (r.preview) return {state:snapshot(), report:report, blocked:plan.errors.length > 0, message:"План: " + plan.changes.length + "; пропусков: " + plan.skips.length + (plan.mediaLimits && plan.mediaLimits.length ? " · без запаса: " + plan.mediaLimits.length : "")};
             result = FFHost.applyPlan(plan); report = FFHost.report(plan, result, r.op);
         } else if (r.op === "trim" || r.op === "split") {
             schema(r, "|op||token||ids||time||edge|"); layers = targets(c, r.ids, false);
@@ -1226,7 +1231,7 @@ var FFCEP = (function () {
             result = directEdit(c, layers, r); report = stringify(result);
         } else fail("Неизвестная операция.");
         if (!result.ok) return {state:snapshot(), failure:result, report:report, message:(result.error ? result.error.message : plan && plan.errors.length ? plan.errors[0] : "Не удалось завершить проверку записи. Откройте отчёт.") + (plan && plan.errors.length && plan.skips.length ? " " + plan.skips[0] : "")};
-        return {state:snapshot(), result:result, report:report, message:result.changed ? "Готово · изменений: " + result.changed : "Подходящих целей нет · сцена не изменена"};
+        return {state:snapshot(), result:result, report:report, warning:result.mediaSkipped > 0, message:(result.changed ? "Готово · изменений: " + result.changed : "Сцена не изменена") + (result.mediaSkipped ? " · без запаса: " + result.mediaSkipped : result.changed ? "" : " · подходящих целей нет")};
     }
     function dispatch(encoded) {
         var request, output, raw, i;

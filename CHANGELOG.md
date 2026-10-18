@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.1
+
+- Keep a finite-media crossing layer and all its keys unchanged when its source handles are exhausted; move other valid targets and report the count. Optional stop-all media policy; other strict checks remain atomic.
+- Start Auto / Layers and Keys on every open by default, including upgrades. Add explicit opt-in to remember a different scope/mode; preserve timing and appearance.
+- Compact the default panel to 420 × 360, reduce controls and spacing, combine composition/CTI and shorten inline descriptions. Keep full details in menu/help.
+- Migrate settings to v3, compact previous default density and retain customized density/zero/false values.
+- Include media-limit counts in preview, visible warning status, diagnostics and history; round diagnostic FPS.
+- Reproduce the supplied ten-layer / five-frame / 24 fps case in both directions; verify media-only no-op, stop-all, relevant lock and unsupported-key blockers, preview and recovery after an injected write failure.
+
+User confirmed 2.1.0 startup and Close Gap in AE 25.6.4x3. New 2.1.1 changes require an actual AE smoke test.
+
 ## 2.1.0
 
 - Remove the duplicate timeline, layer list, drag editing, trim/split inspector and keyboard commands that moved the whole region.
